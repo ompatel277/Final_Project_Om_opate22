@@ -1,0 +1,5 @@
+I think this idea is for everyone because who does not love food.
+I used the python environment because I like it better than setting up the conda one.
+
+I chose Swipe&Bite as the app name because well that is basically describing the app to someone
+you swipe left or right and then when you find something you like you go ahead and eat it (bite)
