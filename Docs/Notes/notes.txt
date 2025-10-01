@@ -3,3 +3,6 @@ I used the python environment because I like it better than setting up the conda
 
 I chose Swipe&Bite as the app name because well that is basically describing the app to someone
 you swipe left or right and then when you find something you like you go ahead and eat it (bite)
+
+
+HW 2: As for the branching strategy I will use the github strategy because I am the only one working on the project. I will create a test branch to test the features of the app and then push it to main branch.
