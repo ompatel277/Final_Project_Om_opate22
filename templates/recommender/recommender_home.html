@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Recommender - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                🤖 AI Food Assistant
+            </h1>
+            <p class="lead text-muted">Get personalized recommendations powered by AI</p>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'recommender:get_recommendations' %}" class="text-decoration-none">
+                <div class="card text-center hover-card h-100">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">🎯</div>
+                        <h5 class="card-title fw-bold">Get Recommendations</h5>
+                        <p class="card-text small text-muted">Based on your preferences</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'recommender:ai_chat' %}" class="text-decoration-none">
+                <div class="card text-center hover-card h-100">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">💬</div>
+                        <h5 class="card-title fw-bold">AI Chat</h5>
+                        <p class="card-text small text-muted">Ask me anything!</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'recommender:surprise_me' %}" class="text-decoration-none">
+                <div class="card text-center hover-card h-100">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">🎲</div>
+                        <h5 class="card-title fw-bold">Surprise Me!</h5>
+                        <p class="card-text small text-muted">Can't decide?</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'recommender:meal_planner' %}" class="text-decoration-none">
+                <div class="card text-center hover-card h-100">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">📅</div>
+                        <h5 class="card-title fw-bold">Meal Planner</h5>
+                        <p class="card-text small text-muted">Plan your week</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Your Preferences -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">Your Food Profile</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <strong>Diet Type:</strong> {{ profile.get_diet_type_display }}
+                            </p>
+                            {% if profile.allergies %}
+                                <p class="mb-2">
+                                    <strong>Allergies:</strong> {{ profile.allergies }}
+                                </p>
+                            {% endif %}
+                            {% if profile.favorite_cuisines %}
+                                <p class="mb-2">
+                                    <strong>Favorite Cuisines:</strong> {{ profile.favorite_cuisines }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if profile.daily_calorie_goal %}
+                                <p class="mb-2">
+                                    <strong>Daily Calorie Goal:</strong> {{ profile.daily_calorie_goal }} cal
+                                </p>
+                            {% endif %}
+                            {% if profile.protein_goal %}
+                                <p class="mb-2">
+                                    <strong>Protein Goal:</strong> {{ profile.protein_goal }}g
+                                </p>
+                            {% endif %}
+                            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-sm btn-outline-primary mt-2">
+                                Update Preferences
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Favorites -->
+    {% if favorite_dishes %}
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">Your Recent Favorites</h3>
+        </div>
+        {% for favorite in favorite_dishes %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <img src="{{ favorite.dish.display_image }}" class="card-img-top" alt="{{ favorite.dish.name }}" style="height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ favorite.dish.name }}</h6>
+                        <a href="{% url 'recommender:similar_dishes' favorite.dish.id %}" class="btn btn-sm btn-primary w-100">
+                            Find Similar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-card {
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(254, 60, 114, 0.3);
+    }
+</style>
+{% endblock %}

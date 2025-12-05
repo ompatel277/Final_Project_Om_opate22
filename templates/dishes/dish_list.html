@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Dishes - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                <i class="fas fa-utensils"></i> Browse Dishes
+            </h1>
+            <p class="lead text-muted">Discover delicious dishes from around the world</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" action="{% url 'dishes:dish_list' %}">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Cuisine</label>
+                                <select name="cuisine" class="form-select">
+                                    <option value="">All Cuisines</option>
+                                    {% for cuisine in cuisines %}
+                                        <option value="{{ cuisine.id }}">{{ cuisine.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Meal Type</label>
+                                <select name="meal_type" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="breakfast">Breakfast</option>
+                                    <option value="lunch">Lunch</option>
+                                    <option value="dinner">Dinner</option>
+                                    <option value="snack">Snack</option>
+                                    <option value="dessert">Dessert</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Dietary</label>
+                                <select name="dietary" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="vegetarian">Vegetarian</option>
+                                    <option value="vegan">Vegan</option>
+                                    <option value="gluten_free">Gluten Free</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter"></i> Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dishes Grid -->
+    <div class="row">
+        {% if dishes %}
+            {% for dish in dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ dish.name }}</h5>
+                                {% if dish.cuisine %}
+                                    <span class="badge bg-info">{{ dish.cuisine.emoji }}</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-clock"></i> {{ dish.get_meal_type_display }}
+                            </p>
+
+                            <p class="card-text">{{ dish.description|truncatewords:15 }}</p>
+
+                            <!-- Tags -->
+                            <div class="mb-3">
+                                {% if dish.is_vegetarian %}
+                                    <span class="badge bg-success">🥬 Vegetarian</span>
+                                {% endif %}
+                                {% if dish.is_vegan %}
+                                    <span class="badge bg-success">🌱 Vegan</span>
+                                {% endif %}
+                                {% if dish.is_gluten_free %}
+                                    <span class="badge bg-warning">🌾 Gluten Free</span>
+                                {% endif %}
+                                {% if dish.spice_level > 0 %}
+                                    <span class="badge bg-danger">🌶️ Spicy ({{ dish.spice_level }}/5)</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <small class="text-muted">
+                                    {% if dish.calories %}
+                                        <i class="fas fa-fire"></i> {{ dish.calories }} cal
+                                    {% endif %}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fas fa-star text-warning"></i> {{ dish.average_rating|floatformat:1 }}
+                                </small>
+                            </div>
+
+                            <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary w-100">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No dishes found. Try adjusting your filters!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

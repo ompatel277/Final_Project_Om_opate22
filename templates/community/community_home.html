@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Community - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                <i class="fas fa-users"></i> Community
+            </h1>
+            <p class="lead text-muted">Discover what's trending and join the conversation</p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 40px;">🔥</div>
+                    <h4 class="fw-bold text-tinder">{{ trending_dishes.count }}</h4>
+                    <p class="text-muted mb-0">Trending Dishes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 40px;">🏆</div>
+                    <h4 class="fw-bold text-tinder">{{ current_week_rankings.count }}</h4>
+                    <p class="text-muted mb-0">Top Ranked</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 40px;">⭐</div>
+                    <h4 class="fw-bold text-tinder">{{ recent_reviews.count }}</h4>
+                    <p class="text-muted mb-0">Recent Reviews</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div style="font-size: 40px;">🎯</div>
+                    <h4 class="fw-bold text-tinder">{{ active_challenges.count }}</h4>
+                    <p class="text-muted mb-0">Active Challenges</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'community:trending' %}" class="text-decoration-none">
+                <div class="card h-100 text-center hover-card">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">🔥</div>
+                        <h5 class="card-title fw-bold">Trending</h5>
+                        <p class="card-text text-muted">Hot dishes right now</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'community:weekly_rankings' %}" class="text-decoration-none">
+                <div class="card h-100 text-center hover-card">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">🏆</div>
+                        <h5 class="card-title fw-bold">Rankings</h5>
+                        <p class="card-text text-muted">Weekly top 10</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'community:challenges' %}" class="text-decoration-none">
+                <div class="card h-100 text-center hover-card">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">🎯</div>
+                        <h5 class="card-title fw-bold">Challenges</h5>
+                        <p class="card-text text-muted">Join & compete</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{% url 'community:leaderboard' %}" class="text-decoration-none">
+                <div class="card h-100 text-center hover-card">
+                    <div class="card-body">
+                        <div style="font-size: 60px;">👑</div>
+                        <h5 class="card-title fw-bold">Leaderboard</h5>
+                        <p class="card-text text-muted">Top contributors</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Trending Dishes Preview -->
+    {% if trending_dishes %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="fw-bold">🔥 Trending Now</h3>
+                <a href="{% url 'community:trending' %}" class="btn btn-outline-primary">View All</a>
+            </div>
+        </div>
+        {% for trending in trending_dishes|slice:":5" %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="row g-0">
+                        <div class="col-4">
+                            <img src="{{ trending.dish.display_image }}" class="img-fluid" alt="{{ trending.dish.name }}" style="height: 150px; object-fit: cover;">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0 fw-bold">{{ trending.dish.name }}</h6>
+                                    <span class="badge bg-danger">🔥 {{ trending.trending_score|floatformat:0 }}</span>
+                                </div>
+                                <p class="card-text small text-muted mb-2">{{ trending.dish.cuisine.name }}</p>
+                                <a href="{% url 'dishes:dish_detail' trending.dish.id %}" class="btn btn-sm btn-primary">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Weekly Rankings Preview -->
+    {% if current_week_rankings %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="fw-bold">🏆 This Week's Top 10</h3>
+                <a href="{% url 'community:weekly_rankings' %}" class="btn btn-outline-primary">Full Rankings</a>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for ranking in current_week_rankings|slice:":5" %}
+                            <div class="list-group-item d-flex align-items-center">
+                                <div class="me-3">
+                                    <h2 class="fw-bold text-tinder mb-0">#{{ ranking.rank }}</h2>
+                                </div>
+                                <img src="{{ ranking.dish.display_image }}" alt="{{ ranking.dish.name }}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">{{ ranking.dish.name }}</h6>
+                                    <small class="text-muted">{{ ranking.dish.cuisine.name }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-success mb-1">{{ ranking.match_rate }}% match</div>
+                                    <div class="badge bg-warning">⭐ {{ ranking.average_rating|floatformat:1 }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Reviews -->
+    {% if recent_reviews %}
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">💬 Recent Reviews</h3>
+        </div>
+        {% for review in recent_reviews %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="card-title fw-bold mb-1">{{ review.title }}</h6>
+                                <small class="text-muted">by {{ review.user.username }} • {{ review.created_at|timesince }} ago</small>
+                            </div>
+                            <div class="text-warning">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="card-text small mb-2">{{ review.content|truncatewords:20 }}</p>
+                        <a href="{% url 'dishes:dish_detail' review.dish.id %}" class="btn btn-sm btn-outline-primary">
+                            View {{ review.dish.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-card {
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(254, 60, 114, 0.3);
+    }
+</style>
+{% endblock %}

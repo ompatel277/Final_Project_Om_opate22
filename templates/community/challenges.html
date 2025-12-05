@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Challenges - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                🎯 Community Challenges
+            </h1>
+            <p class="lead text-muted">Join challenges and compete with the community</p>
+        </div>
+    </div>
+
+    <!-- Active Challenges -->
+    {% if active_challenges %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">🔥 Active Challenges</h3>
+        </div>
+        {% for challenge in active_challenges %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    {% if challenge.image %}
+                        <img src="{{ challenge.image.url }}" class="card-img-top" alt="{{ challenge.title }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title fw-bold">{{ challenge.title }}</h5>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <p class="card-text">{{ challenge.description }}</p>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-calendar"></i> Ends {{ challenge.end_date|date:"M d, Y" }}
+                            </small>
+                            <small class="text-muted d-block">
+                                <i class="fas fa-users"></i> {{ challenge.participants.count }} participants
+                            </small>
+                            {% if challenge.reward_description %}
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-trophy"></i> {{ challenge.reward_description }}
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'community:join_challenge' challenge.id %}" class="btn btn-primary w-100">
+                                <i class="fas fa-plus"></i> Join Challenge
+                            </a>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary w-100">
+                                Login to Join
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Challenges -->
+    {% if upcoming_challenges %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">📅 Coming Soon</h3>
+        </div>
+        {% for challenge in upcoming_challenges %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold">{{ challenge.title }}</h6>
+                        <p class="card-text small">{{ challenge.description|truncatewords:15 }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> Starts {{ challenge.start_date|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Completed Challenges -->
+    {% if completed_challenges %}
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">✅ Recently Completed</h3>
+        </div>
+        {% for challenge in completed_challenges %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-title fw-bold">{{ challenge.title }}</h6>
+                            <span class="badge bg-secondary">Completed</span>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-users"></i> {{ challenge.participants.count }} participated
+                        </small>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

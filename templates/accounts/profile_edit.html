@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="mb-4">Edit Profile</h2>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <h5 class="mb-3">Basic Information</h5>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                {{ user_form.first_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                {{ user_form.last_name }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            {{ user_form.email }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            {{ profile_form.city }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bio</label>
+                            {{ profile_form.bio }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Profile Picture</label>
+                            {{ profile_form.profile_picture }}
+                        </div>
+
+                        <h5 class="mb-3 mt-4">Dietary Preferences</h5>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Diet Type</label>
+                                {{ profile_form.diet_type }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Preferred Delivery App</label>
+                                {{ profile_form.preferred_delivery_app }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Allergies</label>
+                            {{ profile_form.allergies }}
+                            <small class="form-text text-muted">Comma-separated (e.g., peanuts, shellfish, dairy)</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Favorite Cuisines</label>
+                            {{ profile_form.favorite_cuisines }}
+                            <small class="form-text text-muted">Comma-separated (e.g., Italian, Mexican, Chinese)</small>
+                        </div>
+
+                        <h5 class="mb-3 mt-4">Nutrition Goals (Optional)</h5>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Daily Calorie Goal</label>
+                                {{ profile_form.daily_calorie_goal }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Protein Goal (g)</label>
+                                {{ profile_form.protein_goal }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Carbs Goal (g)</label>
+                                {{ profile_form.carbs_goal }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fat Goal (g)</label>
+                                {{ profile_form.fat_goal }}
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 mt-4">App Settings</h5>
+                        <hr>
+
+                        <div class="mb-4">
+                            <label class="form-label">Maximum Distance (miles)</label>
+                            {{ profile_form.max_distance_miles }}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+</style>
+{% endblock %}

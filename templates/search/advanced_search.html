@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Advanced Search - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-5 fw-bold text-tinder mb-3">
+                <i class="fas fa-filter"></i> Advanced Search
+            </h1>
+            <p class="lead text-muted">Find exactly what you're craving</p>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Search Term</label>
+                                <input type="text" name="q" class="form-control" placeholder="Dish name or keyword..." value="{{ query }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Cuisine</label>
+                                <select name="cuisine" class="form-select">
+                                    <option value="">All Cuisines</option>
+                                    {% for cuisine in cuisines %}
+                                        <option value="{{ cuisine.id }}" {% if selected_cuisine == cuisine.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ cuisine.emoji }} {{ cuisine.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Meal Type</label>
+                                <select name="meal_type" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="breakfast" {% if selected_meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                                    <option value="lunch" {% if selected_meal_type == 'lunch' %}selected{% endif %}>Lunch</option>
+                                    <option value="dinner" {% if selected_meal_type == 'dinner' %}selected{% endif %}>Dinner</option>
+                                    <option value="snack" {% if selected_meal_type == 'snack' %}selected{% endif %}>Snack</option>
+                                    <option value="dessert" {% if selected_meal_type == 'dessert' %}selected{% endif %}>Dessert</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Diet Type</label>
+                                <select name="diet_type" class="form-select">
+                                    <option value="">All Diets</option>
+                                    <option value="vegetarian" {% if diet_type == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                                    <option value="vegan" {% if diet_type == 'vegan' %}selected{% endif %}>Vegan</option>
+                                    <option value="gluten_free" {% if diet_type == 'gluten_free' %}selected{% endif %}>Gluten Free</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Max Calories</label>
+                                <input type="number" name="max_calories" class="form-control" placeholder="e.g., 500" value="{{ max_calories }}">
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a href="{% url 'search:advanced_search' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-redo"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <h3 class="fw-bold">Results ({{ dishes.count }})</h3>
+        </div>
+
+        {% if dishes %}
+            {% for dish in dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dish.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                {% if dish.cuisine %}
+                                    {{ dish.cuisine.emoji }} {{ dish.cuisine.name }}
+                                {% endif %}
+                            </p>
+
+                            <!-- Tags -->
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">{{ dish.get_meal_type_display }}</span>
+                                {% if dish.calories %}
+                                    <span class="badge bg-info">{{ dish.calories }} cal</span>
+                                {% endif %}
+                                {% if dish.is_vegetarian %}
+                                    <span class="badge bg-success">🥬 Veg</span>
+                                {% endif %}
+                            </div>
+
+                            <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No dishes match your search criteria. Try adjusting your filters!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

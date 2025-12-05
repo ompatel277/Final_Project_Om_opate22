@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recommendations - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-5 fw-bold text-tinder mb-3">
+                🎯 Your Personalized Recommendations
+            </h1>
+            <p class="lead text-muted">Based on your food profile and preferences</p>
+        </div>
+    </div>
+
+    {% if recommendations %}
+        <div class="row">
+            {% for dish in recommendations %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dish.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                {% if dish.cuisine %}
+                                    {{ dish.cuisine.emoji }} {{ dish.cuisine.name }}
+                                {% endif %}
+                            </p>
+                            <p class="card-text small">{{ dish.description|truncatewords:12 }}</p>
+
+                            <!-- Match Score -->
+                            <div class="mb-3">
+                                <span class="badge bg-success">
+                                    ✓ Matches your preferences
+                                </span>
+                                {% if dish.is_vegetarian and profile.diet_type == 'vegetarian' %}
+                                    <span class="badge bg-info">🥬 Vegetarian</span>
+                                {% endif %}
+                                {% if dish.calories and profile.daily_calorie_goal %}
+                                    <span class="badge bg-warning">{{ dish.calories }} cal</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <a href="{% url 'recommender:similar_dishes' dish.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i> Find Similar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> No recommendations available right now. Try updating your food preferences!
+            <br><br>
+            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">
+                Update Preferences
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

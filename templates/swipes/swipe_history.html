@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Swipe History - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                <i class="fas fa-history"></i> Swipe History
+            </h1>
+            <p class="lead text-muted">Review all your past swipes</p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="fw-bold text-tinder">{{ total_swipes }}</h2>
+                    <p class="text-muted mb-0">Total Swipes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="fw-bold text-success">{{ right_swipes }}</h2>
+                    <p class="text-muted mb-0">Right Swipes ❤️</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="fw-bold text-danger">{{ left_swipes }}</h2>
+                    <p class="text-muted mb-0">Left Swipes 👋</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET">
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label">Filter by Direction</label>
+                                <select name="direction" class="form-select">
+                                    <option value="">All Swipes</option>
+                                    <option value="right">Right Swipes Only</option>
+                                    <option value="left">Left Swipes Only</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter"></i> Apply
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Swipe History -->
+    <div class="row">
+        {% if swipe_actions %}
+            {% for swipe in swipe_actions %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ swipe.dish.display_image }}" class="card-img-top" alt="{{ swipe.dish.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ swipe.dish.name }}</h5>
+                                {% if swipe.direction == 'right' %}
+                                    <span class="badge bg-success" style="font-size: 1.2rem;">❤️</span>
+                                {% else %}
+                                    <span class="badge bg-danger" style="font-size: 1.2rem;">👋</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-muted small mb-2">
+                                {% if swipe.dish.cuisine %}
+                                    {{ swipe.dish.cuisine.emoji }} {{ swipe.dish.cuisine.name }}
+                                {% endif %}
+                            </p>
+
+                            <p class="card-text small">{{ swipe.dish.description|truncatewords:12 }}</p>
+
+                            <small class="text-muted d-block mb-3">
+                                Swiped {{ swipe.created_at|timesince }} ago
+                            </small>
+
+                            <a href="{% url 'dishes:dish_detail' swipe.dish.id %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No swipe history yet. Start swiping to see your history here!
+                    <br><br>
+                    <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">
+                        <i class="fas fa-fire"></i> Start Swiping
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

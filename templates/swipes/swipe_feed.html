@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Swipe - Swipe&Bite{% endblock %}
+
+{% block extra_css %}
+<style>
+    .swipe-card {
+        max-width: 500px;
+        margin: 0 auto;
+        border-radius: 25px;
+        box-shadow: 0 10px 40px rgba(254, 60, 114, 0.3);
+        overflow: hidden;
+    }
+
+    .swipe-image {
+        height: 400px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .swipe-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .swipe-btn {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .swipe-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .btn-nope {
+        background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+        color: white;
+    }
+
+    .btn-like {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+    }
+
+    .badge-custom {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+        border-radius: 20px;
+    }
+
+    .swipe-animation {
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .no-dishes-container {
+        text-align: center;
+        padding: 100px 20px;
+    }
+
+    .no-dishes-emoji {
+        font-size: 120px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if dish %}
+        <div class="row mb-3">
+            <div class="col-md-12 text-center">
+                <p class="text-muted">
+                    <i class="fas fa-layer-group"></i> {{ total_available }} dishes remaining
+                </p>
+            </div>
+        </div>
+
+        <div class="swipe-animation">
+            <div class="swipe-card card">
+                <img src="{{ dish.display_image }}" class="swipe-image" alt="{{ dish.name }}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="card-title fw-bold mb-2">{{ dish.name }}</h2>
+                            {% if dish.cuisine %}
+                                <p class="text-muted mb-0">
+                                    {{ dish.cuisine.emoji }} {{ dish.cuisine.name }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-warning badge-custom">
+                                <i class="fas fa-star"></i> {{ dish.average_rating|floatformat:1 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <p class="card-text mb-3">{{ dish.description }}</p>
+
+                    <!-- Tags -->
+                    <div class="mb-3">
+                        <span class="badge bg-secondary badge-custom">{{ dish.get_meal_type_display }}</span>
+                        {% if dish.is_vegetarian %}
+                            <span class="badge bg-success badge-custom">🥬 Vegetarian</span>
+                        {% endif %}
+                        {% if dish.is_vegan %}
+                            <span class="badge bg-success badge-custom">🌱 Vegan</span>
+                        {% endif %}
+                        {% if dish.is_gluten_free %}
+                            <span class="badge bg-warning badge-custom">🌾 Gluten Free</span>
+                        {% endif %}
+                        {% if dish.spice_level > 0 %}
+                            <span class="badge bg-danger badge-custom">🌶️ Spicy {{ dish.spice_level }}/5</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nutrition Info -->
+                    {% if dish.calories or dish.protein or dish.carbs or dish.fat %}
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Nutrition Facts</h6>
+                            <div class="row text-center">
+                                {% if dish.calories %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.calories }}</div>
+                                    <small class="text-muted">Cal</small>
+                                </div>
+                                {% endif %}
+                                {% if dish.protein %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.protein }}g</div>
+                                    <small class="text-muted">Protein</small>
+                                </div>
+                                {% endif %}
+                                {% if dish.carbs %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.carbs }}g</div>
+                                    <small class="text-muted">Carbs</small>
+                                </div>
+                                {% endif %}
+                                {% if dish.fat %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.fat }}g</div>
+                                    <small class="text-muted">Fat</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-center">
+                        <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-info-circle"></i> More Details
+                        </a>
+                        <a href="{% url 'swipes:add_dish_to_blacklist' dish.id %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-ban"></i> Never Show Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swipe Buttons -->
+            <div class="swipe-buttons">
+                <button class="swipe-btn btn-nope" onclick="swipe('left', {{ dish.id }})">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="swipe-btn btn-like" onclick="swipe('right', {{ dish.id }})">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <i class="fas fa-arrow-left"></i> Swipe left to pass • Swipe right to like <i class="fas fa-arrow-right"></i>
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <!-- No more dishes -->
+        <div class="no-dishes-container">
+            <div class="no-dishes-emoji">🎉</div>
+            <h2 class="fw-bold mb-3">You've Swiped Through Everything!</h2>
+            <p class="lead text-muted mb-4">Come back later for more delicious dishes, or check out your favorites.</p>
+            <a href="{% url 'swipes:favorites' %}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-heart"></i> View Favorites
+            </a>
+            <a href="{% url 'swipes:swipe_history' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-history"></i> Swipe History
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function swipe(direction, dishId) {
+    // Send swipe action to server
+    fetch(`/swipes/swipe/${dishId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `direction=${direction}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Show feedback
+            if (direction === 'right') {
+                showNotification('❤️ Liked!', 'success');
+            } else {
+                showNotification('👋 Passed', 'info');
+            }
+
+            // Reload page after short delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error processing swipe', 'danger');
+    });
+}
+
+function showNotification(message, type) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+    alert.style.zIndex = '9999';
+    alert.textContent = message;
+    document.body.appendChild(alert);
+
+    setTimeout(() => {
+        alert.remove();
+    }, 2000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(event) {
+    {% if dish %}
+    if (event.key === 'ArrowLeft') {
+        swipe('left', {{ dish.id }});
+    } else if (event.key === 'ArrowRight') {
+        swipe('right', {{ dish.id }});
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

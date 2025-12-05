@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Surprise Dish - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center mb-4">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                🎲 Your Surprise Dish!
+            </h1>
+            <p class="lead text-muted">Sometimes the best choices are spontaneous</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card surprise-card">
+                <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 300px; object-fit: cover;">
+                <div class="card-body p-4">
+                    <h2 class="card-title fw-bold mb-3">{{ dish.name }}</h2>
+                    <p class="text-muted mb-3">
+                        <strong>{{ dish.cuisine.emoji }} {{ dish.cuisine.name }}</strong> • {{ dish.get_meal_type_display }}
+                    </p>
+                    <p class="card-text mb-4">{{ dish.description }}</p>
+
+                    <!-- Nutrition -->
+                    {% if dish.calories %}
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Nutrition Facts</h6>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.calories }}</div>
+                                    <small class="text-muted">Cal</small>
+                                </div>
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.protein }}g</div>
+                                    <small class="text-muted">Protein</small>
+                                </div>
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.carbs }}g</div>
+                                    <small class="text-muted">Carbs</small>
+                                </div>
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.fat }}g</div>
+                                    <small class="text-muted">Fat</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-eye"></i> View Full Details
+                        </a>
+                        <a href="{% url 'swipes:add_favorite' dish.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-heart"></i> Add to Favorites
+                        </a>
+                        <a href="{% url 'recommender:surprise_me' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-dice"></i> Surprise Me Again!
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .surprise-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

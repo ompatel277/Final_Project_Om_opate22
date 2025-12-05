@@ -1,3 +1,250 @@
-from django.contrib import admin
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Avg, Count, Q
+from django.utils import timezone
+from datetime import timedelta
+from dishes.models import Dish
+from .models import (
+    Review, ReviewHelpful, WeeklyRanking, TrendingDish,
+    CommunityChallenge, ChallengeParticipation, UserBadge
+)
 
-# Register your models here.
+
+def community_home_view(request):
+    """Community homepage with rankings and trending"""
+
+    # Get trending dishes
+    trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')[:10]
+
+    # Get current week rankings
+    today = timezone.now().date()
+    current_week_rankings = WeeklyRanking.objects.filter(
+        week_start__lte=today,
+        week_end__gte=today
+    ).select_related('dish').order_by('rank')[:10]
+
+    # Get active challenges
+    active_challenges = CommunityChallenge.objects.filter(status='active')
+
+    # Get recent reviews
+    recent_reviews = Review.objects.select_related('user', 'dish').order_by('-created_at')[:5]
+
+    context = {
+        'trending_dishes': trending_dishes,
+        'current_week_rankings': current_week_rankings,
+        'active_challenges': active_challenges,
+        'recent_reviews': recent_reviews,
+    }
+    return render(request, 'community/community_home.html', context)
+
+
+def trending_view(request):
+    """View all trending dishes"""
+    trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')
+
+    context = {
+        'trending_dishes': trending_dishes,
+    }
+    return render(request, 'community/trending.html', context)
+
+
+def weekly_rankings_view(request):
+    """View weekly rankings"""
+    today = timezone.now().date()
+
+    # Current week
+    current_week_rankings = WeeklyRanking.objects.filter(
+        week_start__lte=today,
+        week_end__gte=today
+    ).select_related('dish').order_by('rank')
+
+    # Previous weeks
+    previous_weeks = WeeklyRanking.objects.filter(
+        week_end__lt=today
+    ).values('week_start', 'week_end').distinct().order_by('-week_start')[:4]
+
+    context = {
+        'current_week_rankings': current_week_rankings,
+        'previous_weeks': previous_weeks,
+    }
+    return render(request, 'community/weekly_rankings.html', context)
+
+
+@login_required
+def add_review_view(request, dish_id):
+    """Add review for a dish"""
+    dish = get_object_or_404(Dish, id=dish_id)
+
+    # Check if user already reviewed
+    existing_review = Review.objects.filter(user=request.user, dish=dish).first()
+
+    if request.method == 'POST':
+        rating = int(request.POST.get('rating'))
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        image = request.FILES.get('image')
+
+        if existing_review:
+            # Update existing review
+            existing_review.rating = rating
+            existing_review.title = title
+            existing_review.content = content
+            if image:
+                existing_review.image = image
+            existing_review.save()
+            messages.success(request, 'Review updated successfully!')
+        else:
+            # Create new review
+            Review.objects.create(
+                user=request.user,
+                dish=dish,
+                rating=rating,
+                title=title,
+                content=content,
+                image=image
+            )
+            messages.success(request, 'Review posted successfully!')
+
+        # Update dish rating
+        avg_rating = Review.objects.filter(dish=dish).aggregate(Avg('rating'))['rating__avg']
+        dish.average_rating = avg_rating or 0
+        dish.total_ratings = Review.objects.filter(dish=dish).count()
+        dish.save()
+
+        return redirect('dishes:dish_detail', dish_id=dish.id)
+
+    context = {
+        'dish': dish,
+        'existing_review': existing_review,
+    }
+    return render(request, 'community/add_review.html', context)
+
+
+def dish_reviews_view(request, dish_id):
+    """View all reviews for a dish"""
+    dish = get_object_or_404(Dish, id=dish_id)
+    reviews = Review.objects.filter(dish=dish).select_related('user').order_by('-created_at')
+
+    # Filter by rating
+    rating_filter = request.GET.get('rating')
+    if rating_filter:
+        reviews = reviews.filter(rating=int(rating_filter))
+
+    # Stats
+    total_reviews = reviews.count()
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    rating_distribution = {
+        5: reviews.filter(rating=5).count(),
+        4: reviews.filter(rating=4).count(),
+        3: reviews.filter(rating=3).count(),
+        2: reviews.filter(rating=2).count(),
+        1: reviews.filter(rating=1).count(),
+    }
+
+    context = {
+        'dish': dish,
+        'reviews': reviews,
+        'total_reviews': total_reviews,
+        'avg_rating': avg_rating,
+        'rating_distribution': rating_distribution,
+    }
+    return render(request, 'community/dish_reviews.html', context)
+
+
+@login_required
+def mark_helpful_view(request, review_id):
+    """Mark review as helpful"""
+    review = get_object_or_404(Review, id=review_id)
+
+    helpful, created = ReviewHelpful.objects.get_or_create(user=request.user, review=review)
+
+    if created:
+        review.helpful_count += 1
+        review.save()
+        messages.success(request, 'Marked as helpful!')
+    else:
+        helpful.delete()
+        review.helpful_count -= 1
+        review.save()
+        messages.info(request, 'Removed helpful mark.')
+
+    return redirect('community:dish_reviews', dish_id=review.dish.id)
+
+
+def challenges_view(request):
+    """View all community challenges"""
+    active_challenges = CommunityChallenge.objects.filter(status='active')
+    upcoming_challenges = CommunityChallenge.objects.filter(status='upcoming').order_by('start_date')
+    completed_challenges = CommunityChallenge.objects.filter(status='completed').order_by('-end_date')[:5]
+
+    context = {
+        'active_challenges': active_challenges,
+        'upcoming_challenges': upcoming_challenges,
+        'completed_challenges': completed_challenges,
+    }
+    return render(request, 'community/challenges.html', context)
+
+
+@login_required
+def join_challenge_view(request, challenge_id):
+    """Join a community challenge"""
+    challenge = get_object_or_404(CommunityChallenge, id=challenge_id)
+
+    participation, created = ChallengeParticipation.objects.get_or_create(
+        user=request.user,
+        challenge=challenge
+    )
+
+    if created:
+        messages.success(request, f'You joined {challenge.title}!')
+    else:
+        messages.info(request, 'You are already participating in this challenge.')
+
+    return redirect('community:challenges')
+
+
+@login_required
+def my_badges_view(request):
+    """View user's badges and achievements"""
+    badges = UserBadge.objects.filter(user=request.user).order_by('-earned_at')
+
+    # Stats for badge eligibility
+    from swipes.models import SwipeAction
+    total_swipes = SwipeAction.objects.filter(user=request.user).count()
+    total_reviews = Review.objects.filter(user=request.user).count()
+
+    context = {
+        'badges': badges,
+        'total_swipes': total_swipes,
+        'total_reviews': total_reviews,
+    }
+    return render(request, 'community/my_badges.html', context)
+
+
+def leaderboard_view(request):
+    """Community leaderboard"""
+    from django.contrib.auth.models import User
+    from swipes.models import SwipeAction
+
+    # Top reviewers
+    top_reviewers = User.objects.annotate(
+        review_count=Count('reviews')
+    ).filter(review_count__gt=0).order_by('-review_count')[:10]
+
+    # Top swipers
+    top_swipers = User.objects.annotate(
+        swipe_count=Count('swipes')
+    ).filter(swipe_count__gt=0).order_by('-swipe_count')[:10]
+
+    # Most badges
+    top_badge_earners = User.objects.annotate(
+        badge_count=Count('badges')
+    ).filter(badge_count__gt=0).order_by('-badge_count')[:10]
+
+    context = {
+        'top_reviewers': top_reviewers,
+        'top_swipers': top_swipers,
+        'top_badge_earners': top_badge_earners,
+    }
+    return render(request, 'community/leaderboard.html', context)

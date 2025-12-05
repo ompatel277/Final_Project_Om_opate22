@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Favorites - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                <i class="fas fa-heart"></i> My Favorites
+            </h1>
+            <p class="lead text-muted">Your collection of amazing dishes and restaurants</p>
+        </div>
+    </div>
+
+    <!-- Favorite Dishes -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">
+                <i class="fas fa-utensils"></i> Favorite Dishes ({{ favorite_dishes.count }})
+            </h3>
+        </div>
+
+        {% if favorite_dishes %}
+            {% for favorite in favorite_dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ favorite.dish.display_image }}" class="card-img-top" alt="{{ favorite.dish.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ favorite.dish.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                {% if favorite.dish.cuisine %}
+                                    {{ favorite.dish.cuisine.emoji }} {{ favorite.dish.cuisine.name }}
+                                {% endif %}
+                            </p>
+                            <p class="card-text small">{{ favorite.dish.description|truncatewords:15 }}</p>
+
+                            {% if favorite.dish.calories %}
+                                <p class="small text-muted mb-2">
+                                    <i class="fas fa-fire"></i> {{ favorite.dish.calories }} cal
+                                </p>
+                            {% endif %}
+
+                            <small class="text-muted d-block mb-3">
+                                Added {{ favorite.created_at|date:"M d, Y" }}
+                            </small>
+
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'dishes:dish_detail' favorite.dish.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <a href="{% url 'swipes:remove_favorite' favorite.id %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-heart-broken"></i> Remove
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-heart"></i> No favorite dishes yet. Start swiping to build your collection!
+                    <br><br>
+                    <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">
+                        <i class="fas fa-fire"></i> Start Swiping
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Favorite Restaurants -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">
+                <i class="fas fa-store"></i> Favorite Restaurants ({{ favorite_restaurants.count }})
+            </h3>
+        </div>
+
+        {% if favorite_restaurants %}
+            {% for favorite in favorite_restaurants %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title fw-bold">{{ favorite.restaurant.name }}</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt"></i> {{ favorite.restaurant.city }}, {{ favorite.restaurant.state }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <span class="badge bg-secondary">{{ favorite.restaurant.price_range }}</span>
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-star"></i> {{ favorite.restaurant.rating|floatformat:1 }}
+                                        </span>
+                                    </p>
+                                    <small class="text-muted d-block mb-3">
+                                        Added {{ favorite.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'dishes:restaurant_detail' favorite.restaurant.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View Restaurant
+                                </a>
+                                <a href="{% url 'swipes:remove_favorite_restaurant' favorite.id %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-heart-broken"></i> Remove
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-store"></i> No favorite restaurants yet. Browse restaurants to add some!
+                    <br><br>
+                    <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-primary">
+                        <i class="fas fa-store"></i> Browse Restaurants
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

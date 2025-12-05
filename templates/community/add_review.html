@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review {{ dish.name }} - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h2 class="mb-4">
+                        {% if existing_review %}
+                            Edit Your Review
+                        {% else %}
+                            Write a Review
+                        {% endif %}
+                    </h2>
+
+                    <!-- Dish Info -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                        <img src="{{ dish.display_image }}" alt="{{ dish.name }}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h5 class="mb-1">{{ dish.name }}</h5>
+                            <p class="text-muted mb-0">{{ dish.cuisine.name }}</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Rating -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Rating *</label>
+                            <div class="rating-selector">
+                                {% for i in "12345" %}
+                                    <input type="radio" name="rating" value="{{ forloop.counter }}" id="star{{ forloop.counter }}" {% if existing_review.rating == forloop.counter %}checked{% endif %} required>
+                                    <label for="star{{ forloop.counter }}">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Title *</label>
+                            <input type="text" name="title" class="form-control" placeholder="Sum up your experience" value="{{ existing_review.title }}" required maxlength="200">
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Review *</label>
+                            <textarea name="content" class="form-control" rows="5" placeholder="What did you think?" required>{{ existing_review.content }}</textarea>
+                        </div>
+
+                        <!-- Image -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Add a Photo (Optional)</label>
+                            <input type="file" name="image" class="form-control" accept="image/*">
+                            {% if existing_review.image %}
+                                <small class="text-muted">Current: {{ existing_review.image.name }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if existing_review %}
+                                    Update Review
+                                {% else %}
+                                    Post Review
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rating-selector {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 10px;
+        font-size: 2rem;
+    }
+
+    .rating-selector input {
+        display: none;
+    }
+
+    .rating-selector label {
+        cursor: pointer;
+        color: #ddd;
+        transition: color 0.3s;
+    }
+
+    .rating-selector input:checked ~ label,
+    .rating-selector label:hover,
+    .rating-selector label:hover ~ label {
+        color: #FFD700;
+    }
+</style>
+{% endblock %}

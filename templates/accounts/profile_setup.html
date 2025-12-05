@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile Setup - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-3">Welcome to Swipe&Bite! 🎉</h2>
+                    <p class="text-center text-muted mb-4">Let's set up your profile to personalize your experience</p>
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            {{ form.city }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Bio (Optional)</label>
+                            {{ form.bio }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Diet Type</label>
+                            {{ form.diet_type }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Allergies (Optional)</label>
+                            {{ form.allergies }}
+                            <small class="form-text text-muted">Comma-separated (e.g., peanuts, shellfish)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Favorite Cuisines (Optional)</label>
+                            {{ form.favorite_cuisines }}
+                            <small class="form-text text-muted">Comma-separated (e.g., Italian, Mexican)</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Preferred Delivery App</label>
+                            {{ form.preferred_delivery_app }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-2">Complete Setup & Start Swiping!</button>
+                        <a href="{% url 'home' %}" class="btn btn-link w-100">Skip for now</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+</style>
+{% endblock %}

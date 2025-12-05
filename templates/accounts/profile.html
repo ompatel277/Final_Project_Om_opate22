@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Header -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px; font-size: 48px;">
+                            {{ user.first_name.0 }}{{ user.last_name.0 }}
+                        </div>
+                    {% endif %}
+
+                    <h3>{{ user.get_full_name }}</h3>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    {% if profile.city %}
+                        <p class="mb-2"><i class="fas fa-map-marker-alt"></i> {{ profile.city }}</p>
+                    {% endif %}
+
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Stats</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Swipes</span>
+                        <strong>{{ total_swipes|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Favorites</span>
+                        <strong>{{ favorites_count|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Reviews</span>
+                        <strong>{{ reviews_count|default:0 }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="col-md-8">
+            <!-- Bio -->
+            {% if profile.bio %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">About</h5>
+                    <p class="card-text">{{ profile.bio }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Dietary Preferences -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">🥗 Dietary Preferences</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Diet Type:</strong> {{ profile.get_diet_type_display }}</p>
+                            <p><strong>Preferred Delivery:</strong> {{ profile.get_preferred_delivery_app_display }}</p>
+                            <p><strong>Max Distance:</strong> {{ profile.max_distance_miles }} miles</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if profile.allergies %}
+                                <p><strong>Allergies:</strong></p>
+                                <div class="mb-2">
+                                    {% for allergy in profile.get_allergies_list %}
+                                        <span class="badge bg-danger">{{ allergy }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% if profile.favorite_cuisines %}
+                                <p><strong>Favorite Cuisines:</strong></p>
+                                <div>
+                                    {% for cuisine in profile.get_favorite_cuisines_list %}
+                                        <span class="badge bg-info">{{ cuisine }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition Goals -->
+            {% if profile.daily_calorie_goal or profile.protein_goal or profile.carbs_goal or profile.fat_goal %}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🎯 Nutrition Goals</h5>
+                    <hr>
+                    <div class="row">
+                        {% if profile.daily_calorie_goal %}
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-primary mb-0">{{ profile.daily_calorie_goal }}</h3>
+                                <small class="text-muted">Calories</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if profile.protein_goal %}
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-success mb-0">{{ profile.protein_goal }}g</h3>
+                                <small class="text-muted">Protein</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if profile.carbs_goal %}
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-warning mb-0">{{ profile.carbs_goal }}g</h3>
+                                <small class="text-muted">Carbs</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if profile.fat_goal %}
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-info mb-0">{{ profile.fat_goal }}g</h3>
+                                <small class="text-muted">Fat</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

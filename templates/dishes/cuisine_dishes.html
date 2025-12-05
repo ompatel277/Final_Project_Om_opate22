@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cuisine.name }} Dishes - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-tinder mb-3">
+                {{ cuisine.emoji }} {{ cuisine.name }} Cuisine
+            </h1>
+            {% if cuisine.description %}
+                <p class="lead text-muted">{{ cuisine.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Dishes -->
+    <div class="row">
+        {% if dishes %}
+            {% for dish in dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dish.name }}</h5>
+                            <p class="card-text">{{ dish.description|truncatewords:15 }}</p>
+                            <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> No dishes available for this cuisine yet.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'dishes:dish_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to All Dishes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

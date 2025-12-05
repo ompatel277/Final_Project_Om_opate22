@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Welcome, {{ user.first_name }}! 👋</h2>
+
+    <div class="row">
+        <!-- Stats Cards -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-hand-pointer fa-3x text-primary mb-3"></i>
+                    <h3>{{ total_swipes }}</h3>
+                    <p class="text-muted">Total Swipes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                    <h3>{{ favorites_count }}</h3>
+                    <p class="text-muted">Favorites</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                    <h3>{{ reviews_count }}</h3>
+                    <p class="text-muted">Reviews</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Quick Actions</h5>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-utensils"></i> Start Swiping
+                        </a>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user"></i> View Profile
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="fas fa-heart"></i> My Favorites
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Results - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-5 fw-bold text-tinder mb-3">
+                <i class="fas fa-search"></i> Search Results
+            </h1>
+            {% if query %}
+                <p class="lead text-muted">Results for: "{{ query }}"</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="GET" action="{% url 'search:global_search' %}">
+                <div class="input-group input-group-lg">
+                    <input type="text" name="q" class="form-control" placeholder="Search dishes, restaurants, cuisines..." value="{{ query }}" autofocus>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <a href="{% url 'search:advanced_search' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-filter"></i> Advanced
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if query %}
+        <!-- Dishes Results -->
+        {% if dishes %}
+        <div class="row mb-5">
+            <div class="col-md-12 mb-3">
+                <h3 class="fw-bold">
+                    <i class="fas fa-utensils"></i> Dishes ({{ dishes.count }})
+                </h3>
+            </div>
+            {% for dish in dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dish.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                {% if dish.cuisine %}
+                                    {{ dish.cuisine.emoji }} {{ dish.cuisine.name }}
+                                {% endif %}
+                            </p>
+                            <p class="card-text small">{{ dish.description|truncatewords:15 }}</p>
+                            <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Restaurants Results -->
+        {% if restaurants %}
+        <div class="row mb-5">
+            <div class="col-md-12 mb-3">
+                <h3 class="fw-bold">
+                    <i class="fas fa-store"></i> Restaurants ({{ restaurants.count }})
+                </h3>
+            </div>
+            {% for restaurant in restaurants %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ restaurant.name }}</h5>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt"></i> {{ restaurant.city }}, {{ restaurant.state }}
+                            </p>
+                            <div class="mb-3">
+                                <span class="badge bg-secondary">{{ restaurant.price_range }}</span>
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-star"></i> {{ restaurant.rating|floatformat:1 }}
+                                </span>
+                            </div>
+                            <a href="{% url 'dishes:restaurant_detail' restaurant.id %}" class="btn btn-outline-primary">
+                                View Menu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Cuisines Results -->
+        {% if cuisines %}
+        <div class="row mb-5">
+            <div class="col-md-12 mb-3">
+                <h3 class="fw-bold">
+                    <i class="fas fa-globe"></i> Cuisines ({{ cuisines.count }})
+                </h3>
+            </div>
+            {% for cuisine in cuisines %}
+                <div class="col-md-3 mb-3">
+                    <a href="{% url 'dishes:cuisine_dishes' cuisine.id %}" class="text-decoration-none">
+                        <div class="card text-center hover-card">
+                            <div class="card-body">
+                                <div style="font-size: 60px;">{{ cuisine.emoji }}</div>
+                                <h5 class="card-title fw-bold">{{ cuisine.name }}</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- No Results -->
+        {% if not dishes and not restaurants and not cuisines %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> No results found for "{{ query }}". Try different keywords!
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-search"></i> Enter a search term to find dishes, restaurants, and cuisines.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-card {
+        transition: all 0.3s;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(254, 60, 114, 0.3);
+    }
+</style>
+{% endblock %}

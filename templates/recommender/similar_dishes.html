@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Similar to {{ dish.name }} - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-5 fw-bold text-tinder mb-3">
+                Dishes Similar to {{ dish.name }}
+            </h1>
+        </div>
+    </div>
+    
+    <!-- Original Dish -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <img src="{{ dish.display_image }}" class="img-fluid rounded" alt="{{ dish.name }}">
+                        </div>
+                        <div class="col-md-10">
+                            <h4 class="fw-bold">{{ dish.name }}</h4>
+                            <p class="text-muted mb-2">{{ dish.cuisine.name }} • {{ dish.get_meal_type_display }}</p>
+                            <p class="mb-0">{{ dish.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Similar Dishes -->
+    {% if similar_dishes %}
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <h3 class="fw-bold">You Might Also Like</h3>
+            </div>
+            {% for similar in similar_dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ similar.display_image }}" class="card-img-top" alt="{{ similar.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ similar.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                {{ similar.cuisine.emoji }} {{ similar.cuisine.name }}
+                            </p>
+                            <p class="card-text small">{{ similar.description|truncatewords:12 }}</p>
+                            
+                            <div class="mb-3">
+                                {% if similar.calories %}
+                                    <span class="badge bg-info">{{ similar.calories }} cal</span>
+                                {% endif %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-star"></i> {{ similar.average_rating|floatformat:1 }}
+                                </span>
+                            </div>
+                            
+                            <a href="{% url 'dishes:dish_detail' similar.id %}" class="btn btn-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> No similar dishes found at the moment.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

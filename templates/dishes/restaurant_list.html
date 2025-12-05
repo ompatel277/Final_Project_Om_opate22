@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }} - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Restaurant Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h1 class="fw-bold mb-2">{{ restaurant.name }}</h1>
+                            <p class="text-muted mb-3">
+                                <i class="fas fa-map-marker-alt"></i> {{ restaurant.full_address }}
+                            </p>
+
+                            {% if restaurant.description %}
+                                <p class="mb-3">{{ restaurant.description }}</p>
+                            {% endif %}
+
+                            <!-- Tags -->
+                            <div class="mb-3">
+                                <span class="badge bg-secondary" style="font-size: 1rem;">{{ restaurant.price_range }}</span>
+                                {% if restaurant.cuisine_type %}
+                                    <span class="badge bg-info" style="font-size: 1rem;">{{ restaurant.cuisine_type.name }}</span>
+                                {% endif %}
+                                <span class="badge bg-warning" style="font-size: 1rem;">
+                                    <i class="fas fa-star"></i> {{ restaurant.rating|floatformat:1 }} ({{ restaurant.total_reviews }} reviews)
+                                </span>
+                            </div>
+
+                            <!-- Contact Info -->
+                            <div class="mb-3">
+                                {% if restaurant.phone %}
+                                    <p class="mb-1">
+                                        <i class="fas fa-phone"></i> <a href="tel:{{ restaurant.phone }}">{{ restaurant.phone }}</a>
+                                    </p>
+                                {% endif %}
+                                {% if restaurant.website %}
+                                    <p class="mb-1">
+                                        <i class="fas fa-globe"></i> <a href="{{ restaurant.website }}" target="_blank">Visit Website</a>
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <!-- Delivery Options -->
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Delivery Options</h5>
+                                    {% if restaurant.delivery_options %}
+                                        {% if restaurant.has_uber_eats %}
+                                            <div class="mb-2">
+                                                {% if restaurant.uber_eats_url %}
+                                                    <a href="{{ restaurant.uber_eats_url }}" target="_blank" class="btn btn-dark w-100">
+                                                        Order on Uber Eats
+                                                    </a>
+                                                {% else %}
+                                                    <button class="btn btn-dark w-100" disabled>
+                                                        Uber Eats Available
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if restaurant.has_doordash %}
+                                            <div class="mb-2">
+                                                {% if restaurant.doordash_url %}
+                                                    <a href="{{ restaurant.doordash_url }}" target="_blank" class="btn btn-danger w-100">
+                                                        Order on DoorDash
+                                                    </a>
+                                                {% else %}
+                                                    <button class="btn btn-danger w-100" disabled>
+                                                        DoorDash Available
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if restaurant.has_grubhub %}
+                                            <div class="mb-2">
+                                                {% if restaurant.grubhub_url %}
+                                                    <a href="{{ restaurant.grubhub_url }}" target="_blank" class="btn btn-danger w-100">
+                                                        Order on Grubhub
+                                                    </a>
+                                                {% else %}
+                                                    <button class="btn btn-danger w-100" disabled>
+                                                        Grubhub Available
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="text-muted">No delivery options available</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu / Dishes -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">
+                <i class="fas fa-utensils"></i> Menu
+            </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if restaurant_dishes %}
+            {% for rd in restaurant_dishes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ rd.dish.display_image }}" class="card-img-top" alt="{{ rd.dish.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ rd.dish.name }}</h5>
+                                <h5 class="text-tinder fw-bold mb-0">${{ rd.price }}</h5>
+                            </div>
+
+                            <p class="card-text small">{{ rd.dish.description|truncatewords:15 }}</p>
+
+                            <!-- Dish Tags -->
+                            <div class="mb-3">
+                                {% if rd.dish.is_vegetarian %}
+                                    <span class="badge bg-success">🥬 Veg</span>
+                                {% endif %}
+                                {% if rd.dish.is_vegan %}
+                                    <span class="badge bg-success">🌱 Vegan</span>
+                                {% endif %}
+                                {% if rd.dish.calories %}
+                                    <span class="badge bg-secondary">{{ rd.dish.calories }} cal</span>
+                                {% endif %}
+                            </div>
+
+                            <a href="{% url 'dishes:dish_detail' rd.dish.id %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No menu items available yet.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to All Restaurants
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

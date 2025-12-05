@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ dish.name }} - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Dish Image and Info -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 400px; object-fit: cover; border-radius: 20px 20px 0 0;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="card-title fw-bold">{{ dish.name }}</h2>
+                            {% if dish.cuisine %}
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-globe"></i> {{ dish.cuisine.name }} {{ dish.cuisine.emoji }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <div class="badge bg-primary" style="font-size: 1rem;">
+                                <i class="fas fa-star"></i> {{ dish.average_rating|floatformat:1 }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="card-text">{{ dish.description }}</p>
+
+                    <!-- Dietary Tags -->
+                    <div class="mb-3">
+                        <span class="badge bg-secondary">{{ dish.get_meal_type_display }}</span>
+                        {% if dish.is_vegetarian %}
+                            <span class="badge bg-success">🥬 Vegetarian</span>
+                        {% endif %}
+                        {% if dish.is_vegan %}
+                            <span class="badge bg-success">🌱 Vegan</span>
+                        {% endif %}
+                        {% if dish.is_gluten_free %}
+                            <span class="badge bg-warning">🌾 Gluten Free</span>
+                        {% endif %}
+                        {% if dish.spice_level > 0 %}
+                            <span class="badge bg-danger">🌶️ Spicy Level: {{ dish.spice_level }}/5</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nutrition Info -->
+                    {% if dish.calories or dish.protein or dish.carbs or dish.fat %}
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold">Nutrition Facts</h6>
+                            <div class="row text-center">
+                                {% if dish.calories %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.calories }}</div>
+                                    <small class="text-muted">Calories</small>
+                                </div>
+                                {% endif %}
+                                {% if dish.protein %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.protein }}g</div>
+                                    <small class="text-muted">Protein</small>
+                                </div>
+                                {% endif %}
+                                {% if dish.carbs %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.carbs }}g</div>
+                                    <small class="text-muted">Carbs</small>
+                                </div>
+                                {% endif %}
+                                {% if dish.fat %}
+                                <div class="col-3">
+                                    <div class="fw-bold text-tinder">{{ dish.fat }}g</div>
+                                    <small class="text-muted">Fat</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Ingredients -->
+                    {% if ingredients %}
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold">Ingredients</h6>
+                            <div class="mb-2">
+                                {% for ingredient in ingredients %}
+                                    <span class="badge {% if ingredient.is_allergen %}bg-danger{% else %}bg-secondary{% endif %} me-1 mb-1">
+                                        {{ ingredient.name }}
+                                        {% if ingredient.is_allergen %}<i class="fas fa-exclamation-triangle"></i>{% endif %}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            {% if allergens %}
+                                <small class="text-danger">
+                                    <i class="fas fa-exclamation-triangle"></i> Contains allergens:
+                                    {% for allergen in allergens %}{{ allergen.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Stats -->
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-heart"></i> {{ dish.total_right_swipes }} right swipes
+                            • Match rate: {{ dish.match_rate }}%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurants Serving This Dish -->
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-3">
+                <i class="fas fa-store"></i> Where to Get It
+            </h3>
+
+            {% if restaurant_dishes %}
+                {% for rd in restaurant_dishes %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">{{ rd.restaurant.name }}</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt"></i> {{ rd.restaurant.city }}, {{ rd.restaurant.state }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <span class="badge bg-secondary">{{ rd.restaurant.price_range }}</span>
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-star"></i> {{ rd.restaurant.rating|floatformat:1 }}
+                                        </span>
+                                    </p>
+
+                                    <!-- Delivery Options -->
+                                    {% if rd.restaurant.delivery_options %}
+                                        <div class="mb-2">
+                                            <small class="text-muted">Delivery via:</small><br>
+                                            {% if rd.restaurant.has_uber_eats %}
+                                                <span class="badge bg-dark">Uber Eats</span>
+                                            {% endif %}
+                                            {% if rd.restaurant.has_doordash %}
+                                                <span class="badge bg-danger">DoorDash</span>
+                                            {% endif %}
+                                            {% if rd.restaurant.has_grubhub %}
+                                                <span class="badge bg-danger">Grubhub</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <h3 class="text-tinder fw-bold mb-2">${{ rd.price }}</h3>
+                                    <a href="{% url 'dishes:restaurant_detail' rd.restaurant.id %}" class="btn btn-outline-primary btn-sm">
+                                        View Restaurant
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No restaurants currently serving this dish in our database.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'dishes:dish_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to All Dishes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

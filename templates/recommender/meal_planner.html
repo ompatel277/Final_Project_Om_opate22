@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meal Planner - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-5 fw-bold text-tinder mb-3">
+                📅 Weekly Meal Planner
+            </h1>
+            <p class="lead text-muted">Plan your meals for the week</p>
+        </div>
+    </div>
+    
+    <!-- Breakfast -->
+    <div class="row mb-4">
+        <div class="col-md-12 mb-3">
+            <h3 class="fw-bold">🌅 Breakfast Ideas</h3>
+        </div>
+        {% for dish in breakfast_dishes %}
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ dish.name }}</h6>
+                        <small class="text-muted d-block mb-2">{{ dish.calories }} cal</small>
+                        <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-sm btn-primary w-100">View</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Lunch -->
+    <div class="row mb-4">
+        <div class="col-md-12 mb-3">
+            <h3 class="fw-bold">🌤️ Lunch Ideas</h3>
+        </div>
+        {% for dish in lunch_dishes %}
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ dish.name }}</h6>
+                        <small class="text-muted d-block mb-2">{{ dish.calories }} cal</small>
+                        <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-sm btn-primary w-100">View</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Dinner -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <h3 class="fw-bold">🌙 Dinner Ideas</h3>
+        </div>
+        {% for dish in dinner_dishes %}
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ dish.name }}</h6>
+                        <small class="text-muted d-block mb-2">{{ dish.calories }} cal</small>
+                        <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-sm btn-primary w-100">View</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

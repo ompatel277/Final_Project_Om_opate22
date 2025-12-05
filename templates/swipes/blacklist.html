@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blacklist - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4 fw-bold text-danger mb-3">
+                <i class="fas fa-ban"></i> My Blacklist
+            </h1>
+            <p class="lead text-muted">Dishes, ingredients, or cuisines you want to avoid</p>
+        </div>
+    </div>
+
+    <!-- Add to Blacklist Form -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3">Add to Blacklist</h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Type</label>
+                                <select name="blacklist_type" class="form-select" required>
+                                    <option value="dish">Dish</option>
+                                    <option value="ingredient">Ingredient</option>
+                                    <option value="cuisine">Cuisine</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="item_name" class="form-control" placeholder="e.g., Sushi, Peanuts, Italian" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Reason (Optional)</label>
+                                <input type="text" name="reason" class="form-control" placeholder="e.g., Allergic, Don't like">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-plus"></i> Add to Blacklist
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blacklist Items -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="fw-bold mb-3">
+                <i class="fas fa-list"></i> Blacklisted Items ({{ blacklist_items.count }})
+            </h3>
+        </div>
+
+        {% if blacklist_items %}
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Name</th>
+                                        <th>Reason</th>
+                                        <th>Added</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in blacklist_items %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ item.get_blacklist_type_display }}</span>
+                                            </td>
+                                            <td class="fw-bold">{{ item.item_name }}</td>
+                                            <td class="text-muted">{{ item.reason|default:"—" }}</td>
+                                            <td class="text-muted">{{ item.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'swipes:remove_blacklist' item.id %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i> Remove
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> Your blacklist is empty. Add items you want to avoid seeing.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
