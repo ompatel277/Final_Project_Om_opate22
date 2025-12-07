@@ -13,6 +13,8 @@ urlpatterns = [
     path('dishes/', include('dishes.urls')),
     path('swipes/', include('swipes.urls')),
     path('community/', include('community.urls')),
+    path('search/', include('search.urls')),           # ← ADD THIS
+    path('recommender/', include('recommender.urls')), # ← ADD THIS
 
     # Home
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
