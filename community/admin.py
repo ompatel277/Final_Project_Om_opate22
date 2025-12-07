@@ -64,7 +64,6 @@ class CommunityChallengeAdmin(admin.ModelAdmin):
     list_filter = ['status', 'challenge_type', 'start_date']
     search_fields = ['title', 'description']
     readonly_fields = ['created_at']
-    filter_horizontal = ['participants']
 
     fieldsets = (
         ('Basic Info', {
