@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Macro Calculator - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2><i class="fas fa-calculator"></i> Macro & Nutrition Calculator</h2>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Your Current Goals</h5>
+                    {% if profile.daily_calorie_goal %}
+                        <p><strong>Daily Calories:</strong> {{ profile.daily_calorie_goal }} kcal</p>
+                    {% else %}
+                        <p class="text-muted">No calorie goal set</p>
+                    {% endif %}
+
+                    {% if profile.protein_goal %}
+                        <p><strong>Protein Goal:</strong> {{ profile.protein_goal }}g</p>
+                    {% else %}
+                        <p class="text-muted">No protein goal set</p>
+                    {% endif %}
+
+                    {% if profile.carbs_goal %}
+                        <p><strong>Carbs Goal:</strong> {{ profile.carbs_goal }}g</p>
+                    {% else %}
+                        <p class="text-muted">No carbs goal set</p>
+                    {% endif %}
+
+                    {% if profile.fat_goal %}
+                        <p><strong>Fat Goal:</strong> {{ profile.fat_goal }}g</p>
+                    {% else %}
+                        <p class="text-muted">No fat goal set</p>
+                    {% endif %}
+
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-edit"></i> Update Goals
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5>Quick Macro Reference</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Macronutrient</th>
+                                <th>Calories per Gram</th>
+                                <th>Daily Recommendation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Protein</td>
+                                <td>4 kcal/g</td>
+                                <td>0.8-1g per lb body weight</td>
+                            </tr>
+                            <tr>
+                                <td>Carbohydrates</td>
+                                <td>4 kcal/g</td>
+                                <td>45-65% of total calories</td>
+                            </tr>
+                            <tr>
+                                <td>Fat</td>
+                                <td>9 kcal/g</td>
+                                <td>20-35% of total calories</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

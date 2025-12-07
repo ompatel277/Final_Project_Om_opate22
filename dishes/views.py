@@ -33,7 +33,7 @@ def dish_list_view(request):
         'dishes': dishes,
         'cuisines': cuisines,
     }
-    return render(request, 'accounts/../templates/dishes/dish_list.html', context)
+    return render(request, 'dishes/dish_list.html', context)
 
 
 def dish_detail_view(request, dish_id):
@@ -57,7 +57,7 @@ def dish_detail_view(request, dish_id):
         'ingredients': ingredients,
         'allergens': allergens,
     }
-    return render(request, 'accounts/../templates/dishes/dish_detail.html', context)
+    return render(request, 'dishes/dish_detail.html', context)
 
 
 def restaurant_list_view(request):
@@ -87,7 +87,7 @@ def restaurant_list_view(request):
         'cities': cities,
         'cuisines': cuisines,
     }
-    return render(request, 'accounts/../templates/dishes/restaurant_list.html', context)
+    return render(request, 'dishes/restaurant_list.html', context)
 
 
 def restaurant_detail_view(request, restaurant_id):
@@ -104,7 +104,7 @@ def restaurant_detail_view(request, restaurant_id):
         'restaurant': restaurant,
         'restaurant_dishes': restaurant_dishes,
     }
-    return render(request, 'accounts/../templates/dishes/restaurant_detail.html', context)
+    return render(request, 'dishes/restaurant_detail.html', context)
 
 
 def cuisine_view(request, cuisine_id):
@@ -116,7 +116,7 @@ def cuisine_view(request, cuisine_id):
         'cuisine': cuisine,
         'dishes': dishes,
     }
-    return render(request, 'accounts/../templates/dishes/cuisine_dishes.html', context)
+    return render(request, 'dishes/cuisine_dishes.html', context)
 
 
 def search_view(request):
@@ -144,4 +144,4 @@ def search_view(request):
         'dishes': dishes,
         'restaurants': restaurants,
     }
-    return render(request, 'accounts/../templates/dishes/search_results.html', context)
+    return render(request, 'dishes/search_results.html', context)

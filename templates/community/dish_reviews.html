@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ dish.name }} Reviews - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Reviews for {{ dish.name }}</h2>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>{{ avg_rating|floatformat:1 }} <i class="fas fa-star text-warning"></i></h3>
+                    <p>Based on {{ total_reviews }} review{{ total_reviews|pluralize }}</p>
+
+                    <div class="mt-3">
+                        {% for rating, count in rating_distribution.items %}
+                            <div class="row mb-2">
+                                <div class="col-2">{{ rating }} <i class="fas fa-star text-warning"></i></div>
+                                <div class="col-8">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-tinder" style="width: {% if total_reviews > 0 %}{{ count|floatformat:0 }}{% else %}0{% endif %}%"></div>
+                                    </div>
+                                </div>
+                                <div class="col-2">{{ count }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'community:add_review' dish.id %}" class="btn btn-primary mb-4">
+                    <i class="fas fa-edit"></i> Write a Review
+                </a>
+            {% endif %}
+
+            <h4 class="mb-3">Reviews</h4>
+            {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5>{{ review.title }}</h5>
+                            <div>
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-muted small">by {{ review.user.username }} on {{ review.created_at|date:"M d, Y" }}</p>
+                        <p>{{ review.content }}</p>
+                        {% if review.image %}
+                            <img src="{{ review.image.url }}" class="img-fluid" style="max-width: 300px;">
+                        {% endif %}
+                        <div class="mt-2">
+                            <a href="{% url 'community:mark_helpful' review.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-thumbs-up"></i> Helpful ({{ review.helpful_count }})
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-muted">No reviews yet. Be the first to review!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

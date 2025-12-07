@@ -1,0 +1,42 @@
+/* Custom CSS for Swipe&Bite */
+
+.swipe-card {
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dish-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+}
+
+.swipe-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.btn-swipe-left {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #FF6B6B;
+    background: white;
+    color: #FF6B6B;
+    font-size: 30px;
+}
+
+.btn-swipe-right {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #00D9A5;
+    background: white;
+    color: #00D9A5;
+    font-size: 30px;
+}
