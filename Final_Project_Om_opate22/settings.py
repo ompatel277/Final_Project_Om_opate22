@@ -43,9 +43,10 @@ INSTALLED_APPS = [
     'community.apps.CommunityConfig',
     'search.apps.SearchConfig',
     'recommender.apps.RecommenderConfig',
-    'intergrations',
-    'ai_assistant',
+    'integrations',  # or rename to 'integrations'
+    'ai_assistant.apps.AiAssistantConfig',
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
