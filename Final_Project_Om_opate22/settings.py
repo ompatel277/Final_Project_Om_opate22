@@ -182,6 +182,8 @@ UBER_EATS_API_KEY = os.getenv('UBER_EATS_API_KEY', '')
 DOORDASH_API_KEY = os.getenv('DOORDASH_API_KEY', '')
 YELP_API_KEY = os.getenv('YELP_API_KEY', '')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+SERPAPI_KEY = os.getenv('SERPAPI_KEY', '')
+
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
