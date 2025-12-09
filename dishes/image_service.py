@@ -1,103 +1,79 @@
 """
-Management command to fetch images for dishes without images
+SerpApi Image Search Service for fetching dish images
 """
-from django.core.management.base import BaseCommand
-from dishes.models import Dish
-from dishes.image_service import DishImageService
-import time
+from serpapi import GoogleSearch
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
-    help = 'Fetch images for dishes that don\'t have images'
+class DishImageService:
+    """Service to fetch dish images from Google using SerpApi"""
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--limit',
-            type=int,
-            default=None,
-            help='Maximum number of dishes to process (default: all dishes)'
-        )
-        parser.add_argument(
-            '--force',
-            action='store_true',
-            help='Update images even if dish already has one'
-        )
-        parser.add_argument(
-            '--delay',
-            type=float,
-            default=1.0,
-            help='Delay between API calls in seconds (default: 1.0)'
-        )
+    def __init__(self):
+        self.api_key = settings.SERPAPI_KEY
 
-    def handle(self, *args, **options):
-        limit = options['limit']
-        force = options['force']
-        delay = options['delay']
+    def search_dish_images(self, dish_name, num_results=10):
+        """
+        Search for dish images using SerpApi
 
-        # Get dishes without images
-        if force:
-            dishes_query = Dish.objects.all()
-        else:
-            dishes_query = Dish.objects.filter(
-                image='',
-                image_url=''
-            )
+        Args:
+            dish_name (str): Name of the dish to search for
+            num_results (int): Number of images to return
 
-        # Apply limit if specified
-        if limit:
-            dishes = dishes_query[:limit]
-            total_count = min(limit, dishes_query.count())
-        else:
-            dishes = dishes_query
-            total_count = dishes.count()
+        Returns:
+            list: List of image data dictionaries
+        """
+        if not self.api_key:
+            logger.error("SERPAPI_KEY not configured in settings")
+            return []
 
-        if not dishes:
-            self.stdout.write(self.style.SUCCESS('No dishes to process!'))
-            return
+        try:
+            params = {
+                "engine": "google_images_light",
+                "q": f"{dish_name} food",
+                "api_key": self.api_key
+            }
 
-        self.stdout.write(f'Processing {total_count} dishes...')
-        self.stdout.write(f'API delay: {delay} seconds between requests\n')
+            search = GoogleSearch(params)
+            results = search.get_dict()
 
-        service = DishImageService()
-        updated = 0
-        failed = 0
+            if "images_results" in results:
+                return results["images_results"][:num_results]
+            else:
+                logger.warning(f"No images found for dish: {dish_name}")
+                return []
 
-        for index, dish in enumerate(dishes, 1):
-            # Progress indicator
-            self.stdout.write(f'[{index}/{total_count}] Fetching image for: {dish.name}')
+        except Exception as e:
+            logger.error(f"Error fetching images for {dish_name}: {str(e)}")
+            return []
 
-            try:
-                image_url = service.get_best_dish_image(dish.name)
+    def get_best_dish_image(self, dish_name):
+        """
+        Get the best (first) image URL for a dish
 
-                if image_url:
-                    dish.image_url = image_url
-                    dish.save()
-                    updated += 1
-                    self.stdout.write(
-                        self.style.SUCCESS(f'  ✓ Updated: {image_url[:60]}...')
-                    )
-                else:
-                    failed += 1
-                    self.stdout.write(
-                        self.style.WARNING(f'  ✗ No image found')
-                    )
-            except Exception as e:
-                failed += 1
-                self.stdout.write(
-                    self.style.ERROR(f'  ✗ Error: {str(e)}')
-                )
+        Args:
+            dish_name (str): Name of the dish
 
-            # Rate limiting - be nice to the API
-            if index < total_count:  # Don't delay after the last request
-                time.sleep(delay)
+        Returns:
+            str: Image URL or None
+        """
+        images = self.search_dish_images(dish_name, num_results=1)
+        if images and len(images) > 0:
+            return images[0].get('image')
+        return None
 
-        # Summary
-        self.stdout.write('\n' + '='*60)
-        self.stdout.write(
-            self.style.SUCCESS(f'✓ Successfully updated: {updated} dishes')
-        )
-        if failed > 0:
-            self.stdout.write(
-                self.style.WARNING(f'✗ Failed: {failed} dishes')
-            )
-        self.stdout.write('='*60)
+    def get_all_image_urls(self, dish_name, num_results=10):
+        """
+        Get all image URLs for a dish
+
+        Args:
+            dish_name (str): Name of the dish
+            num_results (int): Number of images to fetch
+
+        Returns:
+            list: List of image URLs
+        """
+        images = self.search_dish_images(dish_name, num_results)
+        return [img.get('image') for img in images if img.get('image')]
