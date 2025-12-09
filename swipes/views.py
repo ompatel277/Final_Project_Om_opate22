@@ -5,13 +5,14 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.utils import timezone
 from dishes.models import Dish, Restaurant
+from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request
 from .models import SwipeAction, Favorite, FavoriteRestaurant, Blacklist, SwipeSession
 import random
 
 
 @login_required
 def swipe_feed_view(request):
-    """Main swipe interface"""
+    """Main swipe interface - location-aware"""
     # Get user's blacklisted items
     blacklist = Blacklist.objects.filter(user=request.user)
     blacklisted_dish_ids = blacklist.filter(blacklist_type='dish', dish__isnull=False).values_list('dish_id', flat=True)
@@ -20,7 +21,7 @@ def swipe_feed_view(request):
     # Get dishes user hasn't swiped on yet
     swiped_dish_ids = SwipeAction.objects.filter(user=request.user).values_list('dish_id', flat=True)
 
-    # Build query
+    # Build base query
     available_dishes = Dish.objects.filter(
         is_active=True
     ).exclude(
@@ -47,6 +48,20 @@ def swipe_feed_view(request):
                 ingredients__is_allergen=True
             )
 
+    # ✅ LOCATION FILTER - Only show dishes from nearby restaurants
+    user_location = get_user_location_from_request(request)
+    if user_location:
+        max_distance = profile.max_distance_miles or 25
+        nearby_dish_ids = get_dishes_from_nearby_restaurants(
+            user_location['latitude'],
+            user_location['longitude'],
+            max_distance
+        )
+        if nearby_dish_ids:
+            available_dishes = available_dishes.filter(id__in=nearby_dish_ids)
+        else:
+            available_dishes = available_dishes.none()
+
     # Get random dish
     dish = None
     if available_dishes.exists():
@@ -58,6 +73,7 @@ def swipe_feed_view(request):
     context = {
         'dish': dish,
         'total_available': available_dishes.count() if available_dishes else 0,
+        'has_location': user_location is not None,
     }
 
     return render(request, 'swipes/swipe_feed.html', context)

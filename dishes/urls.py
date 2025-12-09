@@ -33,6 +33,9 @@ urlpatterns = [
     path('api/dishes/<int:dish_id>/restaurants/', api_views.DishRestaurantsView.as_view(),
          name='api_dish_restaurants_detail'),
 
+    # REST API - Location Management (NEW)
+    path('api/set-location/', views.set_location_view, name='set_location'),
+
     # REST API - Google Maps Integration (NEW)
     path('api/restaurants/nearby/', api_views.find_nearby_restaurants, name='api_nearby_restaurants'),
     path('api/dishes/<int:dish_id>/restaurants/nearby/', api_views.find_restaurants_for_dish,

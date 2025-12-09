@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count
+from django.http import JsonResponse
 from .models import Dish, Restaurant, Cuisine, RestaurantDish
+from .location_utils import filter_nearby_restaurants, get_user_location_from_request, set_user_location_in_session
 
 
 def dish_list_view(request):
@@ -47,6 +49,23 @@ def dish_detail_view(request, dish_id):
         restaurant__is_active=True
     ).select_related('restaurant').order_by('price')
 
+    # ✅ LOCATION FILTER - Sort by distance if user has location
+    user_location = get_user_location_from_request(request)
+    if user_location and request.user.is_authenticated:
+        max_distance = request.user.profile.max_distance_miles or 50
+        restaurants = [rd.restaurant for rd in restaurant_dishes]
+        nearby_restaurants = filter_nearby_restaurants(
+            Restaurant.objects.filter(id__in=[r.id for r in restaurants]),
+            user_location['latitude'],
+            user_location['longitude'],
+            max_distance
+        )
+        # Map distances back to restaurant_dishes
+        distance_map = {r.id: r.distance for r in nearby_restaurants}
+        for rd in restaurant_dishes:
+            rd.distance = distance_map.get(rd.restaurant.id, 999)
+        restaurant_dishes = sorted(restaurant_dishes, key=lambda x: x.distance)
+
     # Get ingredients
     ingredients = dish.ingredients.all()
     allergens = ingredients.filter(is_allergen=True)
@@ -56,12 +75,13 @@ def dish_detail_view(request, dish_id):
         'restaurant_dishes': restaurant_dishes,
         'ingredients': ingredients,
         'allergens': allergens,
+        'has_location': user_location is not None,
     }
     return render(request, 'dishes/dish_detail.html', context)
 
 
 def restaurant_list_view(request):
-    """Browse all restaurants"""
+    """Browse all restaurants - location-aware"""
     restaurants = Restaurant.objects.filter(is_active=True)
 
     # Filters
@@ -78,14 +98,33 @@ def restaurant_list_view(request):
     if price_filter:
         restaurants = restaurants.filter(price_range=price_filter)
 
+    # ✅ LOCATION FILTER - Filter and sort by distance
+    user_location = get_user_location_from_request(request)
+    nearby_restaurants = []
+    has_location = False
+
+    if user_location and request.user.is_authenticated:
+        has_location = True
+        max_distance = request.user.profile.max_distance_miles or 50
+        nearby_restaurants = filter_nearby_restaurants(
+            restaurants,
+            user_location['latitude'],
+            user_location['longitude'],
+            max_distance
+        )
+    else:
+        # No location - show all restaurants (not filtered by distance)
+        nearby_restaurants = list(restaurants)
+
     # Get unique cities
     cities = Restaurant.objects.filter(is_active=True).values_list('city', flat=True).distinct()
     cuisines = Cuisine.objects.all()
 
     context = {
-        'restaurants': restaurants,
+        'restaurants': nearby_restaurants,
         'cities': cities,
         'cuisines': cuisines,
+        'has_location': has_location,
     }
     return render(request, 'dishes/restaurant_list.html', context)
 
@@ -93,6 +132,17 @@ def restaurant_list_view(request):
 def restaurant_detail_view(request, restaurant_id):
     """View single restaurant details"""
     restaurant = get_object_or_404(Restaurant, id=restaurant_id, is_active=True)
+
+    # ✅ Calculate distance if user has location
+    user_location = get_user_location_from_request(request)
+    if user_location and restaurant.latitude and restaurant.longitude:
+        from .location_utils import haversine_distance
+        restaurant.distance = haversine_distance(
+            user_location['latitude'],
+            user_location['longitude'],
+            restaurant.latitude,
+            restaurant.longitude
+        )
 
     # Get dishes available at this restaurant
     restaurant_dishes = RestaurantDish.objects.filter(
@@ -103,6 +153,7 @@ def restaurant_detail_view(request, restaurant_id):
     context = {
         'restaurant': restaurant,
         'restaurant_dishes': restaurant_dishes,
+        'has_location': user_location is not None,
     }
     return render(request, 'dishes/restaurant_detail.html', context)
 
@@ -145,6 +196,44 @@ def search_view(request):
         'restaurants': restaurants,
     }
     return render(request, 'dishes/search_results.html', context)
+
+
 def nearby_restaurants(request):
     """Display page to find nearby restaurants"""
     return render(request, 'dishes/nearby_restaurants.html')
+
+
+@login_required
+def set_location_view(request):
+    """AJAX endpoint to set user location in session"""
+    if request.method == 'POST':
+        import json
+        try:
+            data = json.loads(request.body)
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
+            city = data.get('city', 'Unknown')
+
+            if latitude and longitude:
+                set_user_location_in_session(request, latitude, longitude, city)
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Location updated successfully',
+                    'location': {
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'city': city
+                    }
+                })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Missing latitude or longitude'
+                }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

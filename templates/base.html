@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Swipe&Bite - Discover your next favorite dish using Tinder-style swiping. Find restaurants, read reviews, and get personalized food recommendations.">
-    <meta name="keywords" content="food discovery, restaurant finder, dish recommendations, swipe, tinder for food">
+    <meta name="description" content="Swipe&Bite - Discover your next favorite dish using Tinder-style swiping.">
     <meta name="author" content="Om Opate">
     <title>{% block title %}Swipe&Bite - Discover Your Next Favorite Dish{% endblock %}</title>
 
-    <!-- Favicon -->
     {% load static %}
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/swipe&bite.css' %}">
 
     <style>
@@ -42,46 +32,201 @@
         .navbar {
             background: var(--tinder-gradient) !important;
             box-shadow: 0 2px 15px rgba(254, 60, 114, 0.3);
-            padding: 15px 0;
+            padding: 10px 0;
         }
 
         .navbar-brand {
             font-weight: 800;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: white !important;
-            letter-spacing: -0.5px;
         }
 
         .nav-link {
             color: rgba(255,255,255,0.95) !important;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s;
-            padding: 8px 16px !important;
+            padding: 6px 12px !important;
             border-radius: 20px;
+            font-size: 0.9rem;
         }
 
         .nav-link:hover {
             color: white !important;
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
         }
 
         .btn-outline-light {
             border: 2px solid white;
             font-weight: 600;
             border-radius: 25px;
-            padding: 8px 24px;
+            padding: 6px 18px;
+            font-size: 0.9rem;
         }
 
         .btn-outline-light:hover {
             background-color: white;
             color: var(--tinder-primary);
-            transform: translateY(-2px);
         }
 
-        .content-wrapper {
-            min-height: calc(100vh - 120px);
-            padding-bottom: 50px;
+        .location-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .location-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .dropdown-menu {
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .dropdown-item:hover {
+            background: rgba(254, 60, 114, 0.1);
+            color: var(--tinder-primary);
+        }
+
+        /* Floating Chatbot */
+        #chatbotWidget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        #chatbotToggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--tinder-gradient);
+            border: none;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(254, 60, 114, 0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #chatbotToggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(254, 60, 114, 0.7);
+        }
+
+        #chatbotWindow {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chatbotWindow.show {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: var(--tinder-gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .chat-message.bot {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chat-message.user {
+            background: var(--tinder-gradient);
+            color: white;
+            margin-left: auto;
+        }
+
+        .chatbot-input-area {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .chatbot-input-area form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatbot-input-area input {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 10px 15px;
+        }
+
+        .chatbot-input-area button {
+            background: var(--tinder-gradient);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+        }
+
+        .modal-header {
+            background: var(--tinder-gradient);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .location-option-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .location-option-card:hover {
+            border-color: var(--tinder-primary);
+            background: rgba(254, 60, 114, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .location-option-card i {
+            font-size: 2.5rem;
+            color: var(--tinder-primary);
         }
 
         footer {
@@ -90,131 +235,29 @@
             padding: 30px 0;
             margin-top: 50px;
         }
-
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(254, 60, 114, 0.2);
-        }
-
-        .btn-primary {
-            background: var(--tinder-gradient);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(254, 60, 114, 0.4);
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--tinder-primary);
-            color: var(--tinder-primary);
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--tinder-gradient);
-            color: white;
-            border-color: transparent;
-            transform: translateY(-3px);
-        }
-
-        .dropdown-menu {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-
-        .dropdown-item {
-            padding: 10px 20px;
-            transition: all 0.3s;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(254, 60, 114, 0.1);
-            color: var(--tinder-primary);
-        }
-
-        .bg-gradient-tinder {
-            background: var(--tinder-gradient);
-        }
-
-        .text-tinder {
-            color: var(--tinder-primary);
-        }
-
-        .badge {
-            border-radius: 15px;
-            padding: 6px 12px;
-            font-weight: 600;
-        }
-
-        .bg-danger {
-            background: var(--tinder-primary) !important;
-        }
-
-        .bg-info {
-            background: var(--tinder-secondary) !important;
-        }
-
-        .search-form-nav {
-            display: flex;
-            align-items: center;
-        }
-
-        .search-form-nav input {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-
-        .search-form-nav input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .search-form-nav input:focus {
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            border-color: white;
-        }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                🔥 Swipe&Bite
-            </a>
+            <a class="navbar-brand" href="{% url 'home' %}">🔥 Swipe&Bite</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dishes:dish_list' %}">
-                            <i class="fas fa-utensils"></i> Browse Dishes
-                        </a>
-                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'swipes:swipe_feed' %}">
+                                <i class="fas fa-fire"></i> Swipe
+                            </a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'dishes:restaurant_list' %}">
                             <i class="fas fa-store"></i> Restaurants
@@ -222,7 +265,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'community:community_home' %}">
-                            <i class="fas fa-star"></i> Community
+                            <i class="fas fa-users"></i> Community
                         </a>
                     </li>
                     <li class="nav-item">
@@ -231,56 +274,31 @@
                         </a>
                     </li>
 
-                    <!-- Search Form -->
-                    <li class="nav-item">
-                        <form method="GET" action="{% url 'search:global_search' %}" class="d-flex ms-2 search-form-nav">
-                            <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Search..." aria-label="Search" style="min-width: 180px;">
-                            <button class="btn btn-outline-light btn-sm" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </form>
+                    <li class="nav-item ms-2">
+                        <button class="location-btn" data-bs-toggle="modal" data-bs-target="#locationModal">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="navLocationText">
+                                {% if user_location %}{{ user_location.city|truncatechars:12 }}{% else %}Set Location{% endif %}
+                            </span>
+                        </button>
                     </li>
 
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'swipes:swipe_feed' %}">
-                                <i class="fas fa-fire"></i> Swipe
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'swipes:favorites' %}">
-                                <i class="fas fa-heart"></i> Favorites
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <li class="nav-item dropdown ms-2">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-circle"></i> {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                    <i class="fas fa-user"></i> My Profile
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">
-                                    <i class="fas fa-chart-line"></i> Dashboard
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'swipes:swipe_history' %}">
-                                    <i class="fas fa-history"></i> Swipe History
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'swipes:blacklist' %}">
-                                    <i class="fas fa-ban"></i> Blacklist
-                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user"></i> Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'swipes:favorites' %}"><i class="fas fa-heart"></i> Favorites</a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
-                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-light ms-2" href="{% url 'accounts:register' %}">Sign Up</a>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-outline-light btn-sm" href="{% url 'accounts:login' %}">Login</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -288,24 +306,90 @@
         </div>
     </nav>
 
-    <!-- Messages -->
+    <!-- Location Modal -->
+    <div class="modal fade" id="locationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-map-marker-alt"></i> Set Your Location</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted mb-4">Set your location to find nearby restaurants and dishes.</p>
+
+                    <div class="location-option-card mb-3 text-center" onclick="autoDetectLocation()">
+                        <i class="fas fa-location-crosshairs mb-3"></i>
+                        <h6 class="fw-bold">Auto-Detect Location</h6>
+                        <p class="text-muted small mb-0">Use GPS to find your current location</p>
+                    </div>
+
+                    <div class="location-option-card text-center">
+                        <i class="fas fa-edit mb-3"></i>
+                        <h6 class="fw-bold mb-3">Enter Location Manually</h6>
+                        <form id="manualLocationForm">
+                            <input type="number" step="any" class="form-control mb-2" id="manualLatitude" placeholder="Latitude (e.g., 40.7455)" required>
+                            <input type="number" step="any" class="form-control mb-2" id="manualLongitude" placeholder="Longitude (e.g., -74.0083)" required>
+                            <input type="text" class="form-control mb-3" id="manualCity" placeholder="City (optional)">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-check"></i> Set Location
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="currentLocationDisplay" class="mt-4 p-3 bg-light rounded" style="display: none;">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-check-circle text-success"></i> Current Location:</h6>
+                        <p class="mb-1"><strong>City:</strong> <span id="displayCity"></span></p>
+                        <p class="mb-1"><strong>Latitude:</strong> <span id="displayLat"></span></p>
+                        <p class="mb-0"><strong>Longitude:</strong> <span id="displayLng"></span></p>
+                    </div>
+
+                    <div id="locationStatus" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Chatbot Widget -->
+    <div id="chatbotWidget">
+        <div id="chatbotWindow">
+            <div class="chatbot-header">
+                <strong><i class="fas fa-robot"></i> AI Food Assistant</strong>
+                <button onclick="toggleChatbot()" style="background:none;border:none;color:white;font-size:20px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chatbot-messages" id="chatMessages">
+                <div class="chat-message bot">
+                    Hi! I'm your AI food assistant. Ask me anything about dishes, restaurants, or get recommendations!
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <form onsubmit="sendChatMessage(event)">
+                    <input type="text" id="chatInput" placeholder="Ask me anything..." autocomplete="off">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+        <button id="chatbotToggle" onclick="toggleChatbot()">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+    </div>
+
     {% if messages %}
         <div class="container mt-3">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- Main Content -->
     <div class="content-wrapper">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <h5 class="mb-3">🔥 Swipe&Bite</h5>
@@ -314,8 +398,173 @@
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function getCSRFToken() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (token) return token.value;
+            const name = 'csrftoken';
+            if (document.cookie) {
+                for (let cookie of document.cookie.split(';')) {
+                    const trimmed = cookie.trim();
+                    if (trimmed.startsWith(name + '=')) {
+                        return decodeURIComponent(trimmed.substring(name.length + 1));
+                    }
+                }
+            }
+            return null;
+        }
+
+        function storeLocation(latitude, longitude, city) {
+            const locationData = {
+                latitude: latitude,
+                longitude: longitude,
+                city: city || 'Unknown',
+                timestamp: new Date().getTime()
+            };
+
+            localStorage.setItem('userLocation', JSON.stringify(locationData));
+
+            {% if user.is_authenticated %}
+            fetch("{% url 'dishes:set_location' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(locationData)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showStatus('Location saved! Reloading...', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            })
+            .catch(() => {
+                showStatus('Saved locally. Log in to sync.', 'warning');
+                updateLocationDisplay(city);
+            });
+            {% else %}
+            showStatus('Location saved locally!', 'success');
+            updateLocationDisplay(city);
+            {% endif %}
+        }
+
+        function autoDetectLocation() {
+            showStatus('Detecting location...', 'info');
+            if (!navigator.geolocation) {
+                showStatus('Geolocation not supported', 'danger');
+                return;
+            }
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                showStatus('Geolocation requires HTTPS. Use manual entry.', 'warning');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            const city = data.address.city || data.address.town || 'Unknown';
+                            storeLocation(lat, lng, city);
+                            displayCurrentLocation(lat, lng, city);
+                        })
+                        .catch(() => {
+                            storeLocation(lat, lng, 'Unknown');
+                            displayCurrentLocation(lat, lng, 'Unknown');
+                        });
+                },
+                function(error) {
+                    showStatus('Location access denied', 'danger');
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        document.getElementById('manualLocationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const lat = parseFloat(document.getElementById('manualLatitude').value);
+            const lng = parseFloat(document.getElementById('manualLongitude').value);
+            const city = document.getElementById('manualCity').value || 'Unknown';
+            if (isNaN(lat) || isNaN(lng)) {
+                showStatus('Invalid coordinates', 'danger');
+                return;
+            }
+            storeLocation(lat, lng, city);
+            displayCurrentLocation(lat, lng, city);
+        });
+
+        function displayCurrentLocation(lat, lng, city) {
+            document.getElementById('displayCity').textContent = city;
+            document.getElementById('displayLat').textContent = lat.toFixed(6);
+            document.getElementById('displayLng').textContent = lng.toFixed(6);
+            document.getElementById('currentLocationDisplay').style.display = 'block';
+        }
+
+        function updateLocationDisplay(city) {
+            document.getElementById('navLocationText').textContent = city.substring(0, 12);
+        }
+
+        function showStatus(msg, type) {
+            document.getElementById('locationStatus').innerHTML =
+                `<div class="alert alert-${type}">${msg}</div>`;
+        }
+
+        // Chatbot Functions
+        function toggleChatbot() {
+            document.getElementById('chatbotWindow').classList.toggle('show');
+        }
+
+        function sendChatMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Get dish context if available
+            let dishContext = '';
+            const dishNameEl = document.getElementById('currentDishName');
+            if (dishNameEl) {
+                dishContext = dishNameEl.textContent;
+            }
+
+            // Send to AI (placeholder - connect to your AI endpoint)
+            addChatMessage('I received your message! (Connect AI endpoint)', 'bot');
+        }
+
+        function addChatMessage(text, sender) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${sender}`;
+            msgDiv.textContent = text;
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Load saved location on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('userLocation');
+            if (saved) {
+                try {
+                    const location = JSON.parse(saved);
+                    const ageHours = (new Date().getTime() - location.timestamp) / (1000 * 60 * 60);
+                    if (ageHours < 24) {
+                        updateLocationDisplay(location.city);
+                        displayCurrentLocation(location.latitude, location.longitude, location.city);
+                    }
+                } catch (e) {
+                    console.error('Error parsing location:', e);
+                }
+            }
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.db.models import Avg, Count, Q
 from django.utils import timezone
 from datetime import timedelta
-from dishes.models import Dish
+from dishes.models import Dish, Restaurant
+from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request
 from .models import (
     Review, ReviewHelpful, WeeklyRanking, TrendingDish,
     CommunityChallenge, ChallengeParticipation, UserBadge
@@ -12,52 +13,110 @@ from .models import (
 
 
 def community_home_view(request):
-    """Community homepage with rankings and trending"""
+    """Community homepage with rankings and trending - location-aware"""
 
-    # Get trending dishes
-    trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')[:10]
+    # ✅ LOCATION FILTER - Get location-based dishes
+    user_location = get_user_location_from_request(request)
+    location_dish_ids = None
+    has_location = False
 
-    # Get current week rankings
+    if user_location and request.user.is_authenticated:
+        has_location = True
+        max_distance = request.user.profile.max_distance_miles or 50
+        location_dish_ids = get_dishes_from_nearby_restaurants(
+            user_location['latitude'],
+            user_location['longitude'],
+            max_distance
+        )
+
+    # Get trending dishes (filtered by location if available)
+    trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')
+    if location_dish_ids is not None:
+        trending_dishes = trending_dishes.filter(dish_id__in=location_dish_ids)
+    trending_dishes = trending_dishes[:10]
+
+    # Get current week rankings (filtered by location if available)
     today = timezone.now().date()
     current_week_rankings = WeeklyRanking.objects.filter(
         week_start__lte=today,
         week_end__gte=today
-    ).select_related('dish').order_by('rank')[:10]
+    ).select_related('dish').order_by('rank')
+    if location_dish_ids is not None:
+        current_week_rankings = current_week_rankings.filter(dish_id__in=location_dish_ids)
+    current_week_rankings = current_week_rankings[:10]
 
     # Get active challenges
     active_challenges = CommunityChallenge.objects.filter(status='active')
 
-    # Get recent reviews
-    recent_reviews = Review.objects.select_related('user', 'dish').order_by('-created_at')[:5]
+    # Get recent reviews (filtered by location if available)
+    recent_reviews = Review.objects.select_related('user', 'dish').order_by('-created_at')
+    if location_dish_ids is not None:
+        recent_reviews = recent_reviews.filter(dish_id__in=location_dish_ids)
+    recent_reviews = recent_reviews[:5]
 
     context = {
         'trending_dishes': trending_dishes,
         'current_week_rankings': current_week_rankings,
         'active_challenges': active_challenges,
         'recent_reviews': recent_reviews,
+        'has_location': has_location,
     }
     return render(request, 'community/community_home.html', context)
 
 
 def trending_view(request):
-    """View all trending dishes"""
+    """View all trending dishes - location-aware"""
+
+    # ✅ LOCATION FILTER
+    user_location = get_user_location_from_request(request)
+    location_dish_ids = None
+    has_location = False
+
+    if user_location and request.user.is_authenticated:
+        has_location = True
+        max_distance = request.user.profile.max_distance_miles or 50
+        location_dish_ids = get_dishes_from_nearby_restaurants(
+            user_location['latitude'],
+            user_location['longitude'],
+            max_distance
+        )
+
     trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')
+    if location_dish_ids is not None:
+        trending_dishes = trending_dishes.filter(dish_id__in=location_dish_ids)
 
     context = {
         'trending_dishes': trending_dishes,
+        'has_location': has_location,
     }
     return render(request, 'community/trending.html', context)
 
 
 def weekly_rankings_view(request):
-    """View weekly rankings"""
+    """View weekly rankings - location-aware"""
     today = timezone.now().date()
+
+    # ✅ LOCATION FILTER
+    user_location = get_user_location_from_request(request)
+    location_dish_ids = None
+    has_location = False
+
+    if user_location and request.user.is_authenticated:
+        has_location = True
+        max_distance = request.user.profile.max_distance_miles or 50
+        location_dish_ids = get_dishes_from_nearby_restaurants(
+            user_location['latitude'],
+            user_location['longitude'],
+            max_distance
+        )
 
     # Current week
     current_week_rankings = WeeklyRanking.objects.filter(
         week_start__lte=today,
         week_end__gte=today
     ).select_related('dish').order_by('rank')
+    if location_dish_ids is not None:
+        current_week_rankings = current_week_rankings.filter(dish_id__in=location_dish_ids)
 
     # Previous weeks
     previous_weeks = WeeklyRanking.objects.filter(
@@ -67,6 +126,7 @@ def weekly_rankings_view(request):
     context = {
         'current_week_rankings': current_week_rankings,
         'previous_weeks': previous_weeks,
+        'has_location': has_location,
     }
     return render(request, 'community/weekly_rankings.html', context)
 
