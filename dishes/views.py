@@ -145,3 +145,6 @@ def search_view(request):
         'restaurants': restaurants,
     }
     return render(request, 'dishes/search_results.html', context)
+def nearby_restaurants(request):
+    """Display page to find nearby restaurants"""
+    return render(request, 'dishes/nearby_restaurants.html')

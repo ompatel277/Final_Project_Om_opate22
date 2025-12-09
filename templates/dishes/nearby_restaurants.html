@@ -1,0 +1,505 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Find Nearby Restaurants - Swipe&Bite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4">🗺️ Find Nearby Restaurants</h1>
+
+            <!-- Location Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">📍 Your Location</h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="auto-location">
+                                <button id="get-location-btn" class="btn btn-primary">
+                                    📍 Use My Current Location
+                                </button>
+                                <div id="location-info" class="mt-3" style="display: none;">
+                                    <p class="mb-1"><strong>Latitude:</strong> <span id="auto-latitude"></span></p>
+                                    <p class="mb-0"><strong>Longitude:</strong> <span id="auto-longitude"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-center my-3">OR</div>
+                            <h6>Enter Location Manually</h6>
+                            <div class="mb-2">
+                                <input type="number" step="any" class="form-control" id="manual-latitude" placeholder="Latitude (e.g., 40.7455096)">
+                            </div>
+                            <div class="mb-2">
+                                <input type="number" step="any" class="form-control" id="manual-longitude" placeholder="Longitude (e.g., -74.0083012)">
+                            </div>
+                            <button id="use-manual-location-btn" class="btn btn-secondary">
+                                Use Manual Location
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Current Location Display -->
+                    <div id="current-location-display" class="alert alert-info mt-3" style="display: none;">
+                        <strong>Current Location:</strong> <span id="current-lat-display"></span>, <span id="current-lng-display"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Options -->
+            <div class="card mb-4" id="search-card" style="display: none;">
+                <div class="card-body">
+                    <h5 class="card-title">🔍 Search Options</h5>
+
+                    <div class="mb-3">
+                        <label for="search-query" class="form-label">What are you looking for?</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="search-query"
+                            placeholder="e.g., Pizza, Sushi, Italian restaurant..."
+                        >
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="num-results" class="form-label">Number of Results</label>
+                            <select class="form-select" id="num-results">
+                                <option value="5">5 restaurants</option>
+                                <option value="10" selected>10 restaurants</option>
+                                <option value="15">15 restaurants</option>
+                                <option value="20">20 restaurants</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="sort-by" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort-by">
+                                <option value="rating">Highest Rated</option>
+                                <option value="reviews">Most Reviews</option>
+                                <option value="distance">Closest</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="search-btn" class="btn btn-success">
+                        🔍 Search Restaurants
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="text-center my-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Searching for restaurants...</p>
+            </div>
+
+            <!-- Results -->
+            <div id="results-container"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Place Details Modal -->
+<div class="modal fade" id="placeDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="placeDetailsTitle">Restaurant Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="placeDetailsBody">
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Modal -->
+<div class="modal fade" id="reviewsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewsTitle">Reviews</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="reviewsBody">
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let userLocation = null;
+
+// Get user's current location
+document.getElementById('get-location-btn').addEventListener('click', function() {
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Getting location...';
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                userLocation = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                };
+
+                updateLocationDisplay();
+                btn.innerHTML = '✓ Location Found';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-success');
+            },
+            function(error) {
+                let errorMessage = 'Unable to get location. ';
+
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Please enable location permissions.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Location request timed out.';
+                        break;
+                }
+
+                alert(errorMessage);
+                btn.disabled = false;
+                btn.innerHTML = '📍 Use My Current Location';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        alert('Geolocation is not supported by your browser.');
+        btn.disabled = false;
+        btn.innerHTML = '📍 Use My Current Location';
+    }
+});
+
+// Use manual location
+document.getElementById('use-manual-location-btn').addEventListener('click', function() {
+    const lat = parseFloat(document.getElementById('manual-latitude').value);
+    const lng = parseFloat(document.getElementById('manual-longitude').value);
+
+    if (isNaN(lat) || isNaN(lng)) {
+        alert('Please enter valid latitude and longitude values.');
+        return;
+    }
+
+    userLocation = {
+        latitude: lat,
+        longitude: lng
+    };
+
+    updateLocationDisplay();
+});
+
+// Update location display
+function updateLocationDisplay() {
+    document.getElementById('auto-latitude').textContent = userLocation.latitude.toFixed(6);
+    document.getElementById('auto-longitude').textContent = userLocation.longitude.toFixed(6);
+    document.getElementById('location-info').style.display = 'block';
+
+    document.getElementById('current-lat-display').textContent = userLocation.latitude.toFixed(6);
+    document.getElementById('current-lng-display').textContent = userLocation.longitude.toFixed(6);
+    document.getElementById('current-location-display').style.display = 'block';
+
+    document.getElementById('search-card').style.display = 'block';
+}
+
+// Search for restaurants
+document.getElementById('search-btn').addEventListener('click', function() {
+    if (!userLocation) {
+        alert('Please set your location first!');
+        return;
+    }
+
+    searchRestaurants();
+});
+
+function searchRestaurants() {
+    const query = document.getElementById('search-query').value.trim() || 'restaurants';
+    const numResults = document.getElementById('num-results').value;
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('results-container').innerHTML = '';
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('{% url "dishes:api_nearby_restaurants" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+            query: query,
+            num_results: parseInt(numResults)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('loading').style.display = 'none';
+
+        if (data.success && data.restaurants && data.restaurants.length > 0) {
+            sortAndDisplayResults(data.restaurants);
+        } else {
+            document.getElementById('results-container').innerHTML = `
+                <div class="alert alert-warning">
+                    No restaurants found. Try a different search query.
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        document.getElementById('loading').style.display = 'none';
+        console.error('Error:', error);
+        alert('Error searching for restaurants. Please try again.');
+    });
+}
+
+function sortAndDisplayResults(restaurants) {
+    const sortBy = document.getElementById('sort-by').value;
+
+    let sorted = [...restaurants];
+
+    if (sortBy === 'rating') {
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortBy === 'reviews') {
+        sorted.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+    }
+
+    displayResults(sorted);
+}
+
+function displayResults(restaurants) {
+    const container = document.getElementById('results-container');
+
+    let html = `
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">📍 Found ${restaurants.length} Nearby Restaurants</h5>
+                <div class="list-group">
+    `;
+
+    restaurants.forEach((restaurant, index) => {
+        const rating = restaurant.rating ? '⭐'.repeat(Math.round(restaurant.rating)) + ` ${restaurant.rating}` : 'No rating';
+        const price = restaurant.price_range || 'N/A';
+        const reviews = restaurant.reviews ? `${restaurant.reviews} reviews` : '';
+        const phone = restaurant.phone ? `📞 ${restaurant.phone}` : '';
+        const thumbnail = restaurant.thumbnail || '';
+
+        html += `
+            <div class="list-group-item">
+                <div class="row">
+                    ${thumbnail ? `
+                    <div class="col-md-2">
+                        <img src="${thumbnail}" class="img-fluid rounded" alt="${restaurant.name}" style="width: 100%; height: 100px; object-fit: cover;">
+                    </div>
+                    ` : ''}
+                    <div class="${thumbnail ? 'col-md-10' : 'col-12'}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="mb-1">${index + 1}. ${restaurant.name}</h5>
+                                <p class="mb-1 text-muted">${restaurant.address || 'Address not available'}</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-warning text-dark">${price}</span>
+                                    <span class="ms-2">${rating}</span>
+                                    ${reviews ? `<span class="ms-2 text-muted">${reviews}</span>` : ''}
+                                </div>
+                                ${phone ? `<p class="mb-1">${phone}</p>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            ${restaurant.website ? `
+                                <a href="${restaurant.website}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    🌐 Website
+                                </a>
+                            ` : ''}
+                            ${restaurant.data_id ? `
+                                <button onclick="showPlaceDetails('${restaurant.data_id}')" class="btn btn-sm btn-outline-info">
+                                    ℹ️ Details
+                                </button>
+                                <button onclick="showReviews('${restaurant.data_id}', '${restaurant.name}')" class="btn btn-sm btn-outline-success">
+                                    💬 Reviews
+                                </button>
+                                <button onclick="getDirections('${restaurant.address}')" class="btn btn-sm btn-outline-warning">
+                                    🚗 Directions
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += `
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+// Show place details
+function showPlaceDetails(dataId) {
+    const modal = new bootstrap.Modal(document.getElementById('placeDetailsModal'));
+    modal.show();
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('{% url "dishes:api_place_details" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ data_id: dataId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.place) {
+            displayPlaceDetails(data.place);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function displayPlaceDetails(place) {
+    document.getElementById('placeDetailsTitle').textContent = place.title || 'Restaurant Details';
+
+    let html = `
+        ${place.photos && place.photos.length > 0 ? `
+            <div class="mb-3">
+                <img src="${place.photos[0]}" class="img-fluid rounded" alt="${place.title}">
+            </div>
+        ` : ''}
+
+        <p><strong>Address:</strong> ${place.address || 'N/A'}</p>
+        <p><strong>Phone:</strong> ${place.phone || 'N/A'}</p>
+        <p><strong>Rating:</strong> ${place.rating ? '⭐'.repeat(Math.round(place.rating)) + ` ${place.rating}` : 'N/A'}</p>
+        <p><strong>Price:</strong> ${place.price || 'N/A'}</p>
+
+        ${place.hours ? `
+            <div class="mb-3">
+                <strong>Hours:</strong>
+                <ul class="list-unstyled">
+                    ${place.hours.map(h => `<li>${h}</li>`).join('')}
+                </ul>
+            </div>
+        ` : ''}
+
+        ${place.service_options ? `
+            <div class="mb-3">
+                <strong>Service Options:</strong>
+                <p>${Object.entries(place.service_options).map(([k, v]) => `${k}: ${v}`).join(', ')}</p>
+            </div>
+        ` : ''}
+    `;
+
+    document.getElementById('placeDetailsBody').innerHTML = html;
+}
+
+// Show reviews
+function showReviews(dataId, restaurantName) {
+    const modal = new bootstrap.Modal(document.getElementById('reviewsModal'));
+    document.getElementById('reviewsTitle').textContent = `Reviews - ${restaurantName}`;
+    modal.show();
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('{% url "dishes:api_place_reviews" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            data_id: dataId,
+            num_reviews: 10
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.reviews) {
+            displayReviews(data.reviews);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function displayReviews(reviews) {
+    let html = '';
+
+    if (reviews.length === 0) {
+        html = '<p>No reviews available.</p>';
+    } else {
+        reviews.forEach(review => {
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>${review.user?.name || 'Anonymous'}</h6>
+                            <small class="text-muted">${review.date || ''}</small>
+                        </div>
+                        <div class="mb-2">
+                            ${'⭐'.repeat(review.rating || 0)}
+                        </div>
+                        <p>${review.snippet || review.text || ''}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    document.getElementById('reviewsBody').innerHTML = html;
+}
+
+// Get directions
+function getDirections(endAddress) {
+    if (!userLocation) {
+        alert('Please set your location first!');
+        return;
+    }
+
+    const startAddr = `${userLocation.latitude},${userLocation.longitude}`;
+
+    // Open Google Maps in new tab
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startAddr}&destination=${encodeURIComponent(endAddress)}`;
+    window.open(mapsUrl, '_blank');
+}
+
+// Sort results when selection changes
+document.getElementById('sort-by').addEventListener('change', function() {
+    const container = document.getElementById('results-container');
+    if (container.innerHTML.trim() !== '') {
+        // Re-trigger search to get fresh sorted results
+        // Or implement client-side sorting if you stored the results
+    }
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}

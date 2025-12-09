@@ -61,7 +61,7 @@ class DishImageService:
         """
         images = self.search_dish_images(dish_name, num_results=1)
         if images and len(images) > 0:
-            return images[0].get('image')
+            return images[0].get('original')  # ✅ FIXED: Changed from 'image' to 'original'
         return None
 
     def get_all_image_urls(self, dish_name, num_results=10):
@@ -76,4 +76,4 @@ class DishImageService:
             list: List of image URLs
         """
         images = self.search_dish_images(dish_name, num_results)
-        return [img.get('image') for img in images if img.get('image')]
+        return [img.get('original') for img in images if img.get('original')]  # ✅ FIXED: Changed from 'image' to 'original'
