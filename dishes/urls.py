@@ -43,4 +43,6 @@ urlpatterns = [
     path('api/places/details/', api_views.get_place_details, name='api_place_details'),
     path('api/places/reviews/', api_views.get_place_reviews, name='api_place_reviews'),
     path('api/directions/', api_views.get_directions, name='api_directions'),
+    path('api/set-location/', views.set_location_view, name='set_location'),
+
 ]

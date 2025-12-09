@@ -237,3 +237,35 @@ def set_location_view(request):
             }, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+from django.http import JsonResponse
+import json
+
+
+@login_required
+def set_location_view(request):
+    """AJAX endpoint to set user location in session"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
+            city = data.get('city', 'Unknown')
+
+            if latitude and longitude:
+                request.session['user_location'] = {
+                    'latitude': float(latitude),
+                    'longitude': float(longitude),
+                    'city': city
+                }
+                request.session.modified = True
+
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Location updated successfully'
+                })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

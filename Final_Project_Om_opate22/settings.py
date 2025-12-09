@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'community.apps.CommunityConfig',
     'search.apps.SearchConfig',
     'recommender.apps.RecommenderConfig',
-    'integrations',  # or rename to 'integrations'
+    'integrations',
     'ai_assistant.apps.AiAssistantConfig',
 ]
 
