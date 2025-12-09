@@ -22,4 +22,10 @@ urlpatterns = [
     path('blacklist/', views.blacklist_view, name='blacklist'),
     path('blacklist/remove/<int:blacklist_id>/', views.remove_blacklist_view, name='remove_blacklist'),
     path('blacklist/add/<int:dish_id>/', views.add_dish_to_blacklist_view, name='add_dish_to_blacklist'),
+    path('matches/', views.matches_view, name='matches'),
+    path('block/<int:dish_id>/', views.block_dish_view, name='block_dish'),
+    path('dish/<int:dish_id>/restaurants/', views.get_dish_restaurants_view, name='get_dish_restaurants'),
+
+
+
 ]

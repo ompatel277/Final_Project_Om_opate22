@@ -4,30 +4,36 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
 from django.utils import timezone
-from dishes.models import Dish, Restaurant
-from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request
+from dishes.models import Dish, Restaurant, Cuisine
+from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request, haversine_distance
+from dishes.maps_service import GoogleMapsService
 from .models import SwipeAction, Favorite, FavoriteRestaurant, Blacklist, SwipeSession
 import random
 
 
 @login_required
 def swipe_feed_view(request):
-    """Main swipe interface - location-aware"""
+    """Main swipe interface - shows dishes based on local restaurants"""
+    user_location = get_user_location_from_request(request)
+
     # Get user's blacklisted items
     blacklist = Blacklist.objects.filter(user=request.user)
     blacklisted_dish_ids = blacklist.filter(blacklist_type='dish', dish__isnull=False).values_list('dish_id', flat=True)
     blacklisted_ingredients = blacklist.filter(blacklist_type='ingredient').values_list('item_name', flat=True)
 
-    # Get dishes user hasn't swiped on yet
-    swiped_dish_ids = SwipeAction.objects.filter(user=request.user).values_list('dish_id', flat=True)
+    # ✅ ONLY exclude RIGHT swipes and blacklisted dishes (left swipes can come back)
+    right_swiped_dish_ids = SwipeAction.objects.filter(
+        user=request.user,
+        direction='right'
+    ).values_list('dish_id', flat=True)
 
     # Build base query
     available_dishes = Dish.objects.filter(
         is_active=True
     ).exclude(
-        id__in=swiped_dish_ids
+        id__in=right_swiped_dish_ids  # Only exclude liked dishes
     ).exclude(
-        id__in=blacklisted_dish_ids
+        id__in=blacklisted_dish_ids  # And blocked dishes
     )
 
     # Apply user preferences from profile
@@ -48,24 +54,63 @@ def swipe_feed_view(request):
                 ingredients__is_allergen=True
             )
 
-    # ✅ LOCATION FILTER - Only show dishes from nearby restaurants
-    user_location = get_user_location_from_request(request)
+    # ✅ FILTER DISHES BASED ON LOCAL RESTAURANT CUISINES
+    relevant_cuisines = []
+
     if user_location:
+        maps_service = GoogleMapsService()
         max_distance = profile.max_distance_miles or 25
-        nearby_dish_ids = get_dishes_from_nearby_restaurants(
-            user_location['latitude'],
-            user_location['longitude'],
-            max_distance
+
+        # Fetch real local restaurants from Google Maps
+        local_restaurants = maps_service.search_restaurants(
+            query="restaurants",
+            latitude=user_location['latitude'],
+            longitude=user_location['longitude'],
+            zoom=14,
+            num_results=50
         )
-        if nearby_dish_ids:
-            available_dishes = available_dishes.filter(id__in=nearby_dish_ids)
+
+        # Extract cuisine types from local restaurants
+        cuisine_keywords = set()
+        for restaurant_data in local_restaurants:
+            rest_type = restaurant_data.get('type', '').lower()
+            rest_name = restaurant_data.get('title', '').lower()
+
+            cuisine_words = [
+                'italian', 'pizza', 'mexican', 'chinese', 'japanese', 'sushi',
+                'indian', 'thai', 'vietnamese', 'korean', 'american', 'burger',
+                'french', 'mediterranean', 'greek', 'spanish', 'bbq', 'steakhouse',
+                'seafood', 'asian', 'latin', 'middle eastern', 'ethiopian', 'caribbean'
+            ]
+
+            for word in cuisine_words:
+                if word in rest_type or word in rest_name:
+                    cuisine_keywords.add(word)
+
+        # Map keywords to our Cuisine objects
+        if cuisine_keywords:
+            for keyword in cuisine_keywords:
+                matching_cuisines = Cuisine.objects.filter(Q(name__icontains=keyword))
+                relevant_cuisines.extend(matching_cuisines)
+
+            relevant_cuisines = list(set(relevant_cuisines))
+
+        # Filter dishes by relevant cuisines
+        if relevant_cuisines:
+            available_dishes = available_dishes.filter(cuisine__in=relevant_cuisines)
         else:
-            available_dishes = available_dishes.none()
+            nearby_dish_ids = get_dishes_from_nearby_restaurants(
+                user_location['latitude'],
+                user_location['longitude'],
+                max_distance
+            )
+            if nearby_dish_ids:
+                available_dishes = available_dishes.filter(id__in=nearby_dish_ids)
 
     # Get random dish
     dish = None
+
     if available_dishes.exists():
-        # Get random dish
         count = available_dishes.count()
         random_index = random.randint(0, count - 1)
         dish = available_dishes[random_index]
@@ -74,6 +119,8 @@ def swipe_feed_view(request):
         'dish': dish,
         'total_available': available_dishes.count() if available_dishes else 0,
         'has_location': user_location is not None,
+        'user_location': user_location,
+        'relevant_cuisines': relevant_cuisines,
     }
 
     return render(request, 'swipes/swipe_feed.html', context)
@@ -103,10 +150,6 @@ def swipe_action_view(request, dish_id):
             dish.total_right_swipes += 1
         dish.save()
 
-        # If right swipe, optionally auto-add to favorites
-        if direction == 'right':
-            Favorite.objects.get_or_create(user=request.user, dish=dish)
-
         return JsonResponse({
             'status': 'success',
             'direction': direction,
@@ -117,8 +160,136 @@ def swipe_action_view(request, dish_id):
 
 
 @login_required
+def block_dish_view(request, dish_id):
+    """Block a dish from ever showing again (AJAX)"""
+    if request.method == 'POST':
+        dish = get_object_or_404(Dish, id=dish_id)
+
+        # Add to blacklist
+        blacklist_item, created = Blacklist.objects.get_or_create(
+            user=request.user,
+            dish=dish,
+            blacklist_type='dish',
+            item_name=dish.name,
+            defaults={'reason': 'Blocked from swipe feed'}
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Blocked {dish.name}'
+        })
+
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@login_required
+def matches_view(request):
+    """View matches (right swipes) - restaurants loaded on demand"""
+    # Get all right swipes - NO LIMIT
+    right_swipes = SwipeAction.objects.filter(
+        user=request.user,
+        direction='right'
+    ).select_related('dish', 'dish__cuisine').order_by('-created_at')
+
+    # Convert to list of dishes
+    matches = []
+    for swipe in right_swipes:
+        if swipe.dish and swipe.dish.is_active:  # Make sure dish still exists and is active
+            matches.append(swipe.dish)
+
+    # Get AI recommendations
+    profile = request.user.profile
+    ai_recommendations = []
+
+    if matches:
+        liked_cuisine_ids = [dish.cuisine_id for dish in matches if dish.cuisine_id]
+
+        if liked_cuisine_ids:
+            swiped_dish_ids = SwipeAction.objects.filter(user=request.user).values_list('dish_id', flat=True)
+
+            potential_dishes = Dish.objects.filter(
+                is_active=True,
+                cuisine_id__in=liked_cuisine_ids
+            ).exclude(
+                id__in=swiped_dish_ids
+            )
+
+            if profile.diet_type == 'vegetarian':
+                potential_dishes = potential_dishes.filter(is_vegetarian=True)
+            elif profile.diet_type == 'vegan':
+                potential_dishes = potential_dishes.filter(is_vegan=True)
+
+            ai_recommendations = list(potential_dishes.order_by('-average_rating', '-total_right_swipes')[:10])
+
+    user_location = get_user_location_from_request(request)
+
+    # Debug info
+    print(f"DEBUG: User {request.user.username} has {right_swipes.count()} right swipes")
+    print(f"DEBUG: Showing {len(matches)} matches")
+
+    context = {
+        'matches': matches,
+        'ai_recommendations': ai_recommendations,
+        'total_matches': len(matches),
+        'has_location': user_location is not None,
+        'user_location': user_location,
+        'total_right_swipes': right_swipes.count(),  # For debugging
+    }
+    return render(request, 'swipes/matches.html', context)
+
+
+@login_required
+def get_dish_restaurants_view(request, dish_id):
+    """AJAX endpoint to get restaurants for a specific dish"""
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error'}, status=400)
+
+    dish = get_object_or_404(Dish, id=dish_id)
+    user_location = get_user_location_from_request(request)
+
+    if not user_location:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Location not set'
+        }, status=400)
+
+    maps_service = GoogleMapsService()
+
+    # Fetch local restaurants serving this dish
+    restaurants_data = maps_service.search_restaurants_by_dish(
+        dish_name=dish.name,
+        latitude=user_location['latitude'],
+        longitude=user_location['longitude'],
+        zoom=14,
+        num_results=5
+    )
+
+    # Parse and calculate distances
+    local_restaurants = []
+    for restaurant_data in restaurants_data:
+        parsed = maps_service.parse_restaurant_data(restaurant_data)
+
+        if parsed['latitude'] and parsed['longitude']:
+            parsed['distance'] = haversine_distance(
+                user_location['latitude'],
+                user_location['longitude'],
+                parsed['latitude'],
+                parsed['longitude']
+            )
+            local_restaurants.append(parsed)
+
+    # Sort by distance
+    local_restaurants.sort(key=lambda x: x.get('distance', 999))
+
+    return JsonResponse({
+        'status': 'success',
+        'restaurants': local_restaurants[:5]
+    })
+
+
+@login_required
 def favorites_view(request):
-    """View all favorite dishes"""
+    """View explicitly favorited dishes only"""
     favorite_dishes = Favorite.objects.filter(user=request.user).select_related('dish')
     favorite_restaurants = FavoriteRestaurant.objects.filter(user=request.user).select_related('restaurant')
 

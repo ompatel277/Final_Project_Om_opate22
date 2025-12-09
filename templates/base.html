@@ -43,6 +43,44 @@
         .nav-link:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .search-form input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            width: 200px;
+        }
+        .search-form input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .search-form input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            color: white;
+        }
+        .search-form button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-left: 5px;
+        }
+        .search-form button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
         .location-btn {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -63,7 +101,6 @@
             color: white;
             border-radius: 20px 20px 0 0;
         }
-        /* Chatbot */
         #chatbotWidget {
             position: fixed;
             bottom: 20px;
@@ -168,12 +205,24 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+
                     {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'swipes:swipe_feed' %}"><i class="fas fa-fire"></i> Swipe</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'swipes:matches' %}"><i class="fas fa-heart"></i> Matches</a></li>
                     {% endif %}
+
                     <li class="nav-item"><a class="nav-link" href="{% url 'dishes:restaurant_list' %}"><i class="fas fa-store"></i> Restaurants</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'community:community_home' %}"><i class="fas fa-users"></i> Community</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'recommender:recommender_home' %}"><i class="fas fa-robot"></i> AI</a></li>
+
+                    <!-- Search Form -->
+                    <li class="nav-item">
+                        <form action="{% url 'dishes:search' %}" method="get" class="search-form">
+                            <input type="text" name="q" placeholder="Search dishes..." value="{{ request.GET.q }}">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </form>
+                    </li>
 
                     <li class="nav-item ms-2">
                         <button class="location-btn" data-bs-toggle="modal" data-bs-target="#locationModal">
@@ -189,7 +238,8 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user"></i> Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'swipes:favorites' %}"><i class="fas fa-heart"></i> Favorites</a></li>
+                            <li><a class="dropdown-item" href="{% url 'swipes:favorites' %}"><i class="fas fa-star"></i> Favorites</a></li>
+                            <li><a class="dropdown-item" href="{% url 'swipes:matches' %}"><i class="fas fa-heart"></i> Matches</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                         </ul>
@@ -348,7 +398,6 @@
             input.value = '';
             div.scrollTop = div.scrollHeight;
 
-            // Placeholder response
             setTimeout(() => {
                 div.innerHTML += `<div class="chat-message bot">I'm still learning! Connect me to AI endpoint.</div>`;
                 div.scrollTop = div.scrollHeight;

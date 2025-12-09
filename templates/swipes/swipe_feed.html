@@ -1,582 +1,372 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Swipe - Swipe&Bite{% endblock %}
+{% block title %}Swipe & Bite{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="{% static 'css/swipe&bite.css' %}">
 <style>
-    .swipe-card {
-        max-width: 550px;
-        margin: 0 auto;
-        border-radius: 25px;
-        box-shadow: 0 15px 50px rgba(254, 60, 114, 0.3);
-        overflow: hidden;
-    }
+.location-badge {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
 
-    .swipe-image {
-        height: 450px;
-        object-fit: cover;
-        width: 100%;
-    }
+.cuisine-badges {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
 
-    .swipe-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        margin: 30px 0;
-    }
+.cuisine-badge {
+    background: #f0f0f0;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    color: #555;
+}
 
-    .swipe-btn {
-        width: 75px;
-        height: 75px;
-        border-radius: 50%;
-        border: none;
-        font-size: 2rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.25);
-    }
+.swipe-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-    .swipe-btn:hover {
-        transform: scale(1.15);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-    }
+.swipe-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+}
 
-    .btn-nope {
-        background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
-        color: white;
-    }
+.dish-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
 
-    .btn-like {
-        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-        color: white;
-    }
+.dish-info {
+    padding: 25px;
+}
 
-    .ingredient-tag {
-        display: inline-block;
-        padding: 6px 14px;
-        margin: 4px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
+.dish-info h2 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 700;
+}
 
-    .ingredient-normal {
-        background: #e9ecef;
-        color: #495057;
-    }
+.cuisine {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 15px;
+}
 
-    .ingredient-allergen {
-        background: #ff4444;
-        color: white;
-    }
+.description {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
 
-    #restaurantMap {
-        width: 100%;
-        height: 450px;
-        border-radius: 15px;
-    }
+.dish-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
 
-    .restaurant-item {
-        border: 2px solid #e0e0e0;
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 15px;
-        transition: all 0.3s;
-    }
+.dish-stats span {
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+}
 
-    .restaurant-item:hover {
-        border-color: var(--tinder-primary);
-        box-shadow: 0 5px 20px rgba(254, 60, 114, 0.2);
-        transform: translateY(-2px);
-    }
+.swipe-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 25px;
+    background: #f8f9fa;
+}
 
-    .review-item {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 12px;
-    }
+.btn-swipe {
+    flex: 1;
+    max-width: 140px;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-    .spinner-container {
-        text-align: center;
-        padding: 40px;
-    }
+.btn-block {
+    background: #6c757d;
+    color: white;
+    max-width: 60px;
+    padding: 15px;
+}
+
+.btn-block:hover {
+    background: #5a6268;
+    transform: scale(1.05);
+}
+
+.btn-dislike {
+    background: #ffc107;
+    color: white;
+}
+
+.btn-dislike:hover {
+    background: #ffb300;
+    transform: scale(1.05);
+}
+
+.btn-like {
+    background: #51cf66;
+    color: white;
+}
+
+.btn-like:hover {
+    background: #40c057;
+    transform: scale(1.05);
+}
+
+.no-dishes {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+.available-cuisines {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.available-cuisines h5 {
+    margin-bottom: 15px;
+    color: #333;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    {% if not has_location %}
-    <div class="alert alert-warning text-center mb-4">
-        <i class="fas fa-map-marker-alt fa-2x mb-3"></i>
-        <h5>Location Required</h5>
-        <p class="mb-3">Set your location to see dishes from nearby restaurants!</p>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
-            <i class="fas fa-location-crosshairs"></i> Set Location Now
-        </button>
-    </div>
+<div class="swipe-container">
+    {% if has_location %}
+        <div class="location-badge">
+            📍 {{ user_location.city }}
+            <span style="margin-left: 10px; opacity: 0.9;">🔴 LIVE</span>
+        </div>
     {% endif %}
 
-    {% if dish %}
-        <div class="row mb-3">
-            <div class="col text-center">
-                <p class="text-muted"><i class="fas fa-fire"></i> {{ total_available }} dishes remaining in your area</p>
+    <div class="swipe-header text-center mb-4">
+        <h1>Swipe & Bite</h1>
+        <p class="text-muted">Like, Pass, or Block dishes</p>
+        {% if has_location %}
+            <p class="text-success fw-bold">
+                ✨ Showing dishes from local restaurants
+            </p>
+        {% else %}
+            <div class="alert alert-warning">
+                📍 Enable location to see dishes from nearby restaurants
             </div>
-        </div>
+        {% endif %}
+    </div>
 
-        <div class="swipe-card card">
-            <img src="{{ dish.display_image }}" class="swipe-image" alt="{{ dish.name }}">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <h2 class="fw-bold mb-1" id="currentDishName">{{ dish.name }}</h2>
-                        <p class="text-muted mb-0">
-                            {% if dish.cuisine %}{{ dish.cuisine.emoji }} {{ dish.cuisine.name }}{% endif %}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="badge bg-warning" style="font-size: 1rem; padding: 8px 15px;">
-                            <i class="fas fa-star"></i> {{ dish.average_rating|floatformat:1 }}
-                        </span>
-                    </div>
+    {% if dish %}
+        <div class="swipe-card" id="swipe-card" data-dish-id="{{ dish.id }}">
+            <div class="dish-image">
+                <img src="{{ dish.display_image }}" alt="{{ dish.name }}">
+            </div>
+
+            <div class="dish-info">
+                <h2>{{ dish.name }}</h2>
+                <p class="cuisine">{{ dish.cuisine.emoji }} {{ dish.cuisine.name }}</p>
+                <p class="description">{{ dish.description }}</p>
+
+                <div class="dish-stats">
+                    {% if dish.calories %}
+                        <span>🔥 {{ dish.calories }} cal</span>
+                    {% endif %}
+                    <span>🌶️ Spice: {{ dish.spice_level }}/5</span>
+                    {% if dish.is_vegetarian %}
+                        <span>🌱 Vegetarian</span>
+                    {% endif %}
+                    {% if dish.is_vegan %}
+                        <span>🥬 Vegan</span>
+                    {% endif %}
+                    {% if dish.is_gluten_free %}
+                        <span>🌾 Gluten Free</span>
+                    {% endif %}
                 </div>
+            </div>
 
-                <p class="card-text mb-3">{{ dish.description }}</p>
-
-                <!-- Tags -->
-                <div class="mb-3">
-                    <span class="badge bg-secondary">{{ dish.get_meal_type_display }}</span>
-                    {% if dish.is_vegetarian %}<span class="badge bg-success">🥬 Vegetarian</span>{% endif %}
-                    {% if dish.is_vegan %}<span class="badge bg-success">🌱 Vegan</span>{% endif %}
-                    {% if dish.is_gluten_free %}<span class="badge bg-warning text-dark">🌾 Gluten Free</span>{% endif %}
-                    {% if dish.spice_level > 0 %}<span class="badge bg-danger">🌶️ Spicy Level {{ dish.spice_level }}</span>{% endif %}
-                </div>
-
-                <!-- Ingredients -->
-                <div class="mb-3">
-                    <h6 class="fw-bold mb-2"><i class="fas fa-list"></i> Ingredients:</h6>
-                    <div>
-                        {% for ingredient in dish.ingredients.all %}
-                            <span class="ingredient-tag {% if ingredient.is_allergen %}ingredient-allergen{% else %}ingredient-normal{% endif %}">
-                                {% if ingredient.is_allergen %}<i class="fas fa-exclamation-triangle"></i>{% endif %}
-                                {{ ingredient.name }}
-                            </span>
-                        {% empty %}
-                            <span class="text-muted small">No ingredients listed</span>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Nutrition -->
-                {% if dish.calories or dish.protein or dish.carbs or dish.fat %}
-                <div class="card bg-light mb-3">
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-heartbeat"></i> Nutrition per Serving</h6>
-                        <div class="row text-center">
-                            {% if dish.calories %}
-                            <div class="col-3">
-                                <div class="fw-bold text-danger" style="font-size: 1.2rem;">{{ dish.calories }}</div>
-                                <small class="text-muted">Calories</small>
-                            </div>
-                            {% endif %}
-                            {% if dish.protein %}
-                            <div class="col-3">
-                                <div class="fw-bold text-primary" style="font-size: 1.2rem;">{{ dish.protein }}g</div>
-                                <small class="text-muted">Protein</small>
-                            </div>
-                            {% endif %}
-                            {% if dish.carbs %}
-                            <div class="col-3">
-                                <div class="fw-bold text-warning" style="font-size: 1.2rem;">{{ dish.carbs }}g</div>
-                                <small class="text-muted">Carbs</small>
-                            </div>
-                            {% endif %}
-                            {% if dish.fat %}
-                            <div class="col-3">
-                                <div class="fw-bold text-info" style="font-size: 1.2rem;">{{ dish.fat }}g</div>
-                                <small class="text-muted">Fat</small>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Find Restaurants Button -->
-                <button class="btn btn-primary w-100 btn-lg mb-3" onclick="findRestaurantsNearby()" id="findRestaurantsBtn">
-                    <i class="fas fa-map-marked-alt"></i> Find Nearby Restaurants Serving This Dish
+            <div class="swipe-actions">
+                <button class="btn-swipe btn-block" onclick="blockDish({{ dish.id }})" title="Never show again">
+                    🚫
+                </button>
+                <button class="btn-swipe btn-dislike" onclick="swipe('left', {{ dish.id }})">
+                    ⏭️ Pass
+                </button>
+                <button class="btn-swipe btn-like" onclick="swipe('right', {{ dish.id }})">
+                    💚 Like
                 </button>
             </div>
         </div>
 
-        <!-- Swipe Buttons -->
-        <div class="swipe-buttons">
-            <button class="swipe-btn btn-nope" onclick="handleSwipe('left')">
-                <i class="fas fa-times"></i>
-            </button>
-            <button class="swipe-btn btn-like" onclick="handleSwipe('right')">
-                <i class="fas fa-heart"></i>
-            </button>
-        </div>
-
-        <div class="text-center mb-4">
-            <small class="text-muted">
-                <kbd>←</kbd> Pass • <kbd>→</kbd> Like
-            </small>
+        <div class="text-center mt-3 text-muted">
+            <small>{{ total_available }} dishes available • Arrow keys: ← Pass | → Like | B to Block</small>
         </div>
     {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
-            <h2 class="fw-bold mb-3">All Done!</h2>
-            <p class="lead text-muted mb-4">You've swiped through all available dishes in your area.</p>
-            <a href="{% url 'swipes:favorites' %}" class="btn btn-primary btn-lg me-2">
-                <i class="fas fa-heart"></i> View Favorites
-            </a>
-            <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-primary btn-lg">
-                <i class="fas fa-store"></i> Browse Restaurants
-            </a>
+        <div class="no-dishes">
+            <h3>No more dishes available!</h3>
+            <p>You've swiped through all available dishes.</p>
+            {% if not has_location %}
+                <div class="alert alert-warning mt-3">
+                    📍 Enable location services to see dishes from nearby restaurants!
+                </div>
+            {% endif %}
+            <a href="{% url 'swipes:matches' %}" class="btn btn-success mt-3">View Matches</a>
+            <a href="{% url 'swipes:favorites' %}" class="btn btn-primary mt-3">View Favorites</a>
+        </div>
+    {% endif %}
+
+    <!-- Show available cuisines from local restaurants -->
+    {% if relevant_cuisines %}
+        <div class="available-cuisines">
+            <h5>🍽️ Available cuisines in your area:</h5>
+            <div class="cuisine-badges">
+                {% for cuisine in relevant_cuisines %}
+                    <span class="cuisine-badge">{{ cuisine.emoji }} {{ cuisine.name }}</span>
+                {% endfor %}
+            </div>
         </div>
     {% endif %}
 </div>
 
-<!-- Restaurant Modal -->
-<div class="modal fade" id="restaurantModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-map-marked-alt"></i> Restaurants Near You Serving <strong id="modalDishName"></strong></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Loading -->
-                <div id="loadingSpinner" class="spinner-container">
-                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-                    <p class="mt-3 fw-bold">Searching nearby restaurants...</p>
-                </div>
-
-                <!-- Content -->
-                <div id="restaurantContent" style="display: none;">
-                    <!-- Map -->
-                    <div id="restaurantMap" class="mb-4"></div>
-
-                    <!-- Restaurant List -->
-                    <h5 class="mb-3"><i class="fas fa-store"></i> Found <span id="restaurantCount">0</span> Restaurants</h5>
-                    <div id="restaurantList"></div>
-                </div>
-
-                <!-- No Results -->
-                <div id="noRestaurants" style="display: none;" class="text-center py-5">
-                    <i class="fas fa-store-slash fa-4x text-muted mb-3"></i>
-                    <h5>No Restaurants Found</h5>
-                    <p class="text-muted">We couldn't find any restaurants nearby serving this dish. Try adjusting your location or search radius.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Reviews Modal -->
-<div class="modal fade" id="reviewsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-star"></i> <span id="reviewRestaurantName"></span> - Google Reviews</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="reviewsContent">
-                <!-- Reviews loaded here -->
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const DISH_ID = {{ dish.id|default:"null" }};
-    const DISH_NAME = "{{ dish.name|escapejs }}";
-    let restaurantModalInstance, reviewsModalInstance;
-    let map;
-    let markers = [];
+function swipe(direction, dishId) {
+    const card = document.getElementById('swipe-card');
+    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
 
-    document.addEventListener('DOMContentLoaded', function() {
-        restaurantModalInstance = new bootstrap.Modal(document.getElementById('restaurantModal'));
-        reviewsModalInstance = new bootstrap.Modal(document.getElementById('reviewsModal'));
+    if (direction === 'right') {
+        card.style.transform = 'translateX(500px) rotate(20deg)';
+    } else {
+        card.style.transform = 'translateX(-500px) rotate(-20deg)';
+    }
+    card.style.opacity = '0';
+
+    fetch(`/swipes/action/${dishId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `direction=${direction}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            setTimeout(() => {
+                location.reload();
+            }, 300);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        location.reload();
+    });
+}
+
+function blockDish(dishId) {
+    if (!confirm('Block this dish? You will never see it again.')) {
+        return;
+    }
+
+    const card = document.getElementById('swipe-card');
+    card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    card.style.transform = 'scale(0)';
+    card.style.opacity = '0';
+
+    fetch(`/swipes/block/${dishId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            setTimeout(() => {
+                location.reload();
+            }, 300);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        location.reload();
+    });
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    const dishId = document.getElementById('swipe-card')?.dataset.dishId;
+    if (!dishId) return;
+
+    if (e.key === 'ArrowLeft') {
+        swipe('left', dishId);
+    }
+    if (e.key === 'ArrowRight') {
+        swipe('right', dishId);
+    }
+    if (e.key === 'b' || e.key === 'B') {
+        blockDish(dishId);
+    }
+});
+
+// Touch swipe support
+let touchStartX = 0;
+let touchEndX = 0;
+
+const card = document.getElementById('swipe-card');
+if (card) {
+    card.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
     });
 
-    function handleSwipe(direction) {
-        if (!DISH_ID) return;
-
-        const card = document.querySelector('.swipe-card');
-        card.style.transition = 'transform 0.3s, opacity 0.3s';
-        card.style.transform = direction === 'right' ? 'translateX(100%)' : 'translateX(-100%)';
-        card.style.opacity = '0';
-
-        fetch(`/swipes/swipe/${DISH_ID}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: `direction=${direction}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            setTimeout(() => window.location.reload(), 300);
-        })
-        .catch(err => {
-            console.error('Swipe error:', err);
-            alert('Error processing swipe');
-            card.style.transform = '';
-            card.style.opacity = '1';
-        });
-    }
-
-    function findRestaurantsNearby() {
-        const userLocation = JSON.parse(localStorage.getItem('userLocation') || '{}');
-
-        if (!userLocation.latitude || !userLocation.longitude) {
-            alert('Please set your location first!');
-            new bootstrap.Modal(document.getElementById('locationModal')).show();
-            return;
-        }
-
-        document.getElementById('modalDishName').textContent = DISH_NAME;
-        document.getElementById('loadingSpinner').style.display = 'block';
-        document.getElementById('restaurantContent').style.display = 'none';
-        document.getElementById('noRestaurants').style.display = 'none';
-
-        restaurantModalInstance.show();
-
-        // Call backend API to search restaurants using Google Maps (SerpAPI)
-        fetch(`/dishes/api/dishes/${DISH_ID}/restaurants/nearby/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify({
-                latitude: userLocation.latitude,
-                longitude: userLocation.longitude,
-                num_results: 20
-            })
-        })
-        .then(r => r.json())
-        .then(data => {
-            console.log('API Response:', data);
-            document.getElementById('loadingSpinner').style.display = 'none';
-
-            if (data.success && data.restaurants && data.restaurants.length > 0) {
-                document.getElementById('restaurantContent').style.display = 'block';
-                document.getElementById('restaurantCount').textContent = data.restaurants.length;
-                displayRestaurantsOnMap(data.restaurants, userLocation);
-                displayRestaurantList(data.restaurants, userLocation);
-            } else {
-                document.getElementById('noRestaurants').style.display = 'block';
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching restaurants:', err);
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('noRestaurants').style.display = 'block';
-        });
-    }
-
-    function displayRestaurantsOnMap(restaurants, userLocation) {
-        // Initialize map
-        const mapContainer = document.getElementById('restaurantMap');
-        mapContainer.innerHTML = ''; // Clear previous map
-
-        map = L.map('restaurantMap').setView([userLocation.latitude, userLocation.longitude], 13);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Add user location marker (blue)
-        L.marker([userLocation.latitude, userLocation.longitude], {
-            icon: L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-            })
-        }).addTo(map)
-          .bindPopup('<b>Your Location</b>')
-          .openPopup();
-
-        // Add restaurant markers (red)
-        restaurants.forEach((restaurant, index) => {
-            if (restaurant.latitude && restaurant.longitude) {
-                const marker = L.marker([restaurant.latitude, restaurant.longitude], {
-                    icon: L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                    })
-                }).addTo(map);
-
-                marker.bindPopup(`
-                    <div style="min-width: 200px;">
-                        <h6 class="fw-bold">${restaurant.name}</h6>
-                        <p class="small mb-1">${restaurant.address || ''}</p>
-                        ${restaurant.rating ? `<p class="small mb-1"><i class="fas fa-star text-warning"></i> ${restaurant.rating}</p>` : ''}
-                        <button class="btn btn-sm btn-primary" onclick="openDirections(${restaurant.latitude}, ${restaurant.longitude})">
-                            <i class="fas fa-directions"></i> Directions
-                        </button>
-                    </div>
-                `);
-
-                markers.push(marker);
-            }
-        });
-    }
-
-    function displayRestaurantList(restaurants, userLocation) {
-        let html = '';
-
-        restaurants.forEach((restaurant, index) => {
-            html += `
-                <div class="restaurant-item">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h5 class="fw-bold mb-2">${restaurant.name}</h5>
-                            <p class="text-muted small mb-2">
-                                <i class="fas fa-map-marker-alt"></i> ${restaurant.address || 'Address not available'}
-                            </p>
-                            ${restaurant.phone ? `<p class="small mb-2"><i class="fas fa-phone"></i> ${restaurant.phone}</p>` : ''}
-
-                            <div class="mb-2">
-                                ${restaurant.rating ? `<span class="badge bg-warning text-dark"><i class="fas fa-star"></i> ${restaurant.rating}</span>` : ''}
-                                ${restaurant.reviews ? `<span class="badge bg-secondary">${restaurant.reviews} Google reviews</span>` : ''}
-                                ${restaurant.price_range ? `<span class="badge bg-info">${restaurant.price_range}</span>` : ''}
-                            </div>
-
-                            ${restaurant.hours ? `<p class="small text-muted mb-0"><i class="fas fa-clock"></i> ${restaurant.hours}</p>` : ''}
-                        </div>
-                        <div class="col-md-4 text-end">
-                            ${restaurant.thumbnail ? `<img src="${restaurant.thumbnail}" alt="${restaurant.name}" style="width: 100%; max-width: 150px; border-radius: 12px; object-fit: cover;">` : ''}
-                        </div>
-                    </div>
-
-                    <hr class="my-3">
-
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button class="btn btn-primary" onclick="openDirections(${restaurant.latitude}, ${restaurant.longitude})">
-                            <i class="fas fa-directions"></i> Get Directions
-                        </button>
-                        ${restaurant.data_id ? `
-                            <button class="btn btn-outline-primary" onclick="loadReviews('${restaurant.data_id}', '${restaurant.name.replace(/'/g, "\\'")}')">
-                                <i class="fas fa-star"></i> View Google Reviews
-                            </button>
-                        ` : ''}
-                        ${restaurant.phone ? `
-                            <a href="tel:${restaurant.phone}" class="btn btn-outline-success">
-                                <i class="fas fa-phone"></i> Call
-                            </a>
-                        ` : ''}
-                        ${restaurant.website ? `
-                            <a href="${restaurant.website}" target="_blank" class="btn btn-outline-info">
-                                <i class="fas fa-globe"></i> Website
-                            </a>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        });
-
-        document.getElementById('restaurantList').innerHTML = html;
-    }
-
-    function openDirections(lat, lng) {
-        const userLocation = JSON.parse(localStorage.getItem('userLocation') || '{}');
-        if (!userLocation.latitude) {
-            alert('Please set your location first!');
-            return;
-        }
-
-        const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.latitude},${userLocation.longitude}&destination=${lat},${lng}&travelmode=driving`;
-        window.open(url, '_blank');
-    }
-
-    function loadReviews(dataId, restaurantName) {
-        document.getElementById('reviewRestaurantName').textContent = restaurantName;
-        document.getElementById('reviewsContent').innerHTML = `
-            <div class="text-center py-4">
-                <div class="spinner-border text-primary"></div>
-                <p class="mt-2">Loading Google reviews...</p>
-            </div>
-        `;
-
-        reviewsModalInstance.show();
-
-        fetch('/dishes/api/places/reviews/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify({
-                data_id: dataId,
-                num_reviews: 15
-            })
-        })
-        .then(r => r.json())
-        .then(data => {
-            console.log('Reviews data:', data);
-
-            if (data.success && data.reviews && data.reviews.length > 0) {
-                let html = '';
-                data.reviews.forEach(review => {
-                    html += `
-                        <div class="review-item">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <strong>${review.user?.name || review.author_title || 'Anonymous'}</strong>
-                                    ${review.user?.reviews ? `<small class="text-muted"> • ${review.user.reviews} reviews</small>` : ''}
-                                </div>
-                                <span class="badge bg-warning text-dark">
-                                    ${review.rating} <i class="fas fa-star"></i>
-                                </span>
-                            </div>
-                            <p class="mb-2">${review.snippet || review.text || 'No review text available'}</p>
-                            <small class="text-muted">
-                                <i class="fas fa-calendar"></i> ${review.date || review.iso_date_of_last_edit || ''}
-                            </small>
-                        </div>
-                    `;
-                });
-                document.getElementById('reviewsContent').innerHTML = html;
-            } else {
-                document.getElementById('reviewsContent').innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
-                        <p>No reviews available for this restaurant</p>
-                    </div>
-                `;
-            }
-        })
-        .catch(err => {
-            console.error('Error loading reviews:', err);
-            document.getElementById('reviewsContent').innerHTML = `
-                <div class="text-center py-5 text-danger">
-                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                    <p>Error loading reviews. Please try again.</p>
-                </div>
-            `;
-        });
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if (DISH_ID) {
-            if (e.key === 'ArrowLeft') handleSwipe('left');
-            else if (e.key === 'ArrowRight') handleSwipe('right');
-        }
+    card.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
     });
+
+    function handleSwipeGesture() {
+        const dishId = card.dataset.dishId;
+        if (touchEndX < touchStartX - 50) {
+            swipe('left', dishId);
+        }
+        if (touchEndX > touchStartX + 50) {
+            swipe('right', dishId);
+        }
+    }
+}
 </script>
 {% endblock %}

@@ -10,7 +10,7 @@ from .models import UserProfile
 def register_view(request):
     """Handle user registration"""
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('accounts:dashboard')
 
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -30,7 +30,7 @@ def register_view(request):
 def login_view(request):
     """Handle user login"""
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('accounts:dashboard')
 
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -41,7 +41,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {username}!')
-                next_url = request.GET.get('next', 'home')
+                next_url = request.GET.get('next', 'accounts:dashboard')
                 return redirect(next_url)
             else:
                 messages.error(request, 'Invalid username or password.')
@@ -106,7 +106,7 @@ def profile_setup_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile setup complete! Start swiping!')
-            return redirect('home')
+            return redirect('accounts:dashboard')
     else:
         form = UserProfileForm(instance=profile)
 

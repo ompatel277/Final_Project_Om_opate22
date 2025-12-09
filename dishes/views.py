@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from .models import Dish, Restaurant, Cuisine, RestaurantDish
-from .location_utils import filter_nearby_restaurants, get_user_location_from_request, set_user_location_in_session
+from .location_utils import filter_nearby_restaurants, get_user_location_from_request, set_user_location_in_session, \
+    haversine_distance
+from .maps_service import GoogleMapsService
 
 
 def dish_list_view(request):
@@ -39,92 +41,156 @@ def dish_list_view(request):
 
 
 def dish_detail_view(request, dish_id):
-    """View single dish details"""
+    """View single dish details with LIVE local restaurants"""
     dish = get_object_or_404(Dish, id=dish_id, is_active=True)
 
-    # Get restaurants serving this dish
-    restaurant_dishes = RestaurantDish.objects.filter(
-        dish=dish,
-        is_available=True,
-        restaurant__is_active=True
-    ).select_related('restaurant').order_by('price')
-
-    # ✅ LOCATION FILTER - Sort by distance if user has location
     user_location = get_user_location_from_request(request)
-    if user_location and request.user.is_authenticated:
-        max_distance = request.user.profile.max_distance_miles or 50
-        restaurants = [rd.restaurant for rd in restaurant_dishes]
-        nearby_restaurants = filter_nearby_restaurants(
-            Restaurant.objects.filter(id__in=[r.id for r in restaurants]),
-            user_location['latitude'],
-            user_location['longitude'],
-            max_distance
+    local_restaurants = []
+
+    # ✅ FETCH REAL LOCAL RESTAURANTS SERVING THIS DISH
+    if user_location:
+        maps_service = GoogleMapsService()
+
+        # Search for restaurants serving this specific dish
+        restaurants_data = maps_service.search_restaurants_by_dish(
+            dish_name=dish.name,
+            latitude=user_location['latitude'],
+            longitude=user_location['longitude'],
+            zoom=14,
+            num_results=20
         )
-        # Map distances back to restaurant_dishes
-        distance_map = {r.id: r.distance for r in nearby_restaurants}
-        for rd in restaurant_dishes:
-            rd.distance = distance_map.get(rd.restaurant.id, 999)
-        restaurant_dishes = sorted(restaurant_dishes, key=lambda x: x.distance)
+
+        # Parse and add distance
+        for restaurant_data in restaurants_data:
+            parsed = maps_service.parse_restaurant_data(restaurant_data)
+
+            if parsed['latitude'] and parsed['longitude']:
+                parsed['distance'] = haversine_distance(
+                    user_location['latitude'],
+                    user_location['longitude'],
+                    parsed['latitude'],
+                    parsed['longitude']
+                )
+                local_restaurants.append(parsed)
+
+        # Sort by distance
+        local_restaurants.sort(key=lambda x: x.get('distance', 999))
 
     # Get ingredients
     ingredients = dish.ingredients.all()
     allergens = ingredients.filter(is_allergen=True)
 
+    # Check if user favorited this dish
+    is_favorited = False
+    if request.user.is_authenticated:
+        from swipes.models import Favorite
+        is_favorited = Favorite.objects.filter(user=request.user, dish=dish).exists()
+
     context = {
         'dish': dish,
-        'restaurant_dishes': restaurant_dishes,
+        'local_restaurants': local_restaurants,  # LIVE API DATA
         'ingredients': ingredients,
         'allergens': allergens,
         'has_location': user_location is not None,
+        'user_location': user_location,
+        'is_favorited': is_favorited,
     }
     return render(request, 'dishes/dish_detail.html', context)
 
 
 def restaurant_list_view(request):
-    """Browse all restaurants - location-aware"""
-    restaurants = Restaurant.objects.filter(is_active=True)
+    """Browse restaurants - LIVE API DATA from Google Maps"""
+    user_location = get_user_location_from_request(request)
+    has_location = user_location is not None
 
-    # Filters
-    city_filter = request.GET.get('city')
+    restaurants = []
+    api_restaurants = []
+
+    # Get filters
     cuisine_filter = request.GET.get('cuisine')
     price_filter = request.GET.get('price')
+    use_live_data = request.GET.get('live', 'true').lower() == 'true'
 
-    if city_filter:
-        restaurants = restaurants.filter(city__icontains=city_filter)
+    if has_location and use_live_data:
+        maps_service = GoogleMapsService()
 
-    if cuisine_filter:
-        restaurants = restaurants.filter(cuisine_type__id=cuisine_filter)
+        # Build search query based on filters
+        query = "restaurants"
+        if cuisine_filter:
+            try:
+                cuisine = Cuisine.objects.get(id=cuisine_filter)
+                query = f"{cuisine.name} restaurants"
+            except Cuisine.DoesNotExist:
+                pass
 
-    if price_filter:
-        restaurants = restaurants.filter(price_range=price_filter)
+        # Fetch real restaurants from Google Maps
+        api_restaurants = maps_service.search_restaurants(
+            query=query,
+            latitude=user_location['latitude'],
+            longitude=user_location['longitude'],
+            zoom=14,
+            num_results=30
+        )
 
-    # ✅ LOCATION FILTER - Filter and sort by distance
-    user_location = get_user_location_from_request(request)
-    nearby_restaurants = []
-    has_location = False
+        # Parse and filter API results
+        for restaurant_data in api_restaurants:
+            parsed = maps_service.parse_restaurant_data(restaurant_data)
 
-    if user_location and request.user.is_authenticated:
-        has_location = True
-        max_distance = request.user.profile.max_distance_miles or 50
-        nearby_restaurants = filter_nearby_restaurants(
-            restaurants,
-            user_location['latitude'],
-            user_location['longitude'],
-            max_distance
+            # Apply price filter if specified
+            if price_filter and parsed['price_range'] != price_filter:
+                continue
+
+            # Add distance calculation
+            if parsed['latitude'] and parsed['longitude']:
+                parsed['distance'] = haversine_distance(
+                    user_location['latitude'],
+                    user_location['longitude'],
+                    parsed['latitude'],
+                    parsed['longitude']
+                )
+            else:
+                parsed['distance'] = None
+
+            restaurants.append(parsed)
+
+        # Sort by distance
+        restaurants = sorted(
+            [r for r in restaurants if r['distance'] is not None],
+            key=lambda x: x['distance']
         )
     else:
-        # No location - show all restaurants (not filtered by distance)
-        nearby_restaurants = list(restaurants)
+        # Fallback to database restaurants
+        db_restaurants = Restaurant.objects.filter(is_active=True)
 
-    # Get unique cities
+        if cuisine_filter:
+            db_restaurants = db_restaurants.filter(cuisine_type__id=cuisine_filter)
+
+        if price_filter:
+            db_restaurants = db_restaurants.filter(price_range=price_filter)
+
+        if user_location:
+            max_distance = request.user.profile.max_distance_miles if request.user.is_authenticated else 50
+            restaurants = filter_nearby_restaurants(
+                db_restaurants,
+                user_location['latitude'],
+                user_location['longitude'],
+                max_distance
+            )
+        else:
+            restaurants = list(db_restaurants)
+
+    # Get filter options
     cities = Restaurant.objects.filter(is_active=True).values_list('city', flat=True).distinct()
     cuisines = Cuisine.objects.all()
 
     context = {
-        'restaurants': nearby_restaurants,
+        'restaurants': restaurants,
+        'api_restaurants': api_restaurants,
         'cities': cities,
         'cuisines': cuisines,
         'has_location': has_location,
+        'using_live_data': use_live_data and has_location,
+        'user_location': user_location,
     }
     return render(request, 'dishes/restaurant_list.html', context)
 
@@ -133,10 +199,8 @@ def restaurant_detail_view(request, restaurant_id):
     """View single restaurant details"""
     restaurant = get_object_or_404(Restaurant, id=restaurant_id, is_active=True)
 
-    # ✅ Calculate distance if user has location
     user_location = get_user_location_from_request(request)
     if user_location and restaurant.latitude and restaurant.longitude:
-        from .location_utils import haversine_distance
         restaurant.distance = haversine_distance(
             user_location['latitude'],
             user_location['longitude'],
@@ -178,13 +242,11 @@ def search_view(request):
     restaurants = Restaurant.objects.none()
 
     if query:
-        # Search dishes
         dishes = Dish.objects.filter(
             Q(name__icontains=query) | Q(description__icontains=query),
             is_active=True
         )
 
-        # Search restaurants
         restaurants = Restaurant.objects.filter(
             Q(name__icontains=query) | Q(description__icontains=query),
             is_active=True
@@ -235,37 +297,5 @@ def set_location_view(request):
                 'status': 'error',
                 'message': str(e)
             }, status=400)
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
-
-
-from django.http import JsonResponse
-import json
-
-
-@login_required
-def set_location_view(request):
-    """AJAX endpoint to set user location in session"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            latitude = data.get('latitude')
-            longitude = data.get('longitude')
-            city = data.get('city', 'Unknown')
-
-            if latitude and longitude:
-                request.session['user_location'] = {
-                    'latitude': float(latitude),
-                    'longitude': float(longitude),
-                    'city': city
-                }
-                request.session.modified = True
-
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Location updated successfully'
-                })
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
