@@ -201,3 +201,4 @@ class DishIngredient(models.Model):
 
     class Meta:
         ordering = ['name']
+
