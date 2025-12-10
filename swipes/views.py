@@ -39,11 +39,24 @@ def swipe_feed_view(request):
     # Apply user preferences from profile
     profile = request.user.profile
 
-    # Filter by dietary preferences
-    if profile.diet_type == 'vegetarian':
-        available_dishes = available_dishes.filter(is_vegetarian=True)
-    elif profile.diet_type == 'vegan':
-        available_dishes = available_dishes.filter(is_vegan=True)
+    # Get filter parameters from request
+    cuisine_filter = request.GET.get('cuisine')
+    dietary_filter = request.GET.get('dietary')
+
+    # Filter by dietary preferences (profile default or user filter)
+    if dietary_filter:
+        if dietary_filter == 'vegetarian':
+            available_dishes = available_dishes.filter(is_vegetarian=True)
+        elif dietary_filter == 'vegan':
+            available_dishes = available_dishes.filter(is_vegan=True)
+        elif dietary_filter == 'non_veg':
+            available_dishes = available_dishes.filter(is_vegetarian=False, is_vegan=False)
+    else:
+        # Apply profile defaults if no filter selected
+        if profile.diet_type == 'vegetarian':
+            available_dishes = available_dishes.filter(is_vegetarian=True)
+        elif profile.diet_type == 'vegan':
+            available_dishes = available_dishes.filter(is_vegan=True)
 
     # Filter by allergies
     if profile.allergies:
@@ -97,7 +110,15 @@ def swipe_feed_view(request):
 
         # Filter dishes by relevant cuisines
         if relevant_cuisines:
-            available_dishes = available_dishes.filter(cuisine__in=relevant_cuisines)
+            # Apply cuisine filter if selected
+            if cuisine_filter and cuisine_filter != 'all':
+                try:
+                    selected_cuisine = Cuisine.objects.get(id=cuisine_filter)
+                    available_dishes = available_dishes.filter(cuisine=selected_cuisine)
+                except Cuisine.DoesNotExist:
+                    pass
+            else:
+                available_dishes = available_dishes.filter(cuisine__in=relevant_cuisines)
         else:
             nearby_dish_ids = get_dishes_from_nearby_restaurants(
                 user_location['latitude'],
@@ -106,6 +127,14 @@ def swipe_feed_view(request):
             )
             if nearby_dish_ids:
                 available_dishes = available_dishes.filter(id__in=nearby_dish_ids)
+    else:
+        # No location - still allow cuisine filtering from all cuisines
+        if cuisine_filter and cuisine_filter != 'all':
+            try:
+                selected_cuisine = Cuisine.objects.get(id=cuisine_filter)
+                available_dishes = available_dishes.filter(cuisine=selected_cuisine)
+            except Cuisine.DoesNotExist:
+                pass
 
     # Get random dish
     dish = None
@@ -115,12 +144,21 @@ def swipe_feed_view(request):
         random_index = random.randint(0, count - 1)
         dish = available_dishes[random_index]
 
+    # Get all cuisines for filter dropdown (either relevant or all)
+    if user_location and relevant_cuisines:
+        available_cuisines = relevant_cuisines
+    else:
+        available_cuisines = list(Cuisine.objects.all())
+
     context = {
         'dish': dish,
         'total_available': available_dishes.count() if available_dishes else 0,
         'has_location': user_location is not None,
         'user_location': user_location,
         'relevant_cuisines': relevant_cuisines,
+        'available_cuisines': available_cuisines,
+        'selected_cuisine': cuisine_filter or 'all',
+        'selected_dietary': dietary_filter or 'all',
     }
 
     return render(request, 'swipes/swipe_feed.html', context)
@@ -185,17 +223,40 @@ def block_dish_view(request, dish_id):
 @login_required
 def matches_view(request):
     """View matches (right swipes) - restaurants loaded on demand"""
+    # Get filter parameters
+    cuisine_filter = request.GET.get('cuisine')
+    dietary_filter = request.GET.get('dietary')
+
     # Get all right swipes - NO LIMIT
     right_swipes = SwipeAction.objects.filter(
         user=request.user,
         direction='right'
     ).select_related('dish', 'dish__cuisine').order_by('-created_at')
 
-    # Convert to list of dishes
+    # Convert to list of dishes and apply filters
     matches = []
     for swipe in right_swipes:
         if swipe.dish and swipe.dish.is_active:  # Make sure dish still exists and is active
-            matches.append(swipe.dish)
+            dish = swipe.dish
+
+            # Apply cuisine filter
+            if cuisine_filter and cuisine_filter != 'all':
+                try:
+                    if str(dish.cuisine_id) != cuisine_filter:
+                        continue
+                except (ValueError, AttributeError):
+                    continue
+
+            # Apply dietary filter
+            if dietary_filter:
+                if dietary_filter == 'vegetarian' and not dish.is_vegetarian:
+                    continue
+                elif dietary_filter == 'vegan' and not dish.is_vegan:
+                    continue
+                elif dietary_filter == 'non_veg' and (dish.is_vegetarian or dish.is_vegan):
+                    continue
+
+            matches.append(dish)
 
     # Get AI recommendations
     profile = request.user.profile
@@ -223,6 +284,10 @@ def matches_view(request):
 
     user_location = get_user_location_from_request(request)
 
+    # Get all cuisines from matched dishes for filter dropdown
+    matched_cuisine_ids = set(swipe.dish.cuisine_id for swipe in right_swipes if swipe.dish and swipe.dish.cuisine_id)
+    available_cuisines = list(Cuisine.objects.filter(id__in=matched_cuisine_ids).order_by('name'))
+
     # Debug info
     print(f"DEBUG: User {request.user.username} has {right_swipes.count()} right swipes")
     print(f"DEBUG: Showing {len(matches)} matches")
@@ -234,6 +299,9 @@ def matches_view(request):
         'has_location': user_location is not None,
         'user_location': user_location,
         'total_right_swipes': right_swipes.count(),  # For debugging
+        'available_cuisines': available_cuisines,
+        'selected_cuisine': cuisine_filter or 'all',
+        'selected_dietary': dietary_filter or 'all',
     }
     return render(request, 'swipes/matches.html', context)
 

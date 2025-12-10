@@ -165,6 +165,33 @@
     margin-bottom: 15px;
     color: #333;
 }
+
+.filters-container {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.filter-form .form-label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.filter-form .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.filter-form .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
 </style>
 {% endblock %}
 
@@ -189,6 +216,34 @@
                 📍 Enable location to see dishes from nearby restaurants
             </div>
         {% endif %}
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-container">
+        <form method="get" action="{% url 'swipes:swipe_feed' %}" class="filter-form">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="cuisine" class="form-label">🍽️ Cuisine</label>
+                    <select name="cuisine" id="cuisine" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if selected_cuisine == 'all' %}selected{% endif %}>All Cuisines</option>
+                        {% for cuisine in available_cuisines %}
+                            <option value="{{ cuisine.id }}" {% if selected_cuisine == cuisine.id|stringformat:'s' %}selected{% endif %}>
+                                {{ cuisine.emoji }} {{ cuisine.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="dietary" class="form-label">🌱 Dietary Preference</label>
+                    <select name="dietary" id="dietary" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if selected_dietary == 'all' %}selected{% endif %}>All</option>
+                        <option value="vegetarian" {% if selected_dietary == 'vegetarian' %}selected{% endif %}>🌱 Vegetarian</option>
+                        <option value="vegan" {% if selected_dietary == 'vegan' %}selected{% endif %}>🥬 Vegan</option>
+                        <option value="non_veg" {% if selected_dietary == 'non_veg' %}selected{% endif %}>🍖 Non-Vegetarian</option>
+                    </select>
+                </div>
+            </div>
+        </form>
     </div>
 
     {% if dish %}
@@ -274,7 +329,7 @@ function swipe(direction, dishId) {
     }
     card.style.opacity = '0';
 
-    fetch(`/swipes/action/${dishId}/`, {
+    fetch(`/swipes/swipe/${dishId}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
