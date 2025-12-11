@@ -10,13 +10,13 @@
     position: fixed;
     top: 70px;
     right: 20px;
-    background: #FF6B6B;
+    background: var(--primary);
     color: white;
     padding: 10px 20px;
     border-radius: 25px;
     font-size: 14px;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    box-shadow: 0 4px 15px rgba(124, 150, 171, 0.3);
     z-index: 1000;
 }
 
@@ -28,11 +28,11 @@
 }
 
 .cuisine-badge {
-    background: #f0f0f0;
+    background: rgba(124, 150, 171, 0.08);
     padding: 5px 12px;
     border-radius: 15px;
     font-size: 12px;
-    color: #555;
+    color: var(--text-secondary);
 }
 
 .swipe-container {
@@ -67,12 +67,12 @@
 
 .cuisine {
     font-size: 18px;
-    color: #666;
+    color: var(--text-secondary);
     margin-bottom: 15px;
 }
 
 .description {
-    color: #555;
+    color: var(--text-secondary);
     line-height: 1.6;
     margin-bottom: 20px;
 }
@@ -114,38 +114,38 @@
 }
 
 .btn-block {
-    background: #6c757d;
+    background: var(--neutral);
     color: white;
     max-width: 60px;
     padding: 15px;
 }
 
 .btn-block:hover {
-    background: #5a6268;
+    background: #9fa6ad;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    box-shadow: 0 4px 12px rgba(183, 183, 183, 0.3);
 }
 
 .btn-dislike {
-    background: #FFA94D;
-    color: white;
+    background: var(--accent);
+    color: var(--text-primary);
 }
 
 .btn-dislike:hover {
-    background: #ff9a2e;
+    background: #e3b79f;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 169, 77, 0.3);
+    box-shadow: 0 4px 12px rgba(237, 198, 177, 0.35);
 }
 
 .btn-like {
-    background: #20C997;
+    background: var(--primary);
     color: white;
 }
 
 .btn-like:hover {
-    background: #1ab386;
+    background: var(--secondary);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+    box-shadow: 0 4px 12px rgba(124, 150, 171, 0.35);
 }
 
 .no-dishes {
@@ -166,7 +166,7 @@
 
 .available-cuisines h5 {
     margin-bottom: 15px;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .filters-container {
@@ -192,8 +192,8 @@
 }
 
 .filter-form .form-select:focus {
-    border-color: #FF6B6B;
-    box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.15);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(124, 150, 171, 0.2);
 }
 </style>
 {% endblock %}
