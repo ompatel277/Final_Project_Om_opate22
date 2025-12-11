@@ -1,9 +1,19 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required
+from datetime import timedelta
+import json
+
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import UserRegistrationForm, UserProfileForm, UserUpdateForm
+from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
+from django.shortcuts import redirect, render
+from django.utils import timezone
+
+from community.models import Review
+from swipes.models import Favorite, SwipeAction
+
+from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
 from .models import UserProfile
 
 
@@ -123,13 +133,71 @@ def dashboard_view(request):
     user = request.user
     profile = user.profile
 
-    # Get user stats (we'll populate these from other apps later)
+    total_swipes = SwipeAction.objects.filter(user=user).count()
+    total_matches = SwipeAction.objects.filter(user=user, direction='right').count()
+    total_favorites = Favorite.objects.filter(user=user).count()
+    total_reviews = Review.objects.filter(user=user).count()
+
+    recent_swipes = (
+        SwipeAction.objects.filter(user=user)
+        .select_related('dish')
+        .order_by('-created_at')[:5]
+    )
+    recent_favorites = (
+        Favorite.objects.filter(user=user)
+        .select_related('dish')
+        .order_by('-created_at')[:5]
+    )
+
+    # Build swipe activity for the last 7 days
+    start_date = timezone.now().date() - timedelta(days=6)
+    swipe_activity = {start_date + timedelta(days=i): {'right': 0, 'left': 0} for i in range(7)}
+
+    aggregated_swipes = (
+        SwipeAction.objects.filter(user=user, created_at__date__gte=start_date)
+        .annotate(day=TruncDate('created_at'))
+        .values('day')
+        .annotate(
+            right_count=Count('id', filter=Q(direction='right')),
+            left_count=Count('id', filter=Q(direction='left')),
+        )
+    )
+
+    for entry in aggregated_swipes:
+        day = entry['day']
+        swipe_activity[day]['right'] = entry['right_count']
+        swipe_activity[day]['left'] = entry['left_count']
+
+    chart_labels = [day.strftime('%b %d') for day in swipe_activity.keys()]
+    chart_right = [counts['right'] for counts in swipe_activity.values()]
+    chart_left = [counts['left'] for counts in swipe_activity.values()]
+
+    profile_completion_fields = [
+        bool(profile.city),
+        bool(profile.bio),
+        bool(profile.favorite_cuisines),
+        bool(profile.allergies),
+        bool(profile.profile_picture),
+    ]
+    profile_completion = int((sum(profile_completion_fields) / len(profile_completion_fields)) * 100)
+
     context = {
         'user': user,
         'profile': profile,
-        'total_swipes': 0,  # Will be populated from swipes app
-        'favorites_count': 0,  # Will be populated from swipes app
-        'reviews_count': 0,  # Will be populated from community app
+        'total_swipes': total_swipes,
+        'total_matches': total_matches,
+        'total_favorites': total_favorites,
+        'total_reviews': total_reviews,
+        'recent_swipes': recent_swipes,
+        'recent_favorites': recent_favorites,
+        'profile_completion': profile_completion,
+        'swipe_chart_data': json.dumps(
+            {
+                'labels': chart_labels,
+                'right_swipes': chart_right,
+                'left_swipes': chart_left,
+            }
+        ),
     }
 
     return render(request, 'accounts/dashboard.html', context)

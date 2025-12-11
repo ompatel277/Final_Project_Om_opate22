@@ -16,5 +16,4 @@ urlpatterns = [
 
     # Tools
     path('macro-calculator/', views.macro_calculator_view, name='macro_calculator'),
-    path('meal-planner/', views.meal_planner_view, name='meal_planner'),
 ]

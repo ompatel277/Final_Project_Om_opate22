@@ -236,32 +236,3 @@ def macro_calculator_view(request):
     }
     return render(request, 'recommender/macro_calculator.html', context)
 
-
-@login_required
-def meal_planner_view(request):
-    """Weekly meal planner"""
-    profile = request.user.profile
-
-    # Get diverse dishes for meal planning
-    breakfast_dishes = Dish.objects.filter(
-        meal_type='breakfast',
-        is_active=True
-    ).order_by('?')[:7]
-
-    lunch_dishes = Dish.objects.filter(
-        meal_type='lunch',
-        is_active=True
-    ).order_by('?')[:7]
-
-    dinner_dishes = Dish.objects.filter(
-        meal_type='dinner',
-        is_active=True
-    ).order_by('?')[:7]
-
-    context = {
-        'profile': profile,
-        'breakfast_dishes': breakfast_dishes,
-        'lunch_dishes': lunch_dishes,
-        'dinner_dishes': dinner_dishes,
-    }
-    return render(request, 'recommender/meal_planner.html', context)
