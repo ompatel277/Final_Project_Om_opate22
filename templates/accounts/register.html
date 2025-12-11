@@ -7,10 +7,13 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-4">Join Swipe&Bite 🍔</h2>
-                    <p class="text-center text-muted mb-4">Discover your next favorite dish</p>
+            <div class="surface-card shadow-sm">
+                <div class="p-5">
+                    <div class="text-center mb-4">
+                        <span class="icon-badge mb-3"><i class="fas fa-user-plus"></i></span>
+                        <h2 class="section-heading">Join Swipe&Bite</h2>
+                        <p class="section-subtitle mb-0">Discover your next favorite dish</p>
+                    </div>
                     
                     {% if messages %}
                         {% for message in messages %}
@@ -78,7 +81,7 @@
                         
                         <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
                     </form>
-                    
+
                     <p class="text-center mb-0">
                         Already have an account? <a href="{% url 'accounts:login' %}">Login here</a>
                     </p>
@@ -87,37 +90,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        border-radius: 15px;
-        border: none;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 10px 15px;
-        width: 100%;
-    }
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
-</style>
 {% endblock %}

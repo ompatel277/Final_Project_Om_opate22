@@ -7,10 +7,13 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-4">Welcome Back! 🍕</h2>
-                    <p class="text-center text-muted mb-4">Login to continue swiping</p>
+            <div class="surface-card shadow-sm">
+                <div class="p-5">
+                    <div class="text-center mb-4">
+                        <span class="icon-badge mb-3"><i class="fas fa-sign-in-alt"></i></span>
+                        <h2 class="section-heading">Welcome Back</h2>
+                        <p class="section-subtitle mb-0">Login to continue swiping</p>
+                    </div>
                     
                     {% if messages %}
                         {% for message in messages %}
@@ -42,53 +45,20 @@
                         
                         <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
                     </form>
-                    
+
                     <p class="text-center mb-0">
                         Don't have an account? <a href="{% url 'accounts:register' %}">Sign up here</a>
                     </p>
                 </div>
             </div>
-            
+
             <!-- Test Credentials Info -->
-            <div class="card mt-3 bg-light">
-                <div class="card-body">
-                    <h6 class="card-title">Test Credentials:</h6>
-                    <p class="mb-1 small"><strong>Internal Tester:</strong> mohitg2 / graingerlibrary</p>
-                    <p class="mb-0 small"><strong>Guest:</strong> infoadmins / uiucinfo</p>
-                </div>
+            <div class="surface-card mt-3 p-3" style="background: rgba(124, 150, 171, 0.06); border: 1px dashed rgba(124, 150, 171, 0.35);">
+                <h6 class="section-heading" style="font-size: 1rem;">Test Credentials</h6>
+                <p class="mb-1 small text-secondary"><strong>Internal Tester:</strong> mohitg2 / graingerlibrary</p>
+                <p class="mb-0 small text-secondary"><strong>Guest:</strong> infoadmins / uiucinfo</p>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        border-radius: 15px;
-        border: none;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    input[type="text"],
-    input[type="password"] {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 10px 15px;
-        width: 100%;
-    }
-    input[type="text"]:focus,
-    input[type="password"]:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
-</style>
 {% endblock %}
