@@ -6,134 +6,235 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    {% if profile.profile_picture %}
-                        <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">
-                    {% else %}
-                        <div style="width: 100px; height: 100px; background: #FD7979; border-radius: 8px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 2rem; font-weight: 600;">
-                            {{ user.first_name.0 }}{{ user.last_name.0 }}
+        <!-- Profile Sidebar -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <!-- Avatar -->
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                            <i class="fas fa-user" style="color: #FFFFFF; font-size: 2.5rem;"></i>
+                        {% endif %}
+                    </div>
+
+                    <h4 style="color: #2D3436; font-weight: 700; margin-bottom: 0.25rem;">
+                        {{ user.first_name }} {{ user.last_name }}
+                    </h4>
+                    <p style="color: #636E72; margin-bottom: 1rem;">@{{ user.username }}</p>
+
+                    <!-- Location Badge -->
+                    {% if user_location %}
+                        <div style="background: #FEEAC9; border-radius: 8px; padding: 0.5rem 1rem; display: inline-flex; align-items: center; margin-bottom: 1rem;">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i>
+                            <span style="color: #2D3436; font-weight: 500;">{{ user_location.city }}</span>
                         </div>
                     {% endif %}
 
-                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">{{ user.get_full_name }}</h4>
-                    <p style="color: #636E72; font-size: 0.875rem;">@{{ user.username }}</p>
-                    {% if profile.city %}
-                        <p style="color: #636E72; font-size: 0.875rem;"><i class="fas fa-map-marker-alt" style="color: #FD7979;"></i> {{ profile.city }}</p>
-                    {% endif %}
-
-                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-edit"></i> Edit Profile
-                    </a>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
+            <!-- Stats Card -->
+            <div class="card mt-3">
                 <div class="card-body">
-                    <h6 style="font-weight: 600; margin-bottom: 0.75rem;">Stats</h6>
-                    <div class="d-flex justify-content-between mb-2" style="font-size: 0.875rem;">
+                    <h6 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-chart-bar" style="color: #FD7979;"></i> Your Stats
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: #FAFAFA; border-radius: 8px;">
                         <span style="color: #636E72;">Total Swipes</span>
-                        <strong>{{ total_swipes|default:0 }}</strong>
+                        <strong style="color: #FD7979;">{{ total_swipes|default:0 }}</strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2" style="font-size: 0.875rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: #FAFAFA; border-radius: 8px;">
+                        <span style="color: #636E72;">Matches</span>
+                        <strong style="color: #FD7979;">{{ total_matches|default:0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: #FAFAFA; border-radius: 8px;">
                         <span style="color: #636E72;">Favorites</span>
-                        <strong>{{ favorites_count|default:0 }}</strong>
+                        <strong style="color: #FD7979;">{{ total_favorites|default:0 }}</strong>
                     </div>
-                    <div class="d-flex justify-content-between" style="font-size: 0.875rem;">
+                    <div class="d-flex justify-content-between align-items-center p-2" style="background: #FAFAFA; border-radius: 8px;">
                         <span style="color: #636E72;">Reviews</span>
-                        <strong>{{ reviews_count|default:0 }}</strong>
+                        <strong style="color: #FD7979;">{{ total_reviews|default:0 }}</strong>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Profile Details -->
         <div class="col-md-8">
-            {% if profile.bio %}
+            <!-- Account Info -->
             <div class="card mb-3">
                 <div class="card-body">
-                    <h6 style="font-weight: 600; margin-bottom: 0.5rem;">About</h6>
-                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">{{ profile.bio }}</p>
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h6 style="font-weight: 600; margin-bottom: 0.75rem;">Dietary Preferences</h6>
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-user-circle" style="color: #FD7979;"></i> Account Information
+                    </h5>
                     <div class="row">
-                        <div class="col-md-6">
-                            <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Diet Type:</strong> {{ profile.get_diet_type_display }}</p>
-                            <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Preferred Delivery:</strong> {{ profile.get_preferred_delivery_app_display }}</p>
-                            <p style="font-size: 0.875rem; margin-bottom: 0;"><strong>Max Distance:</strong> {{ profile.max_distance_miles }} miles</p>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">Username</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">{{ user.username }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">Email</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">{{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">First Name</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">{{ user.first_name|default:"Not set" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">Last Name</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">{{ user.last_name|default:"Not set" }}</p>
                         </div>
                         <div class="col-md-6">
-                            {% if profile.allergies %}
-                                <p style="font-size: 0.875rem; margin-bottom: 0.25rem;"><strong>Allergies:</strong></p>
-                                <div class="mb-2">
-                                    {% for allergy in profile.get_allergies_list %}
-                                        <span class="badge" style="background: #FD7979; color: #FFFFFF; margin-right: 0.25rem;">{{ allergy }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            {% if profile.favorite_cuisines %}
-                                <p style="font-size: 0.875rem; margin-bottom: 0.25rem;"><strong>Favorite Cuisines:</strong></p>
-                                <div>
-                                    {% for cuisine in profile.get_favorite_cuisines_list %}
-                                        <span class="badge" style="background: #FFCDC9; color: #2D3436; margin-right: 0.25rem;">{{ cuisine }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+                            <label style="color: #636E72; font-size: 0.875rem;">Member Since</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">{{ user.date_joined|date:"M d, Y" }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {% if profile.daily_calorie_goal or profile.protein_goal or profile.carbs_goal or profile.fat_goal %}
-            <div class="card">
+            <!-- Food Preferences -->
+            <div class="card mb-3">
                 <div class="card-body">
-                    <h6 style="font-weight: 600; margin-bottom: 0.75rem;">Nutrition Goals</h6>
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-utensils" style="color: #FD7979;"></i> Food Preferences
+                    </h5>
                     <div class="row">
-                        {% if profile.daily_calorie_goal %}
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center p-2" style="background: #FEEAC9; border-radius: 8px;">
-                                <h4 style="color: #FD7979; font-weight: 600; margin-bottom: 0;">{{ profile.daily_calorie_goal }}</h4>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">Diet Type</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">
+                                {% if profile.diet_type %}
+                                    <span style="background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.875rem;">
+                                        {{ profile.get_diet_type_display }}
+                                    </span>
+                                {% else %}
+                                    <span style="color: #636E72;">Not specified</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">Spice Preference</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">
+                                {% if profile.spice_level %}
+                                    <span style="background: #FFCDC9; color: #FD7979; padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.875rem;">
+                                        {{ profile.get_spice_level_display }}
+                                    </span>
+                                {% else %}
+                                    <span style="color: #636E72;">Not specified</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label style="color: #636E72; font-size: 0.875rem;">Allergies</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">
+                                {% if profile.allergies %}
+                                    {{ profile.allergies }}
+                                {% else %}
+                                    <span style="color: #636E72;">None specified</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-12">
+                            <label style="color: #636E72; font-size: 0.875rem;">Favorite Cuisines</label>
+                            <p style="color: #2D3436; font-weight: 500; margin: 0;">
+                                {% if profile.favorite_cuisines %}
+                                    {{ profile.favorite_cuisines }}
+                                {% else %}
+                                    <span style="color: #636E72;">None specified</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition Goals -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-heartbeat" style="color: #FD7979;"></i> Nutrition Goals
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div style="background: #FEEAC9; border-radius: 8px; padding: 1rem; text-align: center;">
+                                <i class="fas fa-fire-alt" style="color: #FD7979; font-size: 1.25rem;"></i>
+                                <h5 style="color: #FD7979; font-weight: 700; margin: 0.5rem 0 0;">
+                                    {{ profile.daily_calorie_goal|default:"—" }}
+                                </h5>
                                 <small style="color: #636E72;">Calories</small>
                             </div>
                         </div>
-                        {% endif %}
-
-                        {% if profile.protein_goal %}
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center p-2" style="background: #FFCDC9; border-radius: 8px;">
-                                <h4 style="color: #FD7979; font-weight: 600; margin-bottom: 0;">{{ profile.protein_goal }}g</h4>
+                        <div class="col-md-3 mb-3">
+                            <div style="background: #FFCDC9; border-radius: 8px; padding: 1rem; text-align: center;">
+                                <i class="fas fa-drumstick-bite" style="color: #FD7979; font-size: 1.25rem;"></i>
+                                <h5 style="color: #FD7979; font-weight: 700; margin: 0.5rem 0 0;">
+                                    {{ profile.protein_goal|default:"—" }}g
+                                </h5>
                                 <small style="color: #636E72;">Protein</small>
                             </div>
                         </div>
-                        {% endif %}
-
-                        {% if profile.carbs_goal %}
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center p-2" style="background: #FDACAC; border-radius: 8px;">
-                                <h4 style="color: #FFFFFF; font-weight: 600; margin-bottom: 0;">{{ profile.carbs_goal }}g</h4>
+                        <div class="col-md-3 mb-3">
+                            <div style="background: #FDACAC; border-radius: 8px; padding: 1rem; text-align: center;">
+                                <i class="fas fa-bread-slice" style="color: #FFFFFF; font-size: 1.25rem;"></i>
+                                <h5 style="color: #FFFFFF; font-weight: 700; margin: 0.5rem 0 0;">
+                                    {{ profile.carbs_goal|default:"—" }}g
+                                </h5>
                                 <small style="color: #FFFFFF;">Carbs</small>
                             </div>
                         </div>
-                        {% endif %}
-
-                        {% if profile.fat_goal %}
-                        <div class="col-md-3 mb-2">
-                            <div class="text-center p-2" style="background: #FD7979; border-radius: 8px;">
-                                <h4 style="color: #FFFFFF; font-weight: 600; margin-bottom: 0;">{{ profile.fat_goal }}g</h4>
+                        <div class="col-md-3 mb-3">
+                            <div style="background: #FD7979; border-radius: 8px; padding: 1rem; text-align: center;">
+                                <i class="fas fa-cheese" style="color: #FFFFFF; font-size: 1.25rem;"></i>
+                                <h5 style="color: #FFFFFF; font-weight: 700; margin: 0.5rem 0 0;">
+                                    {{ profile.fat_goal|default:"—" }}g
+                                </h5>
                                 <small style="color: #FFFFFF;">Fat</small>
                             </div>
                         </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
-            {% endif %}
+
+            <!-- Location -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Location Settings
+                    </h5>
+                    {% if user_location %}
+                        <div class="d-flex align-items-center">
+                            <div style="width: 50px; height: 50px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                            </div>
+                            <div>
+                                <strong style="color: #2D3436;">{{ user_location.city }}</strong>
+                                <br>
+                                <small style="color: #636E72;">{{ user_location.latitude|floatformat:4 }}, {{ user_location.longitude|floatformat:4 }}</small>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#locationModal">
+                                <i class="fas fa-edit"></i> Update
+                            </button>
+                        </div>
+                    {% else %}
+                        <div style="background: #FAFAFA; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                            <i class="fas fa-map-marker-alt" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin-bottom: 1rem;">Set your location to discover nearby restaurants</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                                <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i> Set Location
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

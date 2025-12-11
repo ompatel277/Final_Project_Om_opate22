@@ -4,104 +4,169 @@
 {% block title %}Register - Swipe&Bite{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body p-4">
-                    <h2 class="text-center mb-2" style="font-weight: 600; font-size: 1.5rem;">Join Swipe&Bite</h2>
-                    <p class="text-center mb-4" style="color: #636E72; font-size: 0.875rem;">Discover your next favorite dish</p>
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <div style="width: 60px; height: 60px; background: #FEEAC9; border-radius: 8px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-heart" style="color: #FD7979; font-size: 1.5rem;"></i>
+                        </div>
+                        <h2 style="color: #2D3436; font-weight: 700; margin-bottom: 0.25rem;">Join Swipe&Bite</h2>
+                        <p style="color: #636E72; margin: 0;">Create your account and start discovering</p>
+                    </div>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="POST" novalidate>
+                    <!-- Registration Form -->
+                    <form method="POST">
                         {% csrf_token %}
 
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                            {{ form.username }}
-                            {% if form.username.errors %}
-                                <div class="text-danger" style="font-size: 0.75rem;">{{ form.username.errors }}</div>
-                            {% endif %}
-                        </div>
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" style="background: #FFCDC9; border: none; color: #FD7979;">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
-                                {{ form.first_name }}
+                                <label for="first_name" class="form-label" style="color: #2D3436; font-weight: 500;">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                        <i class="fas fa-user" style="color: #FD7979;"></i>
+                                    </span>
+                                    <input type="text" name="first_name" class="form-control" id="first_name" placeholder="First name" value="{{ form.first_name.value|default:'' }}" style="border-left: none;">
+                                </div>
                                 {% if form.first_name.errors %}
-                                    <div class="text-danger" style="font-size: 0.75rem;">{{ form.first_name.errors }}</div>
+                                    <small style="color: #FD7979;">{{ form.first_name.errors.0 }}</small>
                                 {% endif %}
                             </div>
+
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
-                                {{ form.last_name }}
+                                <label for="last_name" class="form-label" style="color: #2D3436; font-weight: 500;">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                        <i class="fas fa-user" style="color: #FD7979;"></i>
+                                    </span>
+                                    <input type="text" name="last_name" class="form-control" id="last_name" placeholder="Last name" value="{{ form.last_name.value|default:'' }}" style="border-left: none;">
+                                </div>
                                 {% if form.last_name.errors %}
-                                    <div class="text-danger" style="font-size: 0.75rem;">{{ form.last_name.errors }}</div>
+                                    <small style="color: #FD7979;">{{ form.last_name.errors.0 }}</small>
                                 {% endif %}
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                            {{ form.email }}
+                            <label for="username" class="form-label" style="color: #2D3436; font-weight: 500;">Username *</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                    <i class="fas fa-at" style="color: #FD7979;"></i>
+                                </span>
+                                <input type="text" name="username" class="form-control" id="username" placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required style="border-left: none;">
+                            </div>
+                            {% if form.username.errors %}
+                                <small style="color: #FD7979;">{{ form.username.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label" style="color: #2D3436; font-weight: 500;">Email *</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                    <i class="fas fa-envelope" style="color: #FD7979;"></i>
+                                </span>
+                                <input type="email" name="email" class="form-control" id="email" placeholder="Enter your email" value="{{ form.email.value|default:'' }}" required style="border-left: none;">
+                            </div>
                             {% if form.email.errors %}
-                                <div class="text-danger" style="font-size: 0.75rem;">{{ form.email.errors }}</div>
+                                <small style="color: #FD7979;">{{ form.email.errors.0 }}</small>
                             {% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                            {{ form.password1 }}
+                            <label for="password1" class="form-label" style="color: #2D3436; font-weight: 500;">Password *</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                    <i class="fas fa-lock" style="color: #FD7979;"></i>
+                                </span>
+                                <input type="password" name="password1" class="form-control" id="password1" placeholder="Create a password" required style="border-left: none;">
+                            </div>
                             {% if form.password1.errors %}
-                                <div class="text-danger" style="font-size: 0.75rem;">{{ form.password1.errors }}</div>
+                                <small style="color: #FD7979;">{{ form.password1.errors.0 }}</small>
                             {% endif %}
-                            <small style="color: #636E72; font-size: 0.75rem;">
-                                Must be at least 8 characters.
-                            </small>
+                            <small style="color: #636E72;">At least 8 characters</small>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                            {{ form.password2 }}
+                        <div class="mb-4">
+                            <label for="password2" class="form-label" style="color: #2D3436; font-weight: 500;">Confirm Password *</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                    <i class="fas fa-lock" style="color: #FD7979;"></i>
+                                </span>
+                                <input type="password" name="password2" class="form-control" id="password2" placeholder="Confirm your password" required style="border-left: none;">
+                            </div>
                             {% if form.password2.errors %}
-                                <div class="text-danger" style="font-size: 0.75rem;">{{ form.password2.errors }}</div>
+                                <small style="color: #FD7979;">{{ form.password2.errors.0 }}</small>
                             {% endif %}
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+                        <div class="form-check mb-4">
+                            <input type="checkbox" name="agree_terms" class="form-check-input" id="agree_terms" required style="border-color: #FDACAC;">
+                            <label class="form-check-label" for="agree_terms" style="color: #636E72; font-size: 0.875rem;">
+                                I agree to the <a href="#" style="color: #FD7979;">Terms of Service</a> and <a href="#" style="color: #FD7979;">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3" style="padding: 0.75rem;">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
                     </form>
 
-                    <p class="text-center mb-0" style="font-size: 0.875rem;">
-                        Already have an account? <a href="{% url 'accounts:login' %}" style="color: #FD7979;">Login here</a>
-                    </p>
+                    <!-- Divider -->
+                    <div class="d-flex align-items-center my-3">
+                        <hr style="flex: 1; border-color: #E9ECEF;">
+                        <span style="color: #636E72; padding: 0 1rem; font-size: 0.875rem;">or</span>
+                        <hr style="flex: 1; border-color: #E9ECEF;">
+                    </div>
+
+                    <!-- Login Link -->
+                    <div class="text-center">
+                        <p style="color: #636E72; margin-bottom: 0.5rem;">Already have an account?</p>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="card mt-3">
+                <div class="card-body p-3">
+                    <h6 style="color: #2D3436; font-weight: 600; text-align: center; margin-bottom: 1rem;">Why Join?</h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div style="width: 40px; height: 40px; background: #FEEAC9; border-radius: 8px; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-fire" style="color: #FD7979;"></i>
+                            </div>
+                            <small style="color: #636E72;">Swipe Dishes</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="width: 40px; height: 40px; background: #FFCDC9; border-radius: 8px; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-robot" style="color: #FD7979;"></i>
+                            </div>
+                            <small style="color: #636E72;">AI Suggestions</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="width: 40px; height: 40px; background: #FDACAC; border-radius: 8px; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                            </div>
+                            <small style="color: #636E72;">Find Nearby</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
-        width: 100%;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #E9ECEF;
-        border-radius: 8px;
-        font-size: 0.875rem;
-    }
-    input:focus {
-        border-color: #FD7979;
-        box-shadow: 0 0 0 3px rgba(253, 121, 121, 0.1);
-        outline: none;
-    }
-</style>
 {% endblock %}

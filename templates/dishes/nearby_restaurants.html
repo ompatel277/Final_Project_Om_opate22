@@ -1,590 +1,208 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Find Nearby Restaurants - Swipe&Bite{% endblock %}
+{% block title %}Nearby Restaurants - Swipe&Bite{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <h1 class="mb-4">🗺️ Find Nearby Restaurants</h1>
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 style="color: #2D3436; font-weight: 700; margin-bottom: 0.25rem;">
+                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1.5rem; margin-right: 0.25rem;"></i> Nearby Restaurants
+            </h1>
+            <p style="color: #636E72;">Discover restaurants close to you</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list"></i> View All Restaurants
+            </a>
+        </div>
+    </div>
 
-            <!-- Location Card -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">📍 Your Location</h5>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div id="auto-location">
-                                <button id="get-location-btn" class="btn btn-primary">
-                                    📍 Use My Current Location
-                                </button>
-                                <div id="location-info" class="mt-3" style="display: none;">
-                                    <p class="mb-1"><strong>Latitude:</strong> <span id="auto-latitude"></span></p>
-                                    <p class="mb-0"><strong>Longitude:</strong> <span id="auto-longitude"></span></p>
-                                </div>
-                            </div>
+    <!-- Location Status -->
+    {% if user_location %}
+        <div class="card mb-4" style="background: linear-gradient(135deg, #FEEAC9 0%, #FFCDC9 100%); border: none;">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div style="width: 50px; height: 50px; background: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1.25rem;"></i>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="text-center my-3">OR</div>
-                            <h6>Enter Location Manually</h6>
-                            <div class="mb-2">
-                                <input type="number" step="any" class="form-control" id="manual-latitude" placeholder="Latitude (e.g., 40.7455096)">
-                            </div>
-                            <div class="mb-2">
-                                <input type="number" step="any" class="form-control" id="manual-longitude" placeholder="Longitude (e.g., -74.0083012)">
-                            </div>
-                            <button id="use-manual-location-btn" class="btn btn-secondary">
-                                Use Manual Location
-                            </button>
+                        <div>
+                            <h5 style="color: #2D3436; font-weight: 600; margin: 0;">{{ user_location.city }}</h5>
+                            <small style="color: #636E72;">
+                                {{ user_location.latitude|floatformat:4 }}, {{ user_location.longitude|floatformat:4 }}
+                            </small>
                         </div>
                     </div>
-
-                    <!-- Current Location Display -->
-                    <div id="current-location-display" class="alert alert-info mt-3" style="display: none;">
-                        <strong>Current Location:</strong> <span id="current-lat-display"></span>, <span id="current-lng-display"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search Options -->
-            <div class="card mb-4" id="search-card" style="display: none;">
-                <div class="card-body">
-                    <h5 class="card-title">🔍 Search Options</h5>
-
-                    <div class="mb-3">
-                        <label for="search-query" class="form-label">What are you looking for?</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="search-query"
-                            placeholder="e.g., Pizza, Sushi, Italian restaurant..."
-                        >
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="num-results" class="form-label">Number of Results</label>
-                            <select class="form-select" id="num-results">
-                                <option value="5">5 restaurants</option>
-                                <option value="10" selected>10 restaurants</option>
-                                <option value="15">15 restaurants</option>
-                                <option value="20">20 restaurants</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="sort-by" class="form-label">Sort By</label>
-                            <select class="form-select" id="sort-by">
-                                <option value="rating">Highest Rated</option>
-                                <option value="reviews">Most Reviews</option>
-                                <option value="distance">Closest</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button id="search-btn" class="btn btn-success">
-                        🔍 Search Restaurants
+                    <button class="btn" style="background: #FFFFFF; color: #FD7979; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#locationModal">
+                        <i class="fas fa-edit"></i> Change Location
                     </button>
                 </div>
             </div>
-
-            <!-- Loading Indicator -->
-            <div id="loading" class="text-center my-4" style="display: none;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2">Searching for restaurants...</p>
-            </div>
-
-            <!-- Results -->
-            <div id="results-container"></div>
         </div>
-    </div>
-</div>
-
-<!-- Place Details Modal -->
-<div class="modal fade" id="placeDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="placeDetailsTitle">Restaurant Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="placeDetailsBody">
-                <div class="text-center">
-                    <div class="spinner-border" role="status"></div>
+    {% else %}
+        <div class="card mb-4">
+            <div class="card-body text-center p-5">
+                <div style="width: 80px; height: 80px; background: #FEEAC9; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 2rem;"></i>
                 </div>
+                <h4 style="color: #2D3436; font-weight: 600;">Set Your Location</h4>
+                <p style="color: #636E72; margin-bottom: 1rem;">We need your location to show nearby restaurants</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                    <i class="fas fa-location-crosshairs"></i> Set Location Now
+                </button>
             </div>
         </div>
-    </div>
-</div>
+    {% endif %}
 
-<!-- Reviews Modal -->
-<div class="modal fade" id="reviewsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="reviewsTitle">Reviews</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="reviewsBody">
-                <div class="text-center">
-                    <div class="spinner-border" role="status"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% csrf_token %}
-
-<script>
-// CSRF Token Helper
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function getCSRFToken() {
-    // Try to get from input field first
-    const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (tokenInput) {
-        return tokenInput.value;
-    }
-    // Fallback to cookie
-    return getCookie('csrftoken');
-}
-
-let userLocation = null;
-
-// Get user's current location
-document.getElementById('get-location-btn').addEventListener('click', function() {
-    const btn = this;
-
-    console.log('🔍 Attempting to get location...');
-
-    // Check if geolocation is supported
-    if (!navigator.geolocation) {
-        console.error('❌ Geolocation not supported');
-        alert('Geolocation is not supported by your browser.');
-        return;
-    }
-
-    // Check if page is secure (HTTPS or localhost)
-    if (location.protocol !== 'https:' && !location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) {
-        console.warn('⚠️ Geolocation may not work on non-HTTPS sites');
-        alert('Geolocation requires HTTPS. Please use manual location entry or access via localhost.');
-        return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Getting location...';
-
-    navigator.geolocation.getCurrentPosition(
-        // Success callback
-        function(position) {
-            console.log('✅ Location obtained:', position.coords);
-
-            userLocation = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-            };
-
-            updateLocationDisplay();
-            btn.innerHTML = '✓ Location Found';
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-success');
-            btn.disabled = false;
-        },
-        // Error callback
-        function(error) {
-            console.error('❌ Geolocation error:', error);
-
-            let errorMessage = 'Unable to get location. ';
-
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage += 'Please enable location permissions in your browser settings.';
-                    console.error('Permission denied by user');
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage += 'Location information is unavailable.';
-                    console.error('Position unavailable');
-                    break;
-                case error.TIMEOUT:
-                    errorMessage += 'Location request timed out. Please try again.';
-                    console.error('Request timeout');
-                    break;
-                default:
-                    errorMessage += 'An unknown error occurred.';
-                    console.error('Unknown error:', error);
-            }
-
-            alert(errorMessage);
-            btn.disabled = false;
-            btn.innerHTML = '📍 Use My Current Location';
-        },
-        // Options
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,  // Increased timeout to 10 seconds
-            maximumAge: 0
-        }
-    );
-});
-
-// Use manual location
-document.getElementById('use-manual-location-btn').addEventListener('click', function() {
-    const lat = parseFloat(document.getElementById('manual-latitude').value);
-    const lng = parseFloat(document.getElementById('manual-longitude').value);
-
-    console.log('📝 Manual location entered:', lat, lng);
-
-    if (isNaN(lat) || isNaN(lng)) {
-        alert('Please enter valid latitude and longitude values.');
-        return;
-    }
-
-    if (lat < -90 || lat > 90) {
-        alert('Latitude must be between -90 and 90');
-        return;
-    }
-
-    if (lng < -180 || lng > 180) {
-        alert('Longitude must be between -180 and 180');
-        return;
-    }
-
-    userLocation = {
-        latitude: lat,
-        longitude: lng
-    };
-
-    updateLocationDisplay();
-});
-
-// Update location display
-function updateLocationDisplay() {
-    console.log('📍 Updating location display:', userLocation);
-
-    document.getElementById('auto-latitude').textContent = userLocation.latitude.toFixed(6);
-    document.getElementById('auto-longitude').textContent = userLocation.longitude.toFixed(6);
-    document.getElementById('location-info').style.display = 'block';
-
-    document.getElementById('current-lat-display').textContent = userLocation.latitude.toFixed(6);
-    document.getElementById('current-lng-display').textContent = userLocation.longitude.toFixed(6);
-    document.getElementById('current-location-display').style.display = 'block';
-
-    document.getElementById('search-card').style.display = 'block';
-}
-
-// Search for restaurants
-document.getElementById('search-btn').addEventListener('click', function() {
-    if (!userLocation) {
-        alert('Please set your location first!');
-        return;
-    }
-
-    searchRestaurants();
-});
-
-function searchRestaurants() {
-    const query = document.getElementById('search-query').value.trim() || 'restaurants';
-    const numResults = document.getElementById('num-results').value;
-
-    console.log('🔍 Searching for:', query, 'at', userLocation);
-
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('results-container').innerHTML = '';
-
-    const csrftoken = getCSRFToken();
-
-    if (!csrftoken) {
-        console.error('❌ CSRF token not found');
-        alert('Security token not found. Please refresh the page.');
-        return;
-    }
-
-    fetch('{% url "dishes:api_nearby_restaurants" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify({
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            query: query,
-            num_results: parseInt(numResults)
-        })
-    })
-    .then(response => {
-        console.log('📡 Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('📊 Data received:', data);
-        document.getElementById('loading').style.display = 'none';
-
-        if (data.success && data.restaurants && data.restaurants.length > 0) {
-            sortAndDisplayResults(data.restaurants);
-        } else {
-            document.getElementById('results-container').innerHTML = `
-                <div class="alert alert-warning">
-                    No restaurants found. Try a different search query.
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        document.getElementById('loading').style.display = 'none';
-        console.error('❌ Error:', error);
-        alert('Error searching for restaurants. Please check the console for details.');
-    });
-}
-
-function sortAndDisplayResults(restaurants) {
-    const sortBy = document.getElementById('sort-by').value;
-
-    let sorted = [...restaurants];
-
-    if (sortBy === 'rating') {
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    } else if (sortBy === 'reviews') {
-        sorted.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
-    }
-
-    displayResults(sorted);
-}
-
-function displayResults(restaurants) {
-    const container = document.getElementById('results-container');
-
-    let html = `
-        <div class="card">
+    {% if user_location %}
+        <!-- Distance Filter -->
+        <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title mb-4">📍 Found ${restaurants.length} Nearby Restaurants</h5>
-                <div class="list-group">
-    `;
-
-    restaurants.forEach((restaurant, index) => {
-        const rating = restaurant.rating ? '⭐'.repeat(Math.round(restaurant.rating)) + ` ${restaurant.rating}` : 'No rating';
-        const price = restaurant.price_range || 'N/A';
-        const reviews = restaurant.reviews ? `${restaurant.reviews} reviews` : '';
-        const phone = restaurant.phone ? `📞 ${restaurant.phone}` : '';
-        const thumbnail = restaurant.thumbnail || '';
-
-        html += `
-            <div class="list-group-item">
-                <div class="row">
-                    ${thumbnail ? `
-                    <div class="col-md-2">
-                        <img src="${thumbnail}" class="img-fluid rounded" alt="${restaurant.name}" style="width: 100%; height: 100px; object-fit: cover;">
+                <form method="GET">
+                    <div class="row align-items-end">
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label" style="color: #2D3436; font-weight: 500;">Max Distance</label>
+                            <select name="distance" class="form-select">
+                                <option value="5" {% if selected_distance == '5' %}selected{% endif %}>Within 5 miles</option>
+                                <option value="10" {% if selected_distance == '10' %}selected{% endif %}>Within 10 miles</option>
+                                <option value="15" {% if selected_distance == '15' %}selected{% endif %}>Within 15 miles</option>
+                                <option value="25" {% if selected_distance == '25' %}selected{% endif %}>Within 25 miles</option>
+                                <option value="50" {% if selected_distance == '50' %}selected{% endif %}>Within 50 miles</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label" style="color: #2D3436; font-weight: 500;">Price Range</label>
+                            <select name="price" class="form-select">
+                                <option value="">All Prices</option>
+                                <option value="$" {% if selected_price == '$' %}selected{% endif %}>$ (Budget)</option>
+                                <option value="$$" {% if selected_price == '$$' %}selected{% endif %}>$$ (Moderate)</option>
+                                <option value="$$$" {% if selected_price == '$$$' %}selected{% endif %}>$$$ (Upscale)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label" style="color: #2D3436; font-weight: 500;">Min Rating</label>
+                            <select name="rating" class="form-select">
+                                <option value="">Any Rating</option>
+                                <option value="3" {% if selected_rating == '3' %}selected{% endif %}>3+ Stars</option>
+                                <option value="4" {% if selected_rating == '4' %}selected{% endif %}>4+ Stars</option>
+                                <option value="4.5" {% if selected_rating == '4.5' %}selected{% endif %}>4.5+ Stars</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Apply Filters
+                            </button>
+                        </div>
                     </div>
-                    ` : ''}
-                    <div class="${thumbnail ? 'col-md-10' : 'col-12'}">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h5 class="mb-1">${index + 1}. ${restaurant.name}</h5>
-                                <p class="mb-1 text-muted">${restaurant.address || 'Address not available'}</p>
-                                <div class="mb-2">
-                                    <span class="badge bg-warning text-dark">${price}</span>
-                                    <span class="ms-2">${rating}</span>
-                                    ${reviews ? `<span class="ms-2 text-muted">${reviews}</span>` : ''}
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Count -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p style="color: #636E72; margin: 0;">
+                Found <strong style="color: #FD7979;">{{ restaurants|length }}</strong> restaurants nearby
+            </p>
+            <div>
+                <span style="background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500;">
+                    <i class="fas fa-sort-amount-down"></i> Sorted by distance
+                </span>
+            </div>
+        </div>
+
+        <!-- Restaurants List -->
+        <div class="row">
+            {% if restaurants %}
+                {% for restaurant in restaurants %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100" style="transition: all 0.2s ease-in-out;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(253,121,121,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div style="flex: 1;">
+                                        <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 0.5rem;">{{ restaurant.name }}</h5>
+                                        <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.25rem;">
+                                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i>
+                                            {{ restaurant.address|truncatewords:5 }}
+                                        </p>
+                                        <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.75rem;">
+                                            {{ restaurant.city }}, {{ restaurant.state }}
+                                        </p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="background: #FD7979; color: #FFFFFF; padding: 0.5rem 0.75rem; border-radius: 8px; font-weight: 600; margin-bottom: 0.5rem;">
+                                            <i class="fas fa-star"></i> {{ restaurant.rating|floatformat:1 }}
+                                        </div>
+                                    </div>
                                 </div>
-                                ${phone ? `<p class="mb-1">${phone}</p>` : ''}
+
+                                <!-- Distance Badge - Prominent -->
+                                <div class="mb-3">
+                                    <span style="background: linear-gradient(135deg, #FEEAC9 0%, #FFCDC9 100%); color: #FD7979; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center;">
+                                        <i class="fas fa-route" style="margin-right: 0.5rem;"></i>
+                                        {{ restaurant.distance|floatformat:1 }} miles away
+                                    </span>
+                                    {% if restaurant.price_range %}
+                                        <span style="background: #FAFAFA; color: #636E72; padding: 0.5rem 0.75rem; border-radius: 8px; font-weight: 600; margin-left: 0.5rem;">
+                                            {{ restaurant.price_range }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Cuisines -->
+                                {% if restaurant.cuisines.all %}
+                                    <div class="mb-3">
+                                        {% for cuisine in restaurant.cuisines.all|slice:":3" %}
+                                            <span style="background: #FAFAFA; color: #636E72; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.75rem; margin-right: 0.25rem;">
+                                                {{ cuisine.emoji }} {{ cuisine.name }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Actions -->
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'dishes:restaurant_detail' restaurant.id %}" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-eye"></i> View Menu
+                                    </a>
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ restaurant.address|urlencode }}+{{ restaurant.city|urlencode }}" target="_blank" class="btn btn-outline-primary">
+                                        <i class="fas fa-directions"></i>
+                                    </a>
+                                    {% if user.is_authenticated %}
+                                        {% if restaurant.id in favorite_ids %}
+                                            <a href="{% url 'swipes:remove_favorite_restaurant_by_id' restaurant.id %}" class="btn" style="background: #FEEAC9; color: #FD7979;">
+                                                <i class="fas fa-heart"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'swipes:add_favorite_restaurant' restaurant.id %}" class="btn btn-outline-primary">
+                                                <i class="far fa-heart"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-
-                        <div class="mt-2">
-                            ${restaurant.website ? `
-                                <a href="${restaurant.website}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    🌐 Website
-                                </a>
-                            ` : ''}
-                            ${restaurant.data_id ? `
-                                <button onclick="showPlaceDetails('${restaurant.data_id}')" class="btn btn-sm btn-outline-info">
-                                    ℹ️ Details
-                                </button>
-                                <button onclick="showReviews('${restaurant.data_id}', '${restaurant.name.replace(/'/g, "\\'")}')  " class="btn btn-sm btn-outline-success">
-                                    💬 Reviews
-                                </button>
-                                <button onclick="getDirections('${restaurant.address.replace(/'/g, "\\'")}')  " class="btn btn-sm btn-outline-warning">
-                                    🚗 Directions
-                                </button>
-                            ` : ''}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body text-center p-5">
+                            <div style="width: 80px; height: 80px; background: #FEEAC9; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-store-slash" style="color: #FD7979; font-size: 2rem;"></i>
+                            </div>
+                            <h4 style="color: #2D3436; font-weight: 600;">No Restaurants Found</h4>
+                            <p style="color: #636E72; margin-bottom: 1rem;">Try increasing your search distance or adjusting filters</p>
+                            <a href="{% url 'dishes:nearby_restaurants' %}?distance=50" class="btn btn-primary">
+                                <i class="fas fa-search-plus"></i> Expand Search to 50 Miles
+                            </a>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
-    });
-
-    html += `
-                </div>
-            </div>
+            {% endif %}
         </div>
-    `;
-
-    container.innerHTML = html;
-}
-
-// Show place details
-function showPlaceDetails(dataId) {
-    const modal = new bootstrap.Modal(document.getElementById('placeDetailsModal'));
-    modal.show();
-
-    const csrftoken = getCSRFToken();
-
-    fetch('{% url "dishes:api_place_details" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify({ data_id: dataId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.place) {
-            displayPlaceDetails(data.place);
-        } else {
-            document.getElementById('placeDetailsBody').innerHTML = '<p class="text-danger">Failed to load details.</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('placeDetailsBody').innerHTML = '<p class="text-danger">Error loading details.</p>';
-    });
-}
-
-function displayPlaceDetails(place) {
-    document.getElementById('placeDetailsTitle').textContent = place.title || 'Restaurant Details';
-
-    let html = `
-        ${place.photos && place.photos.length > 0 ? `
-            <div class="mb-3">
-                <img src="${place.photos[0]}" class="img-fluid rounded" alt="${place.title}">
-            </div>
-        ` : ''}
-
-        <p><strong>Address:</strong> ${place.address || 'N/A'}</p>
-        <p><strong>Phone:</strong> ${place.phone || 'N/A'}</p>
-        <p><strong>Rating:</strong> ${place.rating ? '⭐'.repeat(Math.round(place.rating)) + ` ${place.rating}` : 'N/A'}</p>
-        <p><strong>Price:</strong> ${place.price || 'N/A'}</p>
-
-        ${place.hours ? `
-            <div class="mb-3">
-                <strong>Hours:</strong>
-                <ul class="list-unstyled">
-                    ${place.hours.map(h => `<li>${h}</li>`).join('')}
-                </ul>
-            </div>
-        ` : ''}
-
-        ${place.service_options ? `
-            <div class="mb-3">
-                <strong>Service Options:</strong>
-                <p>${Object.entries(place.service_options).map(([k, v]) => `${k}: ${v}`).join(', ')}</p>
-            </div>
-        ` : ''}
-    `;
-
-    document.getElementById('placeDetailsBody').innerHTML = html;
-}
-
-// Show reviews
-function showReviews(dataId, restaurantName) {
-    const modal = new bootstrap.Modal(document.getElementById('reviewsModal'));
-    document.getElementById('reviewsTitle').textContent = `Reviews - ${restaurantName}`;
-    modal.show();
-
-    const csrftoken = getCSRFToken();
-
-    fetch('{% url "dishes:api_place_reviews" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify({
-            data_id: dataId,
-            num_reviews: 10
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.reviews) {
-            displayReviews(data.reviews);
-        } else {
-            document.getElementById('reviewsBody').innerHTML = '<p class="text-warning">No reviews available.</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('reviewsBody').innerHTML = '<p class="text-danger">Error loading reviews.</p>';
-    });
-}
-
-function displayReviews(reviews) {
-    let html = '';
-
-    if (reviews.length === 0) {
-        html = '<p>No reviews available.</p>';
-    } else {
-        reviews.forEach(review => {
-            html += `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h6>${review.user?.name || 'Anonymous'}</h6>
-                            <small class="text-muted">${review.date || ''}</small>
-                        </div>
-                        <div class="mb-2">
-                            ${'⭐'.repeat(review.rating || 0)}
-                        </div>
-                        <p>${review.snippet || review.text || ''}</p>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    document.getElementById('reviewsBody').innerHTML = html;
-}
-
-// Get directions
-function getDirections(endAddress) {
-    if (!userLocation) {
-        alert('Please set your location first!');
-        return;
-    }
-
-    const startAddr = `${userLocation.latitude},${userLocation.longitude}`;
-
-    // Open Google Maps in new tab
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startAddr}&destination=${encodeURIComponent(endAddress)}`;
-    window.open(mapsUrl, '_blank');
-}
-
-// Debug: Log when page loads
-console.log('✅ Page loaded successfully');
-console.log('🌐 Protocol:', location.protocol);
-console.log('🖥️ Hostname:', location.hostname);
-console.log('🔒 CSRF Token available:', !!getCSRFToken());
-console.log('📍 Geolocation supported:', !!navigator.geolocation);
-</script>
+    {% endif %}
+</div>
 {% endblock %}

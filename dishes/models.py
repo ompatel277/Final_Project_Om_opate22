@@ -77,7 +77,7 @@ class Dish(models.Model):
         """Return image or placeholder"""
         if self.image:
             return self.image.url
-        elif self.image_url:
+        if self.image_url:
             return self.image_url
         return '/static/images/placeholder-dish.jpg'
 
@@ -123,7 +123,7 @@ class Restaurant(models.Model):
     )
     total_reviews = models.IntegerField(default=0)
 
-    # Delivery Options
+    # Delivery Options (optional feature – keep only if you use it in templates)
     has_uber_eats = models.BooleanField(default=False)
     has_doordash = models.BooleanField(default=False)
     has_grubhub = models.BooleanField(default=False)
@@ -133,6 +133,13 @@ class Restaurant(models.Model):
 
     # External IDs
     google_place_id = models.CharField(max_length=200, blank=True, unique=True, null=True)
+
+    # ✅ NEW: store SerpApi/Google Maps identifiers and photo URL
+    # data_id lets you call get_place_details() / get_place_reviews()
+    data_id = models.CharField(max_length=255, blank=True, default="")
+    # thumbnail is a ready-to-render image URL from local_results
+    thumbnail = models.URLField(max_length=500, blank=True, default="")
+
     yelp_id = models.CharField(max_length=200, blank=True)
 
     # Metadata
@@ -169,8 +176,8 @@ class RestaurantDish(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='restaurant_dishes')
     dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='dish_restaurants')
 
-    # Pricing
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    # ✅ NEW: default price so you can populate relationships even without exact menu pricing
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     # Availability
     is_available = models.BooleanField(default=True)
@@ -201,4 +208,3 @@ class DishIngredient(models.Model):
 
     class Meta:
         ordering = ['name']
-

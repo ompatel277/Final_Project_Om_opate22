@@ -14,19 +14,15 @@ class GoogleMapsService:
     def __init__(self):
         self.api_key = settings.SERPAPI_KEY
 
+    # ---------------------------
+    # SEARCH (FAST LIST PAGE)
+    # ---------------------------
     def search_restaurants(self, query, latitude, longitude, zoom=14, num_results=20):
         """
         Search for restaurants using Google Maps
 
-        Args:
-            query (str): Search query (e.g., "Pizza restaurants", "Sushi")
-            latitude (float): Latitude coordinate
-            longitude (float): Longitude coordinate
-            zoom (int): Map zoom level (default: 14)
-            num_results (int): Maximum number of results to return
-
         Returns:
-            list: List of restaurant data dictionaries
+            list: List of restaurant data dictionaries from SerpApi local_results
         """
         if not self.api_key:
             logger.error("SERPAPI_KEY not configured in settings")
@@ -44,45 +40,40 @@ class GoogleMapsService:
             search = GoogleSearch(params)
             results = search.get_dict()
 
-            if "local_results" in results:
-                return results["local_results"][:num_results]
-            else:
+            local_results = results.get("local_results", [])
+            if not local_results:
                 logger.warning(f"No restaurants found for query: {query}")
                 return []
+
+            return local_results[:num_results]
 
         except Exception as e:
             logger.error(f"Error searching restaurants for '{query}': {str(e)}")
             return []
 
     def search_restaurants_by_dish(self, dish_name, latitude, longitude, zoom=14, num_results=10):
-        """
-        Find restaurants that serve a specific dish
-
-        Args:
-            dish_name (str): Name of the dish
-            latitude (float): Latitude coordinate
-            longitude (float): Longitude coordinate
-            zoom (int): Map zoom level (default: 14)
-            num_results (int): Maximum number of results
-
-        Returns:
-            list: List of restaurant data
-        """
+        """Find restaurants that serve a specific dish"""
         query = f"{dish_name} restaurant"
         return self.search_restaurants(query, latitude, longitude, zoom, num_results)
 
+    # ---------------------------
+    # DETAILS (ONLY WHEN NEEDED)
+    # ---------------------------
     def get_place_details(self, data_id):
         """
-        Get detailed information about a specific place
+        Get detailed information about a specific place (SerpApi "place" type).
 
         Args:
-            data_id (str): Google Maps data ID (e.g., "0x89c259a61c75684f:0x79d31adb123348d2")
+            data_id (str): Google Maps data_id from local_results
 
         Returns:
-            dict: Place details or None
+            dict: place_results or None
         """
         if not self.api_key:
             logger.error("SERPAPI_KEY not configured in settings")
+            return None
+
+        if not data_id:
             return None
 
         try:
@@ -104,18 +95,18 @@ class GoogleMapsService:
 
     def get_place_reviews(self, data_id, language="en", num_reviews=10):
         """
-        Get reviews for a specific place
+        Get reviews for a specific place.
 
         Args:
-            data_id (str): Google Maps data ID
-            language (str): Language code (default: "en")
-            num_reviews (int): Number of reviews to fetch
-
+            data_id (str): Google Maps data_id
         Returns:
-            list: List of reviews or empty list
+            list: review dicts
         """
         if not self.api_key:
             logger.error("SERPAPI_KEY not configured in settings")
+            return []
+
+        if not data_id:
             return []
 
         try:
@@ -136,18 +127,23 @@ class GoogleMapsService:
             logger.error(f"Error fetching reviews for {data_id}: {str(e)}")
             return []
 
-    def get_directions(self, start_addr, end_addr, travel_mode="driving"):
+    def get_details_and_reviews(self, data_id, language="en", num_reviews=10):
         """
-        Get directions from start to end address
-
-        Args:
-            start_addr (str): Starting address or coordinates
-            end_addr (str): Ending address or coordinates
-            travel_mode (str): Mode of travel (driving, walking, bicycling, transit)
+        Convenience helper for detail pages.
+        Fetches place details + reviews in one call chain.
 
         Returns:
-            dict: Directions data or None
+            tuple: (place_details_dict_or_None, reviews_list)
         """
+        details = self.get_place_details(data_id)
+        reviews = self.get_place_reviews(data_id, language=language, num_reviews=num_reviews)
+        return details, reviews
+
+    # ---------------------------
+    # DIRECTIONS
+    # ---------------------------
+    def get_directions(self, start_addr, end_addr, travel_mode="driving"):
+        """Get directions from start to end address"""
         if not self.api_key:
             logger.error("SERPAPI_KEY not configured in settings")
             return None
@@ -169,22 +165,17 @@ class GoogleMapsService:
             logger.error(f"Error getting directions: {str(e)}")
             return None
 
+    # ---------------------------
+    # PARSING
+    # ---------------------------
     def parse_restaurant_data(self, restaurant_data):
-        """
-        Parse raw Google Maps data into a clean dictionary
-
-        Args:
-            restaurant_data (dict): Raw restaurant data from Google Maps
-
-        Returns:
-            dict: Cleaned restaurant data
-        """
+        """Parse raw local_results restaurant data into a clean dictionary"""
         return {
             'name': restaurant_data.get('title'),
             'address': restaurant_data.get('address'),
             'phone': restaurant_data.get('phone'),
             'rating': restaurant_data.get('rating'),
-            'reviews': restaurant_data.get('reviews'),
+            'reviews': restaurant_data.get('reviews'),  # this is usually COUNT, not review text
             'price_range': restaurant_data.get('price'),
             'latitude': restaurant_data.get('gps_coordinates', {}).get('latitude'),
             'longitude': restaurant_data.get('gps_coordinates', {}).get('longitude'),
@@ -197,47 +188,101 @@ class GoogleMapsService:
             'service_options': restaurant_data.get('service_options', {}),
         }
 
+    # ---------------------------
+    # DATABASE SAVE (STORE IDS + PHOTO)
+    # ---------------------------
     def save_restaurant_to_db(self, restaurant_data, dish=None):
         """
-        Save restaurant to database
-
-        Args:
-            restaurant_data (dict): Raw restaurant data
-            dish (Dish): Optional dish to associate with
-
-        Returns:
-            Restaurant: Created or updated restaurant
+        Save restaurant to database.
+        IMPORTANT: stores data_id + thumbnail so detail page can fetch reviews/details and show photo.
         """
         from .models import Restaurant, RestaurantDish
 
-        parsed = self.parse_restaurant_data(restaurant_data)
+        # Check if data is already parsed or raw
+        if isinstance(restaurant_data, dict) and 'title' in restaurant_data:
+            parsed = self.parse_restaurant_data(restaurant_data)
+        else:
+            parsed = restaurant_data or {}
+
+        # Skip if no google_place_id (required for uniqueness)
+        if not parsed.get('google_place_id'):
+            logger.warning(f"Skipping restaurant {parsed.get('name')} - no google_place_id")
+            return None
+
+        # Parse city/state/zip from address
+        city, state, zip_code = self._parse_address_parts(parsed.get('address', ''))
 
         # Create or update restaurant
-        restaurant, created = Restaurant.objects.update_or_create(
-            google_place_id=parsed['google_place_id'],
-            defaults={
-                'name': parsed['name'],
-                'address': parsed['address'] or '',
-                'phone': parsed['phone'] or '',
-                'website': parsed['website'] or '',
-                'latitude': parsed['latitude'],
-                'longitude': parsed['longitude'],
-                'rating': parsed['rating'] or 0,
-                'total_reviews': parsed['reviews'] or 0,
-                'price_range': self._parse_price_range(parsed['price_range']),
-                'is_active': True,
-            }
-        )
+        try:
+            restaurant, created = Restaurant.objects.update_or_create(
+                google_place_id=parsed['google_place_id'],
+                defaults={
+                    'name': parsed.get('name') or 'Unknown Restaurant',
+                    'address': parsed.get('address') or '',
+                    'city': city,
+                    'state': state,
+                    'zip_code': zip_code,
+                    'phone': parsed.get('phone') or '',
+                    'website': parsed.get('website') or '',
+                    'latitude': parsed.get('latitude'),
+                    'longitude': parsed.get('longitude'),
+                    'rating': parsed.get('rating') or 0,
+                    'total_reviews': parsed.get('reviews') or 0,
+                    'price_range': self._parse_price_range(parsed.get('price_range')),
+                    'is_active': True,
 
-        # Associate with dish if provided
-        if dish and restaurant:
-            RestaurantDish.objects.get_or_create(
-                restaurant=restaurant,
-                dish=dish,
-                defaults={'is_available': True}
+                    # ✅ NEW: persist identifiers and photo for later detail-page hydration
+                    'data_id': parsed.get('data_id') or '',
+                    'thumbnail': parsed.get('thumbnail') or '',
+                }
             )
 
-        return restaurant
+            # Associate with dish if provided
+            if dish and restaurant:
+                RestaurantDish.objects.get_or_create(
+                    restaurant=restaurant,
+                    dish=dish,
+                    defaults={'is_available': True, 'price': 0}
+                )
+
+            return restaurant
+
+        except Exception as e:
+            logger.error(f"Error saving restaurant {parsed.get('name')}: {str(e)}")
+            return None
+
+    # ---------------------------
+    # HELPERS
+    # ---------------------------
+    def _parse_address_parts(self, address):
+        """Parse city, state, and zip from a full address string"""
+        if not address:
+            return ('Unknown', 'Unknown', '')
+
+        import re
+
+        state_zip_pattern = r',\s*([A-Za-z\s]+),\s*([A-Z]{2})\s*(\d{5})?'
+        match = re.search(state_zip_pattern, address)
+
+        if match:
+            city = match.group(1).strip()
+            state = match.group(2).strip()
+            zip_code = match.group(3) or ''
+            return (city, state, zip_code)
+
+        parts = address.split(',')
+        if len(parts) >= 3:
+            city = parts[-2].strip()
+            last_part = parts[-1].strip()
+            state_match = re.match(r'([A-Z]{2})', last_part)
+            state = state_match.group(1) if state_match else last_part[:20]
+            zip_match = re.search(r'(\d{5})', last_part)
+            zip_code = zip_match.group(1) if zip_match else ''
+            return (city[:100], state[:50], zip_code)
+        elif len(parts) == 2:
+            return (parts[0].strip()[:100], parts[1].strip()[:50], '')
+        else:
+            return (address[:100], 'Unknown', '')
 
     def _parse_price_range(self, price_str):
         """Convert price string ($, $$, $$$, $$$$) to choice"""

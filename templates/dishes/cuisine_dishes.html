@@ -5,49 +5,217 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-4 fw-bold text-tinder mb-3">
-                {{ cuisine.emoji }} {{ cuisine.name }} Cuisine
-            </h1>
-            {% if cuisine.description %}
-                <p class="lead text-muted">{{ cuisine.description }}</p>
-            {% endif %}
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="{% url 'dishes:dish_list' %}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to All Dishes
+        </a>
+    </div>
+
+    <!-- Cuisine Header -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%); border: none;">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center">
+                <div style="width: 80px; height: 80px; background: #FFFFFF; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 1.5rem;">
+                    <span style="font-size: 3rem;">{{ cuisine.emoji }}</span>
+                </div>
+                <div>
+                    <h1 style="color: #FFFFFF; font-weight: 700; margin-bottom: 0.25rem;">{{ cuisine.name }} Cuisine</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin: 0;">
+                        Explore {{ dishes.count }} delicious {{ cuisine.name }} dishes
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Dishes -->
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET">
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Meal Type</label>
+                        <select name="meal_type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="breakfast" {% if selected_meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                            <option value="lunch" {% if selected_meal_type == 'lunch' %}selected{% endif %}>Lunch</option>
+                            <option value="dinner" {% if selected_meal_type == 'dinner' %}selected{% endif %}>Dinner</option>
+                            <option value="snack" {% if selected_meal_type == 'snack' %}selected{% endif %}>Snack</option>
+                            <option value="dessert" {% if selected_meal_type == 'dessert' %}selected{% endif %}>Dessert</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Diet</label>
+                        <select name="diet" class="form-select">
+                            <option value="">All Diets</option>
+                            <option value="vegetarian" {% if selected_diet == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                            <option value="vegan" {% if selected_diet == 'vegan' %}selected{% endif %}>Vegan</option>
+                            <option value="gluten_free" {% if selected_diet == 'gluten_free' %}selected{% endif %}>Gluten Free</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Sort By</label>
+                        <select name="sort" class="form-select">
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name</option>
+                            <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Rating</option>
+                            <option value="calories" {% if sort == 'calories' %}selected{% endif %}>Calories (Low to High)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p style="color: #636E72; margin: 0;">
+            Showing <strong style="color: #FD7979;">{{ dishes.count }}</strong> {{ cuisine.name }} dishes
+        </p>
+        <a href="{% url 'swipes:swipe_feed' %}?cuisine={{ cuisine.id }}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-fire"></i> Swipe {{ cuisine.name }} Dishes
+        </a>
+    </div>
+
+    <!-- Dishes Grid -->
     <div class="row">
         {% if dishes %}
             {% for dish in dishes %}
                 <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 250px; object-fit: cover;">
+                    <div class="card h-100" style="transition: all 0.2s ease-in-out; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(253,121,121,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';">
+                        <div style="position: relative;">
+                            <img src="{{ dish.display_image }}" class="card-img-top" alt="{{ dish.name }}" style="height: 200px; object-fit: cover;">
+
+                            <!-- Rating Badge -->
+                            <div style="position: absolute; top: 10px; right: 10px; background: #FD7979; color: #FFFFFF; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600;">
+                                <i class="fas fa-star"></i> {{ dish.average_rating|floatformat:1 }}
+                            </div>
+
+                            <!-- Diet Badges -->
+                            {% if dish.is_vegetarian %}
+                                <div style="position: absolute; top: 10px; left: 10px; background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
+                                    <i class="fas fa-leaf"></i> Veg
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <div class="card-body">
-                            <h5 class="card-title">{{ dish.name }}</h5>
-                            <p class="card-text">{{ dish.description|truncatewords:15 }}</p>
-                            <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary w-100">
-                                View Details
-                            </a>
+                            <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 0.5rem;">{{ dish.name }}</h5>
+
+                            <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                {{ cuisine.emoji }} {{ cuisine.name }}
+                                {% if dish.meal_type %}
+                                    <span style="color: #FDACAC;">•</span> {{ dish.get_meal_type_display }}
+                                {% endif %}
+                            </p>
+
+                            <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 1rem;">
+                                {{ dish.description|truncatewords:12 }}
+                            </p>
+
+                            <!-- Nutrition Tags -->
+                            <div class="mb-3">
+                                {% if dish.calories %}
+                                    <span style="background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: 500; margin-right: 0.25rem;">
+                                        <i class="fas fa-fire-alt"></i> {{ dish.calories }} cal
+                                    </span>
+                                {% endif %}
+                                {% if dish.protein %}
+                                    <span style="background: #FFCDC9; color: #FD7979; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                                        <i class="fas fa-drumstick-bite"></i> {{ dish.protein }}g
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if user.is_authenticated %}
+                                    <a href="{% url 'swipes:add_favorite' dish.id %}" class="btn btn-outline-primary">
+                                        <i class="far fa-heart"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         {% else %}
             <div class="col-md-12">
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle"></i> No dishes available for this cuisine yet.
+                <div class="card">
+                    <div class="card-body text-center p-5">
+                        <div style="width: 80px; height: 80px; background: #FEEAC9; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 2.5rem;">{{ cuisine.emoji }}</span>
+                        </div>
+                        <h4 style="color: #2D3436; font-weight: 600;">No Dishes Found</h4>
+                        <p style="color: #636E72; margin-bottom: 1rem;">Try adjusting your filters to see more {{ cuisine.name }} dishes</p>
+                        <a href="{% url 'dishes:cuisine_dishes' cuisine.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-redo"></i> Clear Filters
+                        </a>
+                    </div>
                 </div>
             </div>
         {% endif %}
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <a href="{% url 'dishes:dish_list' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to All Dishes
-            </a>
+    <!-- Pagination -->
+    {% if dishes.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if dishes.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ dishes.previous_page_number }}" style="color: #FD7979; border-color: #E9ECEF;">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in dishes.paginator.page_range %}
+                    {% if dishes.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link" style="background: #FD7979; border-color: #FD7979;">{{ num }}</span>
+                        </li>
+                    {% elif num > dishes.number|add:'-3' and num < dishes.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}" style="color: #FD7979; border-color: #E9ECEF;">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if dishes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ dishes.next_page_number }}" style="color: #FD7979; border-color: #E9ECEF;">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <!-- Related Cuisines -->
+    {% if related_cuisines %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                    <i class="fas fa-globe" style="color: #FD7979;"></i> Explore Other Cuisines
+                </h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for related in related_cuisines %}
+                        <a href="{% url 'dishes:cuisine_dishes' related.id %}" class="btn" style="background: #FAFAFA; color: #636E72; border: 1px solid #E9ECEF; transition: all 0.2s;" onmouseover="this.style.background='#FEEAC9'; this.style.color='#FD7979'; this.style.borderColor='#FEEAC9';" onmouseout="this.style.background='#FAFAFA'; this.style.color='#636E72'; this.style.borderColor='#E9ECEF';">
+                            {{ related.emoji }} {{ related.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 {% endblock %}

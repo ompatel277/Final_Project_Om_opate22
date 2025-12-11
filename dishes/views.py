@@ -9,112 +9,22 @@ from .maps_service import GoogleMapsService
 
 
 def dish_list_view(request):
-    """Browse all dishes"""
-    dishes = Dish.objects.filter(is_active=True).select_related('cuisine')
-
-    # Filters
-    cuisine_filter = request.GET.get('cuisine')
-    meal_type_filter = request.GET.get('meal_type')
-    dietary_filter = request.GET.get('dietary')
-
-    if cuisine_filter:
-        dishes = dishes.filter(cuisine__id=cuisine_filter)
-
-    if meal_type_filter:
-        dishes = dishes.filter(meal_type=meal_type_filter)
-
-    if dietary_filter:
-        if dietary_filter == 'vegetarian':
-            dishes = dishes.filter(is_vegetarian=True)
-        elif dietary_filter == 'vegan':
-            dishes = dishes.filter(is_vegan=True)
-        elif dietary_filter == 'gluten_free':
-            dishes = dishes.filter(is_gluten_free=True)
-
-    cuisines = Cuisine.objects.all()
-
-    context = {
-        'dishes': dishes,
-        'cuisines': cuisines,
-    }
-    return render(request, 'dishes/dish_list.html', context)
-
-
-def dish_detail_view(request, dish_id):
-    """View single dish details with LIVE local restaurants"""
-    dish = get_object_or_404(Dish, id=dish_id, is_active=True)
-
-    user_location = get_user_location_from_request(request)
-    local_restaurants = []
-
-    # ✅ FETCH REAL LOCAL RESTAURANTS SERVING THIS DISH
-    if user_location:
-        maps_service = GoogleMapsService()
-
-        # Search for restaurants serving this specific dish
-        restaurants_data = maps_service.search_restaurants_by_dish(
-            dish_name=dish.name,
-            latitude=user_location['latitude'],
-            longitude=user_location['longitude'],
-            zoom=14,
-            num_results=20
-        )
-
-        # Parse and add distance
-        for restaurant_data in restaurants_data:
-            parsed = maps_service.parse_restaurant_data(restaurant_data)
-
-            if parsed['latitude'] and parsed['longitude']:
-                parsed['distance'] = haversine_distance(
-                    user_location['latitude'],
-                    user_location['longitude'],
-                    parsed['latitude'],
-                    parsed['longitude']
-                )
-                local_restaurants.append(parsed)
-
-        # Sort by distance
-        local_restaurants.sort(key=lambda x: x.get('distance', 999))
-
-    # Get ingredients
-    ingredients = dish.ingredients.all()
-    allergens = ingredients.filter(is_allergen=True)
-
-    # Check if user favorited this dish
-    is_favorited = False
-    if request.user.is_authenticated:
-        from swipes.models import Favorite
-        is_favorited = Favorite.objects.filter(user=request.user, dish=dish).exists()
-
-    context = {
-        'dish': dish,
-        'local_restaurants': local_restaurants,  # LIVE API DATA
-        'ingredients': ingredients,
-        'allergens': allergens,
-        'has_location': user_location is not None,
-        'user_location': user_location,
-        'is_favorited': is_favorited,
-    }
-    return render(request, 'dishes/dish_detail.html', context)
-
-
-def restaurant_list_view(request):
-    """Browse restaurants - LIVE API DATA from Google Maps"""
+    """
+        Browse restaurants - HYBRID APPROACH
+        Fetches from Google Maps API and saves to database for full functionality
+        """
     user_location = get_user_location_from_request(request)
     has_location = user_location is not None
-
     restaurants = []
-    api_restaurants = []
 
     # Get filters
     cuisine_filter = request.GET.get('cuisine')
     price_filter = request.GET.get('price')
-    use_live_data = request.GET.get('live', 'true').lower() == 'true'
-
-    if has_location and use_live_data:
+    if has_location:
         maps_service = GoogleMapsService()
 
         # Build search query based on filters
+
         query = "restaurants"
         if cuisine_filter:
             try:
@@ -132,64 +42,49 @@ def restaurant_list_view(request):
             num_results=30
         )
 
-        # Parse and filter API results
+        # HYBRID: Save API restaurants to database and collect database objects
         for restaurant_data in api_restaurants:
-            parsed = maps_service.parse_restaurant_data(restaurant_data)
 
-            # Apply price filter if specified
-            if price_filter and parsed['price_range'] != price_filter:
-                continue
+            # Save to database (returns database object with ID)
+            db_restaurant = maps_service.save_restaurant_to_db(restaurant_data)
+            if db_restaurant:
 
-            # Add distance calculation
-            if parsed['latitude'] and parsed['longitude']:
-                parsed['distance'] = haversine_distance(
-                    user_location['latitude'],
-                    user_location['longitude'],
-                    parsed['latitude'],
-                    parsed['longitude']
-                )
-            else:
-                parsed['distance'] = None
+                # Apply price filter if specified
+                if price_filter and db_restaurant.price_range != price_filter:
+                    continue
 
-            restaurants.append(parsed)
+                # Add distance calculation
+                if db_restaurant.latitude and db_restaurant.longitude:
+                    db_restaurant.distance = haversine_distance(
+                        user_location['latitude'],
+                        user_location['longitude'],
+                        db_restaurant.latitude,
+                        db_restaurant.longitude
+                    )
+                else:
+                    db_restaurant.distance = None
+                restaurants.append(db_restaurant)
 
         # Sort by distance
         restaurants = sorted(
-            [r for r in restaurants if r['distance'] is not None],
-            key=lambda x: x['distance']
+            [r for r in restaurants if r.distance is not None],
+            key=lambda x: x.distance
         )
     else:
-        # Fallback to database restaurants
+        # No location - show database restaurants
         db_restaurants = Restaurant.objects.filter(is_active=True)
-
         if cuisine_filter:
             db_restaurants = db_restaurants.filter(cuisine_type__id=cuisine_filter)
-
         if price_filter:
             db_restaurants = db_restaurants.filter(price_range=price_filter)
-
-        if user_location:
-            max_distance = request.user.profile.max_distance_miles if request.user.is_authenticated else 50
-            restaurants = filter_nearby_restaurants(
-                db_restaurants,
-                user_location['latitude'],
-                user_location['longitude'],
-                max_distance
-            )
-        else:
-            restaurants = list(db_restaurants)
+        restaurants = list(db_restaurants)
 
     # Get filter options
-    cities = Restaurant.objects.filter(is_active=True).values_list('city', flat=True).distinct()
     cuisines = Cuisine.objects.all()
-
     context = {
         'restaurants': restaurants,
-        'api_restaurants': api_restaurants,
-        'cities': cities,
         'cuisines': cuisines,
         'has_location': has_location,
-        'using_live_data': use_live_data and has_location,
         'user_location': user_location,
     }
     return render(request, 'dishes/restaurant_list.html', context)
@@ -261,8 +156,91 @@ def search_view(request):
 
 
 def nearby_restaurants(request):
-    """Display page to find nearby restaurants"""
-    return render(request, 'dishes/nearby_restaurants.html')
+    """
+
+        Display nearby restaurants - HYBRID APPROACH
+        Fetches from Google Maps API and saves to database
+        """
+    user_location = get_user_location_from_request(request)
+    has_location = user_location is not None
+    restaurants = []
+
+    # Get filters
+    distance_filter = request.GET.get('distance', '10')
+    price_filter = request.GET.get('price')
+    rating_filter = request.GET.get('rating')
+    try:
+        max_distance = float(distance_filter)
+    except (ValueError, TypeError):
+        max_distance = 10
+    if has_location:
+        maps_service = GoogleMapsService()
+
+        # Fetch real restaurants from Google Maps
+        api_restaurants = maps_service.search_restaurants(
+            query="restaurants",
+            latitude=user_location['latitude'],
+            longitude=user_location['longitude'],
+            zoom=14,
+            num_results=40
+        )
+
+        # HYBRID: Save API restaurants to database and collect database objects
+        for restaurant_data in api_restaurants:
+            db_restaurant = maps_service.save_restaurant_to_db(restaurant_data)
+            if db_restaurant:
+
+                # Calculate distance
+                if db_restaurant.latitude and db_restaurant.longitude:
+                    db_restaurant.distance = haversine_distance(
+                        user_location['latitude'],
+                        user_location['longitude'],
+                        db_restaurant.latitude,
+                        db_restaurant.longitude
+                    )
+
+                    # Apply distance filter
+                    if db_restaurant.distance > max_distance:
+                        continue
+                else:
+                    continue
+
+                # Apply price filter
+                if price_filter and db_restaurant.price_range != price_filter:
+                    continue
+
+                # Apply rating filter
+                if rating_filter:
+                    try:
+                        min_rating = float(rating_filter)
+                        if db_restaurant.rating < min_rating:
+                            continue
+                    except (ValueError, TypeError):
+                        pass
+                restaurants.append(db_restaurant)
+
+        # Sort by distance
+        restaurants = sorted(restaurants, key=lambda x: x.distance)
+
+    # Get favorite restaurant IDs for logged-in user
+    favorite_ids = []
+    if request.user.is_authenticated:
+        from swipes.models import FavoriteRestaurant
+        favorite_ids = list(
+            FavoriteRestaurant.objects.filter(user=request.user)
+            .values_list('restaurant_id', flat=True)
+        )
+
+    context = {
+        'restaurants': restaurants,
+        'has_location': has_location,
+        'user_location': user_location,
+        'selected_distance': distance_filter,
+        'selected_price': price_filter,
+        'selected_rating': rating_filter,
+        'favorite_ids': favorite_ids,
+    }
+    return render(request, 'dishes/nearby_restaurants.html', context)
 
 
 @login_required

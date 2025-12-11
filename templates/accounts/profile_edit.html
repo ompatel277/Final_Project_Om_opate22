@@ -7,144 +7,199 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <h2 class="mb-4">Edit Profile</h2>
-
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        <h5 class="mb-3">Basic Information</h5>
-                        <hr>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">First Name</label>
-                                {{ user_form.first_name }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Last Name</label>
-                                {{ user_form.last_name }}
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            {{ user_form.email }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">City</label>
-                            {{ profile_form.city }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Bio</label>
-                            {{ profile_form.bio }}
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Profile Picture</label>
-                            {{ profile_form.profile_picture }}
-                        </div>
-
-                        <h5 class="mb-3 mt-4">Dietary Preferences</h5>
-                        <hr>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Diet Type</label>
-                                {{ profile_form.diet_type }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Preferred Delivery App</label>
-                                {{ profile_form.preferred_delivery_app }}
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Allergies</label>
-                            {{ profile_form.allergies }}
-                            <small class="form-text text-muted">Comma-separated (e.g., peanuts, shellfish, dairy)</small>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Favorite Cuisines</label>
-                            {{ profile_form.favorite_cuisines }}
-                            <small class="form-text text-muted">Comma-separated (e.g., Italian, Mexican, Chinese)</small>
-                        </div>
-
-                        <h5 class="mb-3 mt-4">Nutrition Goals (Optional)</h5>
-                        <hr>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Daily Calorie Goal</label>
-                                {{ profile_form.daily_calorie_goal }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Protein Goal (g)</label>
-                                {{ profile_form.protein_goal }}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Carbs Goal (g)</label>
-                                {{ profile_form.carbs_goal }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Fat Goal (g)</label>
-                                {{ profile_form.fat_goal }}
-                            </div>
-                        </div>
-
-                        <h5 class="mb-3 mt-4">App Settings</h5>
-                        <hr>
-
-                        <div class="mb-4">
-                            <label class="form-label">Maximum Distance (miles)</label>
-                            {{ profile_form.max_distance_miles }}
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
+            <!-- Header -->
+            <div class="d-flex align-items-center mb-4">
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 style="color: #2D3436; font-weight: 700; margin: 0;">Edit Profile</h2>
+                    <p style="color: #636E72; margin: 0;">Update your account and food preferences</p>
                 </div>
             </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Account Information -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-user-circle" style="color: #FD7979;"></i> Account Information
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label" style="color: #2D3436; font-weight: 500;">First Name</label>
+                                <input type="text" name="first_name" class="form-control" id="first_name" value="{{ user.first_name }}" placeholder="Enter first name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label" style="color: #2D3436; font-weight: 500;">Last Name</label>
+                                <input type="text" name="last_name" class="form-control" id="last_name" value="{{ user.last_name }}" placeholder="Enter last name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label" style="color: #2D3436; font-weight: 500;">Email</label>
+                                <input type="email" name="email" class="form-control" id="email" value="{{ user.email }}" placeholder="Enter email">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="avatar" class="form-label" style="color: #2D3436; font-weight: 500;">Profile Photo</label>
+                                <input type="file" name="avatar" class="form-control" id="avatar" accept="image/*">
+                                {% if profile.avatar %}
+                                    <small style="color: #636E72;">Current: {{ profile.avatar.name }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Food Preferences -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-utensils" style="color: #FD7979;"></i> Food Preferences
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="diet_type" class="form-label" style="color: #2D3436; font-weight: 500;">Diet Type</label>
+                                <select name="diet_type" class="form-select" id="diet_type">
+                                    <option value="">No preference</option>
+                                    <option value="omnivore" {% if profile.diet_type == 'omnivore' %}selected{% endif %}>Omnivore</option>
+                                    <option value="vegetarian" {% if profile.diet_type == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                                    <option value="vegan" {% if profile.diet_type == 'vegan' %}selected{% endif %}>Vegan</option>
+                                    <option value="pescatarian" {% if profile.diet_type == 'pescatarian' %}selected{% endif %}>Pescatarian</option>
+                                    <option value="keto" {% if profile.diet_type == 'keto' %}selected{% endif %}>Keto</option>
+                                    <option value="paleo" {% if profile.diet_type == 'paleo' %}selected{% endif %}>Paleo</option>
+                                    <option value="gluten_free" {% if profile.diet_type == 'gluten_free' %}selected{% endif %}>Gluten Free</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="spice_level" class="form-label" style="color: #2D3436; font-weight: 500;">Spice Preference</label>
+                                <select name="spice_level" class="form-select" id="spice_level">
+                                    <option value="">No preference</option>
+                                    <option value="none" {% if profile.spice_level == 'none' %}selected{% endif %}>No Spice</option>
+                                    <option value="mild" {% if profile.spice_level == 'mild' %}selected{% endif %}>Mild</option>
+                                    <option value="medium" {% if profile.spice_level == 'medium' %}selected{% endif %}>Medium</option>
+                                    <option value="hot" {% if profile.spice_level == 'hot' %}selected{% endif %}>Hot</option>
+                                    <option value="extra_hot" {% if profile.spice_level == 'extra_hot' %}selected{% endif %}>Extra Hot</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label for="allergies" class="form-label" style="color: #2D3436; font-weight: 500;">Allergies</label>
+                                <input type="text" name="allergies" class="form-control" id="allergies" value="{{ profile.allergies }}" placeholder="e.g., Peanuts, Shellfish, Dairy">
+                                <small style="color: #636E72;">Separate multiple allergies with commas</small>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label for="favorite_cuisines" class="form-label" style="color: #2D3436; font-weight: 500;">Favorite Cuisines</label>
+                                <input type="text" name="favorite_cuisines" class="form-control" id="favorite_cuisines" value="{{ profile.favorite_cuisines }}" placeholder="e.g., Italian, Mexican, Japanese">
+                                <small style="color: #636E72;">Separate multiple cuisines with commas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Goals -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-heartbeat" style="color: #FD7979;"></i> Nutrition Goals
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="daily_calorie_goal" class="form-label" style="color: #2D3436; font-weight: 500;">Daily Calorie Goal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #FEEAC9; border: 1px solid #E9ECEF; border-right: none;">
+                                        <i class="fas fa-fire-alt" style="color: #FD7979;"></i>
+                                    </span>
+                                    <input type="number" name="daily_calorie_goal" class="form-control" id="daily_calorie_goal" value="{{ profile.daily_calorie_goal }}" placeholder="e.g., 2000" style="border-left: none;">
+                                    <span class="input-group-text" style="background: #FAFAFA; border: 1px solid #E9ECEF;">kcal</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="protein_goal" class="form-label" style="color: #2D3436; font-weight: 500;">Protein Goal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #FFCDC9; border: 1px solid #E9ECEF; border-right: none;">
+                                        <i class="fas fa-drumstick-bite" style="color: #FD7979;"></i>
+                                    </span>
+                                    <input type="number" name="protein_goal" class="form-control" id="protein_goal" value="{{ profile.protein_goal }}" placeholder="e.g., 150" style="border-left: none;">
+                                    <span class="input-group-text" style="background: #FAFAFA; border: 1px solid #E9ECEF;">g</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="carbs_goal" class="form-label" style="color: #2D3436; font-weight: 500;">Carbs Goal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #FDACAC; border: 1px solid #E9ECEF; border-right: none;">
+                                        <i class="fas fa-bread-slice" style="color: #FFFFFF;"></i>
+                                    </span>
+                                    <input type="number" name="carbs_goal" class="form-control" id="carbs_goal" value="{{ profile.carbs_goal }}" placeholder="e.g., 250" style="border-left: none;">
+                                    <span class="input-group-text" style="background: #FAFAFA; border: 1px solid #E9ECEF;">g</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="fat_goal" class="form-label" style="color: #2D3436; font-weight: 500;">Fat Goal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: #FD7979; border: 1px solid #E9ECEF; border-right: none;">
+                                        <i class="fas fa-cheese" style="color: #FFFFFF;"></i>
+                                    </span>
+                                    <input type="number" name="fat_goal" class="form-control" id="fat_goal" value="{{ profile.fat_goal }}" placeholder="e.g., 65" style="border-left: none;">
+                                    <span class="input-group-text" style="background: #FAFAFA; border: 1px solid #E9ECEF;">g</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Location
+                        </h5>
+
+                        {% if user_location %}
+                            <div class="d-flex align-items-center p-3" style="background: #FAFAFA; border-radius: 8px;">
+                                <div style="width: 40px; height: 40px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                    <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <strong style="color: #2D3436;">{{ user_location.city }}</strong>
+                                    <br>
+                                    <small style="color: #636E72;">{{ user_location.latitude|floatformat:4 }}, {{ user_location.longitude|floatformat:4 }}</small>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#locationModal">
+                                    <i class="fas fa-edit"></i> Change
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="text-center p-3" style="background: #FAFAFA; border-radius: 8px;">
+                                <i class="fas fa-map-marker-alt" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                <p style="color: #636E72; margin-bottom: 1rem;">No location set</p>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#locationModal">
+                                    <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i> Set Location
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<style>
-    input[type="text"],
-    input[type="email"],
-    input[type="number"],
-    select,
-    textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
-</style>
 {% endblock %}

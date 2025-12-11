@@ -5,59 +5,247 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4" style="font-weight: 600;">Welcome, {{ user.first_name }}</h2>
-
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div style="width: 48px; height: 48px; background: #FEEAC9; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-hand-pointer" style="color: #FD7979; font-size: 1.25rem;"></i>
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card" style="background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%); border: none;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 style="color: #FFFFFF; font-weight: 700; margin-bottom: 0.25rem;">
+                                Welcome back, {{ user.first_name|default:user.username }}!
+                            </h2>
+                            <p style="color: rgba(255,255,255,0.9); margin: 0;">Ready to discover something delicious?</p>
+                        </div>
+                        <a href="{% url 'swipes:swipe_feed' %}" class="btn" style="background: #FFFFFF; color: #FD7979; font-weight: 600;">
+                            <i class="fas fa-fire"></i> Start Swiping
+                        </a>
                     </div>
-                    <h3 style="font-weight: 600; margin-bottom: 0.25rem;">{{ total_swipes }}</h3>
-                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Total Swipes</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div style="width: 48px; height: 48px; background: #FFCDC9; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-heart" style="color: #FD7979; font-size: 1.25rem;"></i>
-                    </div>
-                    <h3 style="font-weight: 600; margin-bottom: 0.25rem;">{{ favorites_count }}</h3>
-                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Favorites</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div style="width: 48px; height: 48px; background: #FDACAC; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-star" style="color: #FD7979; font-size: 1.25rem;"></i>
-                    </div>
-                    <h3 style="font-weight: 600; margin-bottom: 0.25rem;">{{ reviews_count }}</h3>
-                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Reviews</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card mt-3">
-        <div class="card-body">
-            <h5 style="font-weight: 600; margin-bottom: 1rem;">Quick Actions</h5>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">
-                    <i class="fas fa-utensils"></i> Start Swiping
-                </a>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-user"></i> View Profile
-                </a>
-                <a href="{% url 'swipes:favorites' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-heart"></i> My Favorites
-                </a>
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 50px; height: 50px; background: #FEEAC9; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-hand-pointer" style="color: #FD7979; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="color: #FD7979; font-weight: 700; margin-bottom: 0;">{{ total_swipes|default:0 }}</h3>
+                    <small style="color: #636E72;">Total Swipes</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 50px; height: 50px; background: #FFCDC9; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-heart" style="color: #FD7979; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="color: #FD7979; font-weight: 700; margin-bottom: 0;">{{ total_matches|default:0 }}</h3>
+                    <small style="color: #636E72;">Matches</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 50px; height: 50px; background: #FDACAC; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-star" style="color: #FD7979; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="color: #FD7979; font-weight: 700; margin-bottom: 0;">{{ total_favorites|default:0 }}</h3>
+                    <small style="color: #636E72;">Favorites</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 50px; height: 50px; background: #FD7979; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-comment" style="color: #FFFFFF; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="color: #FD7979; font-weight: 700; margin-bottom: 0;">{{ total_reviews|default:0 }}</h3>
+                    <small style="color: #636E72;">Reviews</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-bolt" style="color: #FD7979;"></i> Quick Actions
+                    </h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">
+                            <i class="fas fa-fire"></i> Swipe Dishes
+                        </a>
+                        <a href="{% url 'swipes:matches' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-heart"></i> View Matches
+                        </a>
+                        <a href="{% url 'swipes:favorites' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-star"></i> My Favorites
+                        </a>
+                        <a href="{% url 'dishes:nearby_restaurants' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Nearby Restaurants
+                        </a>
+                        <a href="{% url 'recommender:ai_chat' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-robot"></i> AI Assistant
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Status -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Your Location
+                    </h5>
+                    {% if user_location %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 40px; height: 40px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                            </div>
+                            <div>
+                                <strong style="color: #2D3436;">{{ user_location.city }}</strong>
+                                <br>
+                                <small style="color: #636E72;">{{ user_location.latitude|floatformat:4 }}, {{ user_location.longitude|floatformat:4 }}</small>
+                            </div>
+                        </div>
+                        <a href="{% url 'dishes:nearby_restaurants' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-store"></i> Find Nearby Restaurants
+                        </a>
+                    {% else %}
+                        <div style="background: #FEEAC9; border-radius: 8px; padding: 1rem; text-align: center; margin-bottom: 1rem;">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin: 0; font-size: 0.875rem;">Set your location to discover nearby restaurants</p>
+                        </div>
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#locationModal">
+                            <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i> Set Location
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Completion -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-user" style="color: #FD7979;"></i> Your Profile
+                    </h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small style="color: #636E72;">Profile Completion</small>
+                            <small style="color: #FD7979; font-weight: 600;">{{ profile_completion|default:50 }}%</small>
+                        </div>
+                        <div class="progress" style="height: 8px; border-radius: 4px; background: #FEEAC9;">
+                            <div class="progress-bar" style="width: {{ profile_completion|default:50 }}%; background: #FD7979; border-radius: 4px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small style="color: #636E72;">Diet Type:</small>
+                        <strong style="color: #2D3436; display: block;">{{ profile.get_diet_type_display|default:"Not set" }}</strong>
+                    </div>
+
+                    {% if profile.allergies %}
+                    <div class="mb-3">
+                        <small style="color: #636E72;">Allergies:</small>
+                        <strong style="color: #2D3436; display: block;">{{ profile.allergies }}</strong>
+                    </div>
+                    {% endif %}
+
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 style="color: #2D3436; font-weight: 600; margin: 0;">
+                            <i class="fas fa-history" style="color: #FD7979;"></i> Recent Swipes
+                        </h5>
+                        <a href="{% url 'swipes:swipe_history' %}" style="color: #FD7979; font-size: 0.875rem; text-decoration: none;">View All</a>
+                    </div>
+                    {% if recent_swipes %}
+                        {% for swipe in recent_swipes %}
+                        <div class="d-flex align-items-center mb-2 p-2" style="background: #FAFAFA; border-radius: 8px;">
+                            <img src="{{ swipe.dish.display_image }}" alt="{{ swipe.dish.name }}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; margin-right: 0.75rem;">
+                            <div style="flex: 1;">
+                                <strong style="color: #2D3436; font-size: 0.875rem;">{{ swipe.dish.name }}</strong>
+                                <br>
+                                <small style="color: #636E72;">{{ swipe.created_at|timesince }} ago</small>
+                            </div>
+                            {% if swipe.direction == 'right' %}
+                                <span class="badge" style="background: #FEEAC9; color: #FD7979;">
+                                    <i class="fas fa-heart"></i>
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background: #E9ECEF; color: #636E72;">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center p-3" style="background: #FAFAFA; border-radius: 8px;">
+                            <i class="fas fa-hand-pointer" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin: 0; font-size: 0.875rem;">No swipes yet. Start swiping!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 style="color: #2D3436; font-weight: 600; margin: 0;">
+                            <i class="fas fa-star" style="color: #FD7979;"></i> Recent Favorites
+                        </h5>
+                        <a href="{% url 'swipes:favorites' %}" style="color: #FD7979; font-size: 0.875rem; text-decoration: none;">View All</a>
+                    </div>
+                    {% if recent_favorites %}
+                        {% for favorite in recent_favorites %}
+                        <div class="d-flex align-items-center mb-2 p-2" style="background: #FAFAFA; border-radius: 8px;">
+                            <img src="{{ favorite.dish.display_image }}" alt="{{ favorite.dish.name }}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; margin-right: 0.75rem;">
+                            <div style="flex: 1;">
+                                <strong style="color: #2D3436; font-size: 0.875rem;">{{ favorite.dish.name }}</strong>
+                                <br>
+                                <small style="color: #636E72;">Added {{ favorite.created_at|timesince }} ago</small>
+                            </div>
+                            <a href="{% url 'dishes:dish_detail' favorite.dish.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center p-3" style="background: #FAFAFA; border-radius: 8px;">
+                            <i class="fas fa-star" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin: 0; font-size: 0.875rem;">No favorites yet. Start exploring!</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

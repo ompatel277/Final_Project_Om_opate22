@@ -1,77 +1,253 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Profile Setup - Swipe&Bite{% endblock %}
+{% block title %}Setup Profile - Swipe&Bite{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-3">Welcome to Swipe&Bite! 🎉</h2>
-                    <p class="text-center text-muted mb-4">Let's set up your profile to personalize your experience</p>
-                    
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">City</label>
-                            {{ form.city }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Bio (Optional)</label>
-                            {{ form.bio }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Diet Type</label>
-                            {{ form.diet_type }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Allergies (Optional)</label>
-                            {{ form.allergies }}
-                            <small class="form-text text-muted">Comma-separated (e.g., peanuts, shellfish)</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Favorite Cuisines (Optional)</label>
-                            {{ form.favorite_cuisines }}
-                            <small class="form-text text-muted">Comma-separated (e.g., Italian, Mexican)</small>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label">Preferred Delivery App</label>
-                            {{ form.preferred_delivery_app }}
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 mb-2">Complete Setup & Start Swiping!</button>
-                        <a href="{% url 'home' %}" class="btn btn-link w-100">Skip for now</a>
-                    </form>
+            <!-- Progress Header -->
+            <div class="card mb-4" style="background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%); border: none;">
+                <div class="card-body p-4 text-center">
+                    <h2 style="color: #FFFFFF; font-weight: 700; margin-bottom: 0.5rem;">
+                        <i class="fas fa-utensils"></i> Let's Set Up Your Profile
+                    </h2>
+                    <p style="color: rgba(255,255,255,0.9); margin: 0;">Help us personalize your food discovery experience</p>
                 </div>
             </div>
+
+            <!-- Progress Steps -->
+            <div class="d-flex justify-content-center mb-4">
+                <div class="d-flex align-items-center">
+                    <div style="width: 35px; height: 35px; background: #FD7979; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #FFFFFF; font-weight: 600;">1</span>
+                    </div>
+                    <div style="width: 60px; height: 3px; background: #FEEAC9;"></div>
+                    <div style="width: 35px; height: 35px; background: #FEEAC9; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #FD7979; font-weight: 600;">2</span>
+                    </div>
+                    <div style="width: 60px; height: 3px; background: #FEEAC9;"></div>
+                    <div style="width: 35px; height: 35px; background: #FEEAC9; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #FD7979; font-weight: 600;">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Step 1: Basic Info -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 40px; height: 40px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-user" style="color: #FD7979;"></i>
+                            </div>
+                            <h5 style="color: #2D3436; font-weight: 600; margin: 0;">Basic Information</h5>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label" style="color: #2D3436; font-weight: 500;">First Name</label>
+                                <input type="text" name="first_name" class="form-control" id="first_name" value="{{ user.first_name }}" placeholder="Your first name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label" style="color: #2D3436; font-weight: 500;">Last Name</label>
+                                <input type="text" name="last_name" class="form-control" id="last_name" value="{{ user.last_name }}" placeholder="Your last name">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="avatar" class="form-label" style="color: #2D3436; font-weight: 500;">Profile Photo (Optional)</label>
+                                <input type="file" name="avatar" class="form-control" id="avatar" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Food Preferences -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 40px; height: 40px; background: #FFCDC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-utensils" style="color: #FD7979;"></i>
+                            </div>
+                            <h5 style="color: #2D3436; font-weight: 600; margin: 0;">Food Preferences</h5>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="diet_type" class="form-label" style="color: #2D3436; font-weight: 500;">What's your diet type?</label>
+                                <select name="diet_type" class="form-select" id="diet_type">
+                                    <option value="">No preference</option>
+                                    <option value="omnivore">Omnivore</option>
+                                    <option value="vegetarian">Vegetarian</option>
+                                    <option value="vegan">Vegan</option>
+                                    <option value="pescatarian">Pescatarian</option>
+                                    <option value="keto">Keto</option>
+                                    <option value="paleo">Paleo</option>
+                                    <option value="gluten_free">Gluten Free</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="spice_level" class="form-label" style="color: #2D3436; font-weight: 500;">How spicy do you like it?</label>
+                                <select name="spice_level" class="form-select" id="spice_level">
+                                    <option value="">No preference</option>
+                                    <option value="none">No Spice</option>
+                                    <option value="mild">Mild</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hot">Hot</option>
+                                    <option value="extra_hot">Extra Hot</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label for="allergies" class="form-label" style="color: #2D3436; font-weight: 500;">
+                                    <i class="fas fa-exclamation-triangle" style="color: #FD7979;"></i> Any food allergies?
+                                </label>
+                                <input type="text" name="allergies" class="form-control" id="allergies" placeholder="e.g., Peanuts, Shellfish, Dairy, Gluten">
+                                <small style="color: #636E72;">Separate multiple allergies with commas. We'll help you avoid these!</small>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label for="favorite_cuisines" class="form-label" style="color: #2D3436; font-weight: 500;">Favorite cuisines?</label>
+                                <input type="text" name="favorite_cuisines" class="form-control" id="favorite_cuisines" placeholder="e.g., Italian, Mexican, Japanese, Indian">
+                                <small style="color: #636E72;">Tell us what you love and we'll show you more of it!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Location -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 40px; height: 40px; background: #FDACAC; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem;"></i>
+                            </div>
+                            <h5 style="color: #2D3436; font-weight: 600; margin: 0;">Your Location</h5>
+                        </div>
+
+                        <p style="color: #636E72; margin-bottom: 1rem;">Set your location to discover nearby restaurants and get personalized recommendations.</p>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <button type="button" class="btn btn-primary w-100" onclick="autoDetectLocation()">
+                                    <i class="fas fa-location-crosshairs"></i> Auto-Detect My Location
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center my-3">
+                            <hr style="flex: 1; border-color: #E9ECEF;">
+                            <span style="color: #636E72; padding: 0 1rem; font-size: 0.875rem;">or enter manually</span>
+                            <hr style="flex: 1; border-color: #E9ECEF;">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="latitude" class="form-label" style="color: #2D3436; font-weight: 500;">Latitude</label>
+                                <input type="number" step="any" name="latitude" class="form-control" id="latitude" placeholder="e.g., 40.7128">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="longitude" class="form-label" style="color: #2D3436; font-weight: 500;">Longitude</label>
+                                <input type="number" step="any" name="longitude" class="form-control" id="longitude" placeholder="e.g., -74.0060">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="city" class="form-label" style="color: #2D3436; font-weight: 500;">City</label>
+                                <input type="text" name="city" class="form-control" id="city" placeholder="e.g., New York">
+                            </div>
+                        </div>
+
+                        <div id="locationStatus" style="background: #FEEAC9; border-radius: 8px; padding: 0.75rem; display: none;">
+                            <i class="fas fa-check-circle" style="color: #FD7979;"></i>
+                            <span id="locationStatusText" style="color: #2D3436;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutrition Goals (Optional) -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 40px; height: 40px; background: #FD7979; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-heartbeat" style="color: #FFFFFF;"></i>
+                            </div>
+                            <div>
+                                <h5 style="color: #2D3436; font-weight: 600; margin: 0;">Nutrition Goals</h5>
+                                <small style="color: #636E72;">Optional - Set these to track your nutrition</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="daily_calorie_goal" class="form-label" style="color: #2D3436; font-weight: 500;">Daily Calories</label>
+                                <div class="input-group">
+                                    <input type="number" name="daily_calorie_goal" class="form-control" id="daily_calorie_goal" placeholder="e.g., 2000">
+                                    <span class="input-group-text" style="background: #FAFAFA;">kcal</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="protein_goal" class="form-label" style="color: #2D3436; font-weight: 500;">Daily Protein</label>
+                                <div class="input-group">
+                                    <input type="number" name="protein_goal" class="form-control" id="protein_goal" placeholder="e.g., 150">
+                                    <span class="input-group-text" style="background: #FAFAFA;">g</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'accounts:dashboard' %}" style="color: #636E72; text-decoration: none;">
+                        <i class="fas fa-arrow-left"></i> Skip for now
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check"></i> Complete Setup
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<style>
-    input[type="text"],
-    select,
-    textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+<script>
+function autoDetectLocation() {
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser');
+        return;
     }
-    
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        outline: none;
-    }
-</style>
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            document.getElementById('latitude').value = lat.toFixed(6);
+            document.getElementById('longitude').value = lng.toFixed(6);
+
+            // Reverse geocode to get city name
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(r => r.json())
+                .then(data => {
+                    const city = data.address.city || data.address.town || data.address.village || 'Unknown';
+                    document.getElementById('city').value = city;
+
+                    // Show success message
+                    const status = document.getElementById('locationStatus');
+                    const statusText = document.getElementById('locationStatusText');
+                    status.style.display = 'block';
+                    statusText.textContent = `Location detected: ${city}`;
+                })
+                .catch(() => {
+                    document.getElementById('city').value = 'Unknown';
+                });
+        },
+        function(error) {
+            alert('Unable to retrieve your location. Please enter it manually.');
+        }
+    );
+}
+</script>
 {% endblock %}

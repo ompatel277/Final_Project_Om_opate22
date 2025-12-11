@@ -1,122 +1,246 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Restaurants{% endblock %}
+{% block title %}Restaurants - Swipe&Bite{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>
-            {% if using_live_data %}
-                🌍 Live Local Restaurants
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 style="color: #2D3436; font-weight: 700; margin-bottom: 0.25rem;">
+                <i class="fas fa-store" style="color: #FD7979;"></i> Restaurants
+            </h1>
+            <p style="color: #636E72;">Discover amazing places to eat</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user_location %}
+                <a href="{% url 'dishes:nearby_restaurants' %}" class="btn btn-primary">
+                    <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i> View Nearby
+                </a>
             {% else %}
-                Restaurants
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                    <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i> Set Location
+                </button>
             {% endif %}
-        </h1>
-        {% if has_location %}
-            <span class="badge bg-success">
-                📍 {{ user_location.city }}
-            </span>
-        {% endif %}
+        </div>
     </div>
 
-    {% if using_live_data %}
-        <div class="alert alert-info">
-            <strong>🔴 LIVE DATA:</strong> Showing real-time restaurants from Google Maps near {{ user_location.city }}
+    <!-- Location Banner -->
+    {% if user_location %}
+        <div class="card mb-4" style="background: #FEEAC9; border: none;">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div style="width: 40px; height: 40px; background: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                        </div>
+                        <div>
+                            <strong style="color: #2D3436;">Your Location: {{ user_location.city }}</strong>
+                            <br>
+                            <small style="color: #636E72;">Showing restaurants near you</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm" style="background: #FFFFFF; color: #FD7979;" data-bs-toggle="modal" data-bs-target="#locationModal">
+                        <i class="fas fa-edit"></i> Change
+                    </button>
+                </div>
+            </div>
         </div>
     {% endif %}
 
     <!-- Filters -->
-    <form method="get" class="mb-4">
-        <div class="row">
-            <div class="col-md-4">
-                <select name="cuisine" class="form-select">
-                    <option value="">All Cuisines</option>
-                    {% for cuisine in cuisines %}
-                        <option value="{{ cuisine.id }}">{{ cuisine.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select name="price" class="form-select">
-                    <option value="">All Prices</option>
-                    <option value="$">$ Budget</option>
-                    <option value="$$">$$ Moderate</option>
-                    <option value="$$$">$$$ Expensive</option>
-                    <option value="$$$$">$$$$ Luxury</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select name="live" class="form-select">
-                    <option value="true" selected>Live API Data</option>
-                    <option value="false">Database Only</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
-            </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET">
+                <div class="row align-items-end">
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Search</label>
+                        <input type="text" name="q" class="form-control" placeholder="Restaurant name..." value="{{ query }}">
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Price Range</label>
+                        <select name="price" class="form-select">
+                            <option value="">All Prices</option>
+                            <option value="$" {% if selected_price == '$' %}selected{% endif %}>$ (Budget)</option>
+                            <option value="$$" {% if selected_price == '$$' %}selected{% endif %}>$$ (Moderate)</option>
+                            <option value="$$$" {% if selected_price == '$$$' %}selected{% endif %}>$$$ (Upscale)</option>
+                            <option value="$$$$" {% if selected_price == '$$$$' %}selected{% endif %}>$$$$ (Fine Dining)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Min Rating</label>
+                        <select name="rating" class="form-select">
+                            <option value="">Any Rating</option>
+                            <option value="3" {% if selected_rating == '3' %}selected{% endif %}>3+ Stars</option>
+                            <option value="4" {% if selected_rating == '4' %}selected{% endif %}>4+ Stars</option>
+                            <option value="4.5" {% if selected_rating == '4.5' %}selected{% endif %}>4.5+ Stars</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <label class="form-label" style="color: #2D3436; font-weight: 500;">Sort By</label>
+                        <select name="sort" class="form-select">
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name</option>
+                            <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Rating</option>
+                            <option value="distance" {% if sort == 'distance' %}selected{% endif %}>Distance</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
-    <!-- Restaurant List -->
+    <!-- Results Count -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p style="color: #636E72; margin: 0;">
+            Found <strong style="color: #FD7979;">{{ restaurants.count }}</strong> restaurants
+        </p>
+    </div>
+
+    <!-- Restaurants Grid -->
     <div class="row">
-        {% for restaurant in restaurants %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    {% if restaurant.thumbnail %}
-                        <img src="{{ restaurant.thumbnail }}" class="card-img-top" alt="{{ restaurant.name }}" style="height: 200px; object-fit: cover;">
-                    {% endif %}
+        {% if restaurants %}
+            {% for restaurant in restaurants %}
+                {% if restaurant.id %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100" style="transition: all 0.2s ease-in-out;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(253,121,121,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div style="flex: 1;">
+                                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 0.5rem;">{{ restaurant.name }}</h5>
+                                    <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i>
+                                        {{ restaurant.address|truncatewords:6 }}
+                                    </p>
+                                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">
+                                        {{ restaurant.city }}, {{ restaurant.state }} {{ restaurant.zip_code }}
+                                    </p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="background: #FD7979; color: #FFFFFF; padding: 0.5rem 0.75rem; border-radius: 8px; font-weight: 600; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-star"></i> {{ restaurant.rating|floatformat:1 }}
+                                    </div>
+                                    {% if restaurant.price_range %}
+                                        <span style="background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600;">
+                                            {{ restaurant.price_range }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                    <div class="card-body">
-                        <h5 class="card-title">{{ restaurant.name }}</h5>
-
-                        <p class="card-text">
-                            {% if restaurant.address %}
-                                📍 {{ restaurant.address }}<br>
-                            {% endif %}
-
-                            {% if restaurant.rating %}
-                                ⭐ {{ restaurant.rating }}
-                                {% if restaurant.reviews %}
-                                    ({{ restaurant.reviews }} reviews)
-                                {% endif %}
-                                <br>
-                            {% endif %}
-
-                            {% if restaurant.price_range %}
-                                💰 {{ restaurant.price_range }}<br>
-                            {% endif %}
-
+                            <!-- Distance -->
                             {% if restaurant.distance %}
-                                📏 {{ restaurant.distance|floatformat:1 }} miles away<br>
+                                <div class="mb-3">
+                                    <span style="background: #FFCDC9; color: #FD7979; padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500;">
+                                        <i class="fas fa-route"></i> {{ restaurant.distance|floatformat:1 }} miles away
+                                    </span>
+                                </div>
                             {% endif %}
 
-                            {% if restaurant.phone %}
-                                📞 {{ restaurant.phone }}<br>
+                            <!-- Contact Info -->
+                            <div class="mb-3">
+                                {% if restaurant.phone %}
+                                    <small style="color: #636E72; display: block; margin-bottom: 0.25rem;">
+                                        <i class="fas fa-phone" style="color: #FDACAC; width: 16px;"></i> {{ restaurant.phone }}
+                                    </small>
+                                {% endif %}
+                                {% if restaurant.website %}
+                                    <small style="color: #636E72; display: block;">
+                                        <i class="fas fa-globe" style="color: #FDACAC; width: 16px;"></i>
+                                        <a href="{{ restaurant.website }}" target="_blank" style="color: #FD7979;">Visit Website</a>
+                                    </small>
+                                {% endif %}
+                            </div>
+
+                            <!-- Cuisines -->
+                            {% if restaurant.cuisines.all %}
+                                <div class="mb-3">
+                                    {% for cuisine in restaurant.cuisines.all %}
+                                        <span style="background: #FAFAFA; color: #636E72; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.75rem; margin-right: 0.25rem; display: inline-block; margin-bottom: 0.25rem;">
+                                            {{ cuisine.emoji }} {{ cuisine.name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
                             {% endif %}
-                        </p>
 
-                        {% if restaurant.website %}
-                            <a href="{{ restaurant.website }}" target="_blank" class="btn btn-primary btn-sm">Visit Website</a>
-                        {% endif %}
-
-                        {% if restaurant.google_place_id %}
-                            <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id={{ restaurant.google_place_id }}"
-                               target="_blank" class="btn btn-secondary btn-sm">View on Maps</a>
-                        {% endif %}
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'dishes:restaurant_detail' restaurant.id %}" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-eye"></i> View Menu
+                                </a>
+                                {% if user.is_authenticated %}
+                                    {% if restaurant.id in favorite_restaurant_ids %}
+                                        <a href="{% url 'swipes:remove_favorite_restaurant_by_id' restaurant.id %}" class="btn" style="background: #FEEAC9; color: #FD7979;">
+                                            <i class="fas fa-heart"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'swipes:add_favorite_restaurant' restaurant.id %}" class="btn btn-outline-primary">
+                                            <i class="far fa-heart"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body text-center p-5">
+                        <div style="width: 80px; height: 80px; background: #FEEAC9; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-store" style="color: #FD7979; font-size: 2rem;"></i>
+                        </div>
+                        <h4 style="color: #2D3436; font-weight: 600;">No restaurants found</h4>
+                        <p style="color: #636E72; margin-bottom: 1rem;">Try adjusting your search or filters</p>
+                        <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-redo"></i> Clear Filters
+                        </a>
                     </div>
                 </div>
             </div>
-        {% empty %}
-            <div class="col-12">
-                <div class="alert alert-warning">
-                    No restaurants found.
-                    {% if not has_location %}
-                        Please enable location services to see nearby restaurants.
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
+        {% endif %}
     </div>
+
+    <!-- Pagination -->
+    {% if restaurants.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if restaurants.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ restaurants.previous_page_number }}" style="color: #FD7979; border-color: #E9ECEF;">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in restaurants.paginator.page_range %}
+                    {% if restaurants.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link" style="background: #FD7979; border-color: #FD7979;">{{ num }}</span>
+                        </li>
+                    {% elif num > restaurants.number|add:'-3' and num < restaurants.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}" style="color: #FD7979; border-color: #E9ECEF;">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if restaurants.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ restaurants.next_page_number }}" style="color: #FD7979; border-color: #E9ECEF;">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
 </div>
 {% endblock %}

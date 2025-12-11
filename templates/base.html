@@ -158,8 +158,16 @@
         }
 
         .location-btn i {
-            margin-right: 0.25rem;
             color: var(--primary);
+            font-size: 1rem;
+            margin-right: 0.25rem;
+        }
+
+        /* Standardized Location Icon */
+        .location-icon {
+            color: #FD7979;
+            font-size: 1rem;
+            margin-right: 0.25rem;
         }
 
         /* Dropdown */
@@ -212,6 +220,7 @@
 
         .modal-title i {
             color: var(--primary);
+            font-size: 1rem;
             margin-right: 0.5rem;
         }
 
@@ -466,6 +475,30 @@
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
         }
+
+        /* Text Colors */
+        .text-tinder, .text-primary-custom {
+            color: var(--primary) !important;
+        }
+
+        /* Background Colors */
+        .bg-light-custom {
+            background: var(--light) !important;
+        }
+        .bg-secondary-custom {
+            background: var(--secondary) !important;
+        }
+        .bg-primary-hover-custom {
+            background: var(--primary-hover) !important;
+        }
+        .bg-primary-custom {
+            background: var(--primary) !important;
+        }
+
+        /* Gradient for headers */
+        .bg-gradient-tinder {
+            background: var(--primary) !important;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -499,7 +532,7 @@
 
                     <li class="nav-item ms-2">
                         <button class="location-btn" data-bs-toggle="modal" data-bs-target="#locationModal">
-                            <i class="fas fa-map-marker-alt"></i>
+                            <i class="fas fa-map-marker-alt location-icon"></i>
                             <span id="navLocationText">{% if user_location %}{{ user_location.city|truncatechars:12 }}{% else %}Set Location{% endif %}</span>
                         </button>
                     </li>
@@ -529,7 +562,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-map-marker-alt"></i> Set Your Location</h5>
+                    <h5 class="modal-title"><i class="fas fa-map-marker-alt location-icon"></i> Set Your Location</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-3">

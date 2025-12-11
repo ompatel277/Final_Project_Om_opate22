@@ -4,99 +4,304 @@
 {% block title %}{{ restaurant.name }} - Swipe&Bite{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Restaurants
+        </a>
+    </div>
+
+    <!-- Restaurant Header -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%); border: none;">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 style="color: #FFFFFF; font-weight: 700; margin-bottom: 0.5rem;">{{ restaurant.name }}</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 0.5rem;">
+                        <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i>
+                        {{ restaurant.address }}
+                    </p>
+                    <p style="color: rgba(255,255,255,0.9); margin: 0;">
+                        {{ restaurant.city }}, {{ restaurant.state }} {{ restaurant.zip_code }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div style="background: #FFFFFF; color: #FD7979; padding: 1rem; border-radius: 8px; display: inline-block;">
+                        <h2 style="margin: 0; font-weight: 700;">
+                            <i class="fas fa-star"></i> {{ restaurant.rating|floatformat:1 }}
+                        </h2>
+                        <small style="color: #636E72;">{{ restaurant.review_count|default:0 }} reviews</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
-        <div class="col-md-12">
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- About Section -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h1 class="card-title text-tinder">{{ restaurant.name }}</h1>
-                    <p class="text-muted">
-                        <i class="fas fa-map-marker-alt"></i> {{ restaurant.full_address }}
-                    </p>
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle" style="color: #FD7979;"></i> About
+                    </h5>
 
-                    {% if restaurant.description %}
-                        <p class="mt-3">{{ restaurant.description }}</p>
-                    {% endif %}
-
-                    <div class="row mt-4">
-                        <div class="col-md-3">
-                            <strong>Price Range:</strong>
-                            <div>{{ restaurant.price_range }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Rating:</strong>
-                            <div>
-                                {% for i in "12345" %}
-                                    {% if forloop.counter <= restaurant.rating %}
-                                        <i class="fas fa-star text-warning"></i>
-                                    {% else %}
-                                        <i class="far fa-star text-warning"></i>
-                                    {% endif %}
-                                {% endfor %}
-                                ({{ restaurant.rating }})
+                    <div class="row mb-3">
+                        {% if restaurant.price_range %}
+                            <div class="col-md-4 mb-2">
+                                <div style="background: #FEEAC9; border-radius: 8px; padding: 0.75rem; text-align: center;">
+                                    <i class="fas fa-dollar-sign" style="color: #FD7979;"></i>
+                                    <strong style="color: #2D3436; display: block;">{{ restaurant.price_range }}</strong>
+                                    <small style="color: #636E72;">Price Range</small>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Cuisine:</strong>
-                            <div>{{ restaurant.cuisine_type|default:"Various" }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Phone:</strong>
-                            <div>{{ restaurant.phone|default:"N/A" }}</div>
+                        {% endif %}
+
+                        {% if restaurant.distance %}
+                            <div class="col-md-4 mb-2">
+                                <div style="background: #FFCDC9; border-radius: 8px; padding: 0.75rem; text-align: center;">
+                                    <i class="fas fa-route" style="color: #FD7979;"></i>
+                                    <strong style="color: #2D3436; display: block;">{{ restaurant.distance|floatformat:1 }} mi</strong>
+                                    <small style="color: #636E72;">Distance</small>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="col-md-4 mb-2">
+                            <div style="background: #FDACAC; border-radius: 8px; padding: 0.75rem; text-align: center;">
+                                <i class="fas fa-utensils" style="color: #FFFFFF;"></i>
+                                <strong style="color: #FFFFFF; display: block;">{{ dishes.count|default:0 }}</strong>
+                                <small style="color: #FFFFFF;">Menu Items</small>
+                            </div>
                         </div>
                     </div>
 
-                    {% if restaurant.delivery_options %}
-                        <div class="mt-4">
-                            <strong>Delivery Options:</strong>
-                            <div class="mt-2">
-                                {% if restaurant.has_uber_eats %}
-                                    <a href="{{ restaurant.uber_eats_url }}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
-                                        <i class="fas fa-motorcycle"></i> Uber Eats
-                                    </a>
-                                {% endif %}
-                                {% if restaurant.has_doordash %}
-                                    <a href="{{ restaurant.doordash_url }}" target="_blank" class="btn btn-sm btn-outline-danger me-2">
-                                        <i class="fas fa-shopping-bag"></i> DoorDash
-                                    </a>
-                                {% endif %}
-                                {% if restaurant.has_grubhub %}
-                                    <a href="{{ restaurant.grubhub_url }}" target="_blank" class="btn btn-sm btn-outline-warning me-2">
-                                        <i class="fas fa-utensils"></i> Grubhub
-                                    </a>
-                                {% endif %}
-                            </div>
+                    <!-- Cuisines -->
+                    {% if restaurant.cuisines.all %}
+                        <div class="mb-3">
+                            <strong style="color: #2D3436; display: block; margin-bottom: 0.5rem;">Cuisines:</strong>
+                            {% for cuisine in restaurant.cuisines.all %}
+                                <span style="background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; margin-right: 0.5rem; display: inline-block; margin-bottom: 0.25rem;">
+                                    {{ cuisine.emoji }} {{ cuisine.name }}
+                                </span>
+                            {% endfor %}
                         </div>
                     {% endif %}
 
-                    {% if user.is_authenticated %}
-                        <div class="mt-4">
-                            <a href="{% url 'swipes:add_favorite_restaurant' restaurant.id %}" class="btn btn-primary">
-                                <i class="fas fa-heart"></i> Add to Favorites
-                            </a>
+                    {% if restaurant.description %}
+                        <p style="color: #636E72; margin: 0;">{{ restaurant.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Menu Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 style="color: #2D3436; font-weight: 600; margin: 0;">
+                            <i class="fas fa-book-open" style="color: #FD7979;"></i> Menu
+                        </h5>
+                        <span style="background: #FEEAC9; color: #FD7979; padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500;">
+                            {{ dishes.count }} items
+                        </span>
+                    </div>
+
+                    {% if dishes %}
+                        <div class="row">
+                            {% for dish in dishes %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex p-2" style="background: #FAFAFA; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='#FEEAC9'" onmouseout="this.style.background='#FAFAFA'">
+                                        <img src="{{ dish.display_image }}" alt="{{ dish.name }}" style="width: 70px; height: 70px; border-radius: 8px; object-fit: cover; margin-right: 0.75rem;">
+                                        <div style="flex: 1;">
+                                            <h6 style="color: #2D3436; font-weight: 600; margin-bottom: 0.25rem;">{{ dish.name }}</h6>
+                                            <p style="color: #636E72; font-size: 0.75rem; margin-bottom: 0.25rem;">{{ dish.description|truncatewords:8 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                {% if dish.calories %}
+                                                    <small style="color: #FDACAC;">{{ dish.calories }} cal</small>
+                                                {% endif %}
+                                                <span style="color: #FD7979; font-size: 0.75rem;">
+                                                    <i class="fas fa-star"></i> {{ dish.average_rating|floatformat:1 }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <a href="{% url 'dishes:dish_detail' dish.id %}" class="btn btn-sm btn-outline-primary align-self-center ms-2">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center p-4" style="background: #FAFAFA; border-radius: 8px;">
+                            <i class="fas fa-utensils" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin: 0;">No menu items available</p>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <h3 class="mb-3">Menu</h3>
-            <div class="row">
-                {% for rd in restaurant_dishes %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ rd.dish.name }}</h5>
-                                <p class="text-muted small">{{ rd.dish.cuisine }}</p>
-                                <h4 class="text-tinder">${{ rd.price }}</h4>
-                                <a href="{% url 'dishes:dish_detail' rd.dish.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+            <!-- Reviews Section -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 style="color: #2D3436; font-weight: 600; margin: 0;">
+                            <i class="fas fa-comments" style="color: #FD7979;"></i> Reviews
+                        </h5>
+                        <a href="{% url 'community:restaurant_reviews' restaurant.id %}" style="color: #FD7979; font-size: 0.875rem; text-decoration: none;">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <div class="p-3 mb-2" style="background: #FAFAFA; border-radius: 8px; border-left: 3px solid #FD7979;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong style="color: #2D3436;">{{ review.user.username }}</strong>
+                                        <br>
+                                        <small style="color: #636E72;">{{ review.created_at|timesince }} ago</small>
+                                    </div>
+                                    <div>
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star" style="color: #FD7979;"></i>
+                                            {% else %}
+                                                <i class="far fa-star" style="color: #FDACAC;"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% if review.title %}
+                                    <h6 style="color: #2D3436; font-weight: 600; margin-bottom: 0.25rem;">{{ review.title }}</h6>
+                                {% endif %}
+                                <p style="color: #636E72; margin: 0;">{{ review.content|truncatewords:25 }}</p>
                             </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center p-4" style="background: #FAFAFA; border-radius: 8px;">
+                            <i class="fas fa-comment" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin: 0;">No reviews yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Contact Info -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-phone-alt" style="color: #FD7979;"></i> Contact
+                    </h5>
+
+                    <!-- Address -->
+                    <div class="d-flex align-items-start mb-3">
+                        <div style="width: 35px; height: 35px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; flex-shrink: 0;">
+                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                        </div>
+                        <div>
+                            <small style="color: #636E72; display: block;">Address</small>
+                            <span style="color: #2D3436;">{{ restaurant.address }}</span>
+                            <br>
+                            <span style="color: #2D3436;">{{ restaurant.city }}, {{ restaurant.state }} {{ restaurant.zip_code }}</span>
                         </div>
                     </div>
-                {% empty %}
-                    <div class="col-12">
-                        <p class="text-muted">No menu items available.</p>
+
+                    <!-- Phone -->
+                    {% if restaurant.phone %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 35px; height: 35px; background: #FFCDC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                <i class="fas fa-phone" style="color: #FD7979;"></i>
+                            </div>
+                            <div>
+                                <small style="color: #636E72; display: block;">Phone</small>
+                                <a href="tel:{{ restaurant.phone }}" style="color: #FD7979; text-decoration: none;">{{ restaurant.phone }}</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Website -->
+                    {% if restaurant.website %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div style="width: 35px; height: 35px; background: #FDACAC; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                                <i class="fas fa-globe" style="color: #FFFFFF;"></i>
+                            </div>
+                            <div>
+                                <small style="color: #636E72; display: block;">Website</small>
+                                <a href="{{ restaurant.website }}" target="_blank" style="color: #FD7979; text-decoration: none;">Visit Website</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Hours -->
+                    {% if restaurant.hours %}
+                        <div class="d-flex align-items-start">
+                            <div style="width: 35px; height: 35px; background: #FD7979; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; flex-shrink: 0;">
+                                <i class="fas fa-clock" style="color: #FFFFFF;"></i>
+                            </div>
+                            <div>
+                                <small style="color: #636E72; display: block;">Hours</small>
+                                <span style="color: #2D3436;">{{ restaurant.hours }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
+                        <i class="fas fa-bolt" style="color: #FD7979;"></i> Actions
+                    </h5>
+
+                    <div class="d-grid gap-2">
+                        {% if user.is_authenticated %}
+                            {% if is_favorite %}
+                                <a href="{% url 'swipes:remove_favorite_restaurant_by_id' restaurant.id %}" class="btn" style="background: #FEEAC9; color: #FD7979; font-weight: 600;">
+                                    <i class="fas fa-heart"></i> Remove from Favorites
+                                </a>
+                            {% else %}
+                                <a href="{% url 'swipes:add_favorite_restaurant' restaurant.id %}" class="btn btn-primary">
+                                    <i class="far fa-heart"></i> Add to Favorites
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i> Login to Save
+                            </a>
+                        {% endif %}
+
+                        {% if restaurant.website %}
+                            <a href="{{ restaurant.website }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i> Order Online
+                            </a>
+                        {% endif %}
+
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ restaurant.address|urlencode }}+{{ restaurant.city|urlencode }}+{{ restaurant.state|urlencode }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-directions"></i> Get Directions
+                        </a>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+
+            <!-- Map Placeholder -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div style="background: #FAFAFA; height: 200px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <div class="text-center">
+                            <i class="fas fa-map-marker-alt" style="color: #FDACAC; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="color: #636E72; margin: 0; font-size: 0.875rem;">{{ restaurant.city }}, {{ restaurant.state }}</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ restaurant.address|urlencode }}+{{ restaurant.city|urlencode }}+{{ restaurant.state|urlencode }}" target="_blank" style="color: #FD7979; font-size: 0.875rem;">
+                                View on Google Maps <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
