@@ -5,7 +5,7 @@ app_name = 'community'
 
 urlpatterns = [
     # Existing URLs
-    path('', views.community_home_view, name='home'),
+    path('', views.community_home_view, name='community_home'),
     path('trending/', views.trending_view, name='trending'),
     path('rankings/', views.weekly_rankings_view, name='rankings'),
     path('dish/<int:dish_id>/reviews/', views.dish_reviews_view, name='dish_reviews'),

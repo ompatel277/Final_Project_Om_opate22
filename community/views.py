@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.db.models import Avg, Count, Q
 from django.utils import timezone
 from datetime import timedelta
-from dishes.models import Dish, Restaurant
+from dishes.models import Dish, Restaurant, Cuisine
 from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request, haversine_distance
 from dishes.maps_service import GoogleMapsService
 from dishes.ai_service import AIService, DeliveryAppService
@@ -16,7 +16,7 @@ from .models import (
 
 
 def community_home_view(request):
-    """Community homepage with rankings and trending - location-aware with AI enhancements"""
+    """Community homepage with rankings and trending - personalized for each user"""
 
     # ✅ LOCATION FILTER - Get location-based dishes
     user_location = get_user_location_from_request(request)
@@ -32,19 +32,51 @@ def community_home_view(request):
             max_distance
         )
 
-    # Get trending dishes (filtered by location if available)
-    trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')
-    if location_dish_ids is not None:
-        trending_dishes = trending_dishes.filter(dish_id__in=location_dish_ids)
-    trending_dishes = trending_dishes[:10]
+    # ✅ PERSONALIZED TRENDING DISHES - Tailored to user profile
+    trending_query = Dish.objects.filter(is_active=True).select_related('cuisine')
 
-    # Get trending restaurants based on reviews and ratings
-    trending_restaurants = Restaurant.objects.annotate(
-        avg_rating=Avg('reviews__rating'),
-        review_count=Count('reviews')
+    # Filter by user preferences if authenticated
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        profile = request.user.profile
+
+        # Filter by diet type
+        if profile.diet_type == 'vegetarian':
+            trending_query = trending_query.filter(is_vegetarian=True)
+        elif profile.diet_type == 'vegan':
+            trending_query = trending_query.filter(is_vegan=True)
+
+        # Filter by favorite cuisines if set
+        favorite_cuisines = profile.get_favorite_cuisines_list()
+        if favorite_cuisines:
+            # Get cuisine objects matching the favorite cuisine names
+            cuisine_ids = Cuisine.objects.filter(
+                name__in=favorite_cuisines
+            ).values_list('id', flat=True)
+            if cuisine_ids:
+                trending_query = trending_query.filter(cuisine_id__in=cuisine_ids)
+
+    # Apply location filter
+    if location_dish_ids is not None:
+        trending_query = trending_query.filter(id__in=location_dish_ids)
+
+    # Get trending dishes - prioritize by swipes, ratings, and recency
+    trending_dishes = trending_query.annotate(
+        review_count=Count('reviews'),
+        avg_rating=Avg('reviews__rating')
     ).filter(
-        review_count__gte=1
-    ).order_by('-avg_rating', '-review_count')[:10]
+        total_swipes__gte=1  # Must have at least 1 swipe
+    ).order_by(
+        '-total_right_swipes',  # Most right swipes first
+        '-average_rating',  # Then by rating
+        '-review_count',  # Then by reviews
+        '-created_at'  # Then by newest
+    )[:5]  # TOP 5
+
+    # Get TOP 5 trending restaurants based on existing ratings
+    trending_restaurants = Restaurant.objects.filter(
+        total_reviews__gte=1,
+        is_active=True
+    ).order_by('-rating', '-total_reviews')[:5]  # TOP 5
 
     # Calculate distance for restaurants if location available
     if user_location:
@@ -76,6 +108,9 @@ def community_home_view(request):
         recent_reviews = recent_reviews.filter(dish_id__in=location_dish_ids)
     recent_reviews = recent_reviews[:5]
 
+    # Calculate personalization indicator
+    is_personalized = request.user.is_authenticated and hasattr(request.user, 'profile')
+
     context = {
         'trending_dishes': trending_dishes,
         'trending_restaurants': trending_restaurants,
@@ -84,12 +119,13 @@ def community_home_view(request):
         'recent_reviews': recent_reviews,
         'has_location': has_location,
         'user_location': user_location,
+        'is_personalized': is_personalized,  # Indicate if results are personalized
     }
     return render(request, 'community/community_home.html', context)
 
 
 def trending_view(request):
-    """View all trending dishes - location-aware"""
+    """View all trending dishes - personalized and location-aware"""
 
     # ✅ LOCATION FILTER
     user_location = get_user_location_from_request(request)
@@ -105,14 +141,52 @@ def trending_view(request):
             max_distance
         )
 
-    trending_dishes = TrendingDish.objects.select_related('dish').order_by('-trending_score')
+    # ✅ PERSONALIZED TRENDING DISHES
+    trending_query = Dish.objects.filter(is_active=True).select_related('cuisine')
+
+    # Filter by user preferences if authenticated
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        profile = request.user.profile
+
+        # Filter by diet type
+        if profile.diet_type == 'vegetarian':
+            trending_query = trending_query.filter(is_vegetarian=True)
+        elif profile.diet_type == 'vegan':
+            trending_query = trending_query.filter(is_vegan=True)
+
+        # Filter by favorite cuisines if set
+        favorite_cuisines = profile.get_favorite_cuisines_list()
+        if favorite_cuisines:
+            cuisine_ids = Cuisine.objects.filter(
+                name__in=favorite_cuisines
+            ).values_list('id', flat=True)
+            if cuisine_ids:
+                trending_query = trending_query.filter(cuisine_id__in=cuisine_ids)
+
+    # Apply location filter
     if location_dish_ids is not None:
-        trending_dishes = trending_dishes.filter(dish_id__in=location_dish_ids)
+        trending_query = trending_query.filter(id__in=location_dish_ids)
+
+    # Get ALL trending dishes for this page
+    trending_dishes = trending_query.annotate(
+        review_count=Count('reviews'),
+        avg_rating=Avg('reviews__rating')
+    ).filter(
+        total_swipes__gte=1
+    ).order_by(
+        '-total_right_swipes',
+        '-average_rating',
+        '-review_count',
+        '-created_at'
+    )[:20]  # Show top 20 on full trending page
+
+    is_personalized = request.user.is_authenticated and hasattr(request.user, 'profile')
 
     context = {
         'trending_dishes': trending_dishes,
         'has_location': has_location,
         'user_location': user_location,
+        'is_personalized': is_personalized,
     }
     return render(request, 'community/trending.html', context)
 
@@ -265,25 +339,49 @@ def dish_reviews_view(request, dish_id):
 
 
 def restaurant_reviews_view(request, restaurant_id):
-    """View all reviews for a specific restaurant"""
+    """View REAL Google reviews for a restaurant using Google Maps API"""
     restaurant = get_object_or_404(Restaurant, id=restaurant_id)
-    reviews = Review.objects.filter(restaurant=restaurant).select_related('user').order_by('-created_at')
 
-    # Filter by rating
+    # Initialize Google Maps service
+    maps_service = GoogleMapsService()
+
+    # Get real reviews from Google if we have google_place_id
+    google_reviews = []
+    place_details = None
+
+    if restaurant.google_place_id:
+        # Try to get place details first
+        place_details = maps_service.get_place_details(restaurant.google_place_id)
+
+        # Get Google reviews
+        google_reviews = maps_service.get_place_reviews(
+            restaurant.google_place_id,
+            num_reviews=20
+        )
+
+    # Calculate stats from Google reviews
+    total_reviews = len(google_reviews)
+    avg_rating = 0
+    rating_distribution = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
+
+    if google_reviews:
+        ratings = [review.get('rating', 0) for review in google_reviews]
+        avg_rating = sum(ratings) / len(ratings) if ratings else 0
+
+        for review in google_reviews:
+            rating = review.get('rating', 0)
+            if rating in rating_distribution:
+                rating_distribution[rating] += 1
+    else:
+        # Fallback to restaurant's own rating
+        avg_rating = restaurant.rating
+        total_reviews = restaurant.total_reviews
+
+    # Filter by rating if requested
     rating_filter = request.GET.get('rating')
-    if rating_filter:
-        reviews = reviews.filter(rating=int(rating_filter))
-
-    # Stats
-    total_reviews = reviews.count()
-    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
-    rating_distribution = {
-        5: reviews.filter(rating=5).count(),
-        4: reviews.filter(rating=4).count(),
-        3: reviews.filter(rating=3).count(),
-        2: reviews.filter(rating=2).count(),
-        1: reviews.filter(rating=1).count(),
-    }
+    if rating_filter and google_reviews:
+        rating_value = int(rating_filter)
+        google_reviews = [r for r in google_reviews if r.get('rating') == rating_value]
 
     # Get delivery links
     delivery_service = DeliveryAppService()
@@ -302,43 +400,47 @@ def restaurant_reviews_view(request, restaurant_id):
             restaurant.longitude
         )
 
+    # Get dishes available at this restaurant
+    restaurant_dishes = restaurant.restaurant_dishes.select_related('dish').all()[:10]
+
     context = {
         'restaurant': restaurant,
-        'reviews': reviews,
+        'google_reviews': google_reviews,  # Real Google reviews
+        'place_details': place_details,  # Extra place info from Google
         'total_reviews': total_reviews,
-        'avg_rating': avg_rating,
+        'avg_rating': round(avg_rating, 1),
         'rating_distribution': rating_distribution,
         'delivery_links': delivery_links,
         'has_location': user_location is not None,
+        'restaurant_dishes': restaurant_dishes,
     }
     return render(request, 'community/restaurant_reviews.html', context)
 
 
 @login_required
 def add_restaurant_review(request, restaurant_id):
-    """Add or update a restaurant review"""
-    if request.method == 'POST':
-        restaurant = get_object_or_404(Restaurant, id=restaurant_id)
-        rating = int(request.POST.get('rating'))
-        title = request.POST.get('title', '')
-        content = request.POST.get('content', '')
+    """Add a review for a dish at a restaurant - redirects to dish review form"""
+    restaurant = get_object_or_404(Restaurant, id=restaurant_id)
 
-        review, created = Review.objects.update_or_create(
-            user=request.user,
-            restaurant=restaurant,
-            defaults={
-                'rating': rating,
-                'title': title,
-                'content': content
-            }
-        )
+    # Get the first dish from this restaurant or show selection
+    restaurant_dishes = restaurant.restaurant_dishes.all()
+
+    if request.method == 'POST':
+        dish_id = request.POST.get('dish_id')
+        if dish_id:
+            return redirect('community:add_review', dish_id=dish_id)
 
         return JsonResponse({
-            'status': 'success',
-            'message': 'Review posted!' if created else 'Review updated!'
-        })
+            'status': 'error',
+            'message': 'Please select a dish to review'
+        }, status=400)
 
-    return JsonResponse({'status': 'error'}, status=400)
+    # Show dish selection page
+    context = {
+        'restaurant': restaurant,
+        'dishes': restaurant_dishes
+    }
+    return render(request, 'community/select_dish_for_review.html', context)
 
 
 @login_required
@@ -472,13 +574,11 @@ def search_community(request):
 
     dishes = dishes[:10]
 
-    # Search restaurants
+    # Search restaurants - use existing rating and total_reviews fields
     restaurants = Restaurant.objects.filter(
-        Q(name__icontains=query) | Q(address__icontains=query)
-    ).annotate(
-        avg_rating=Avg('reviews__rating'),
-        review_count=Count('reviews')
-    )[:10]
+        Q(name__icontains=query) | Q(address__icontains=query),
+        is_active=True
+    ).order_by('-rating', '-total_reviews')[:10]
 
     dishes_data = [{
         'id': d.id,
@@ -493,8 +593,8 @@ def search_community(request):
         'id': r.id,
         'name': r.name,
         'address': r.address,
-        'avg_rating': round(r.avg_rating, 1) if r.avg_rating else 0,
-        'review_count': r.review_count
+        'avg_rating': round(r.rating, 1),
+        'review_count': r.total_reviews
     } for r in restaurants]
 
     return JsonResponse({
