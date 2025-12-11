@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count
 from django.http import JsonResponse
+from swipes.models import Favorite
 from .models import Dish, Restaurant, Cuisine, RestaurantDish
 from .location_utils import filter_nearby_restaurants, get_user_location_from_request, set_user_location_in_session, \
     haversine_distance
@@ -86,6 +87,103 @@ def dish_list_view(request):
         'cuisines': cuisines,
         'has_location': has_location,
         'user_location': user_location,
+    }
+    return render(request, 'dishes/restaurant_list.html', context)
+
+
+def dish_detail_view(request, dish_id):
+    """View detailed dish information and where to find it."""
+    dish = get_object_or_404(Dish, id=dish_id, is_active=True)
+    user_location = get_user_location_from_request(request)
+
+    restaurant_qs = Restaurant.objects.filter(
+        restaurant_dishes__dish=dish,
+        restaurant_dishes__is_available=True
+    ).distinct().select_related('cuisine_type')
+
+    restaurants = []
+    if user_location:
+        for restaurant in restaurant_qs:
+            if restaurant.latitude and restaurant.longitude:
+                restaurant.distance = haversine_distance(
+                    user_location['latitude'],
+                    user_location['longitude'],
+                    restaurant.latitude,
+                    restaurant.longitude
+                )
+            restaurants.append(restaurant)
+        restaurants.sort(key=lambda r: r.distance if hasattr(r, 'distance') and r.distance is not None else float('inf'))
+    else:
+        restaurants = list(restaurant_qs)
+
+    is_favorite = False
+    if request.user.is_authenticated:
+        is_favorite = Favorite.objects.filter(user=request.user, dish=dish).exists()
+
+    context = {
+        'dish': dish,
+        'restaurants': restaurants,
+        'user_location': user_location,
+        'is_favorite': is_favorite,
+    }
+    return render(request, 'dishes/dish_detail.html', context)
+
+
+def restaurant_list_view(request):
+    """Browse restaurants with optional filters and sorting."""
+    user_location = get_user_location_from_request(request)
+
+    query = request.GET.get('q', '')
+    price_filter = request.GET.get('price')
+    rating_filter = request.GET.get('rating')
+    sort = request.GET.get('sort', 'name')
+
+    restaurants_qs = Restaurant.objects.filter(is_active=True)
+
+    if query:
+        restaurants_qs = restaurants_qs.filter(
+            Q(name__icontains=query) | Q(address__icontains=query) | Q(city__icontains=query)
+        )
+
+    if price_filter:
+        restaurants_qs = restaurants_qs.filter(price_range=price_filter)
+
+    if rating_filter:
+        try:
+            restaurants_qs = restaurants_qs.filter(rating__gte=float(rating_filter))
+        except (ValueError, TypeError):
+            pass
+
+    restaurants = list(restaurants_qs)
+
+    if user_location and sort == 'distance':
+        for restaurant in restaurants:
+            if restaurant.latitude and restaurant.longitude:
+                restaurant.distance = haversine_distance(
+                    user_location['latitude'],
+                    user_location['longitude'],
+                    restaurant.latitude,
+                    restaurant.longitude
+                )
+        restaurants = [r for r in restaurants if hasattr(r, 'distance')]
+        restaurants.sort(key=lambda r: r.distance)
+    else:
+        if sort == 'rating':
+            restaurants_qs = restaurants_qs.order_by('-rating')
+        elif sort == 'name':
+            restaurants_qs = restaurants_qs.order_by('name')
+        restaurants = list(restaurants_qs)
+
+    restaurant_count = len(restaurants)
+
+    context = {
+        'restaurants': restaurants,
+        'restaurant_count': restaurant_count,
+        'user_location': user_location,
+        'query': query,
+        'selected_price': price_filter,
+        'selected_rating': rating_filter,
+        'sort': sort,
     }
     return render(request, 'dishes/restaurant_list.html', context)
 
