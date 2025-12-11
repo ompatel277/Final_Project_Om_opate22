@@ -7,14 +7,9 @@ urlpatterns = [
     # Existing URLs
     path('', views.community_home_view, name='community_home'),
     path('trending/', views.trending_view, name='trending'),
-    path('rankings/', views.weekly_rankings_view, name='rankings'),
     path('dish/<int:dish_id>/reviews/', views.dish_reviews_view, name='dish_reviews'),
     path('dish/<int:dish_id>/review/add/', views.add_review_view, name='add_review'),
     path('review/<int:review_id>/helpful/', views.mark_helpful_view, name='mark_helpful'),
-    path('challenges/', views.challenges_view, name='challenges'),
-    path('challenge/<int:challenge_id>/join/', views.join_challenge_view, name='join_challenge'),
-    path('badges/', views.my_badges_view, name='my_badges'),
-    path('leaderboard/', views.leaderboard_view, name='leaderboard'),
 
     # NEW URLs
     path('restaurant/<int:restaurant_id>/reviews/', views.restaurant_reviews_view, name='restaurant_reviews'),
