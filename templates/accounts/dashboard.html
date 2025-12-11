@@ -5,59 +5,59 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Welcome, {{ user.first_name }}! 👋</h2>
+    <h2 class="mb-4" style="font-weight: 600;">Welcome, {{ user.first_name }}</h2>
 
     <div class="row">
-        <!-- Stats Cards -->
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="fas fa-hand-pointer fa-3x text-primary mb-3"></i>
-                    <h3>{{ total_swipes }}</h3>
-                    <p class="text-muted">Total Swipes</p>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 48px; height: 48px; background: #FEEAC9; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-hand-pointer" style="color: #FD7979; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.25rem;">{{ total_swipes }}</h3>
+                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Total Swipes</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="fas fa-heart fa-3x text-danger mb-3"></i>
-                    <h3>{{ favorites_count }}</h3>
-                    <p class="text-muted">Favorites</p>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 48px; height: 48px; background: #FFCDC9; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-heart" style="color: #FD7979; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.25rem;">{{ favorites_count }}</h3>
+                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Favorites</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
-                    <h3>{{ reviews_count }}</h3>
-                    <p class="text-muted">Reviews</p>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 48px; height: 48px; background: #FDACAC; border-radius: 8px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-star" style="color: #FD7979; font-size: 1.25rem;"></i>
+                    </div>
+                    <h3 style="font-weight: 600; margin-bottom: 0.25rem;">{{ reviews_count }}</h3>
+                    <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Reviews</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Quick Actions</h5>
-                    <div class="d-grid gap-2 d-md-flex">
-                        <a href="#" class="btn btn-primary">
-                            <i class="fas fa-utensils"></i> Start Swiping
-                        </a>
-                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-user"></i> View Profile
-                        </a>
-                        <a href="#" class="btn btn-outline-secondary">
-                            <i class="fas fa-heart"></i> My Favorites
-                        </a>
-                    </div>
-                </div>
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 style="font-weight: 600; margin-bottom: 1rem;">Quick Actions</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">
+                    <i class="fas fa-utensils"></i> Start Swiping
+                </a>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-user"></i> View Profile
+                </a>
+                <a href="{% url 'swipes:favorites' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-heart"></i> My Favorites
+                </a>
             </div>
         </div>
     </div>

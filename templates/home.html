@@ -6,140 +6,156 @@
 {% block content %}
 <div class="container">
     <!-- Hero Section -->
-    <div class="row align-items-center" style="min-height: 80vh;">
+    <div class="row align-items-center py-5">
         <div class="col-md-6">
-            <h1 class="display-2 fw-bold mb-4" style="color: #21262E;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; color: #2D3436; margin-bottom: 1rem;">
                 Find Your<br>
-                <span style="color: #FF6B6B; font-weight: 800;">
-                    Perfect Match
-                </span>
+                <span style="color: #FD7979;">Perfect Match</span>
             </h1>
-            <p class="lead mb-4" style="color: #666; font-size: 1.3rem;">
+            <p style="color: #636E72; font-size: 1rem; margin-bottom: 1.5rem;">
                 Swipe right on dishes you crave. Discover restaurants nearby.
-                Order instantly. It's like Tinder, but for food!
+                Order instantly. Food discovery made simple.
             </p>
 
             {% if user.is_authenticated %}
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary btn-lg me-3" style="font-size: 1.2rem; padding: 15px 40px; background: #FF6B6B; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);">
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary me-2">
                     <i class="fas fa-fire"></i> Start Swiping
                 </a>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary btn-lg" style="font-size: 1.2rem; padding: 15px 40px; color: #FF6B6B; border-color: #FF6B6B; border-radius: 12px;">
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
                     <i class="fas fa-user"></i> My Profile
                 </a>
             {% else %}
-                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg me-3" style="font-size: 1.2rem; padding: 15px 40px; background: #FF6B6B; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);">
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary me-2">
                     <i class="fas fa-heart"></i> Join Free
                 </a>
-                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg" style="font-size: 1.2rem; padding: 15px 40px; color: #FF6B6B; border-color: #FF6B6B; border-radius: 12px;">
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </a>
             {% endif %}
         </div>
         <div class="col-md-6 text-center">
-            <div style="font-size: 280px; line-height: 1;">🍔</div>
+            <div style="width: 200px; height: 200px; background: #FEEAC9; border-radius: 8px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-hamburger" style="font-size: 4rem; color: #FD7979;"></i>
+            </div>
         </div>
     </div>
 
     <!-- Features Section -->
-    <div class="row mt-5 mb-5">
-        <div class="col-md-12 text-center mb-5">
-            <h2 class="display-5 fw-bold" style="color: #21262E;">How It Works</h2>
-            <p class="lead text-muted">Three simple swipes to your next meal</p>
+    <div class="row py-4">
+        <div class="col-md-12 text-center mb-4">
+            <h2 style="font-weight: 600; color: #2D3436;">How It Works</h2>
+            <p style="color: #636E72;">Three simple steps to your next meal</p>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-center p-4 h-100" style="border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <div class="card-body">
-                    <div class="mb-3" style="font-size: 80px;">👆</div>
-                    <h3 class="card-title fw-bold" style="color: #FF6B6B;">Swipe</h3>
-                    <p class="card-text" style="color: #666;">Browse delicious dishes. Right for yes, left for nope. Just like dating, but tastier.</p>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 60px; height: 60px; background: #FEEAC9; border-radius: 8px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-hand-pointer" style="font-size: 1.5rem; color: #FD7979;"></i>
+                    </div>
+                    <h5 style="color: #FD7979; font-weight: 600;">Swipe</h5>
+                    <p style="color: #636E72; font-size: 0.875rem;">Browse dishes. Right for yes, left for no.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-center p-4 h-100" style="border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <div class="card-body">
-                    <div class="mb-3" style="font-size: 80px;">💘</div>
-                    <h3 class="card-title fw-bold" style="color: #FF6B6B;">Match</h3>
-                    <p class="card-text" style="color: #666;">Found a match! See nearby restaurants serving your dish with ratings and reviews.</p>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 60px; height: 60px; background: #FFCDC9; border-radius: 8px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-heart" style="font-size: 1.5rem; color: #FD7979;"></i>
+                    </div>
+                    <h5 style="color: #FD7979; font-weight: 600;">Match</h5>
+                    <p style="color: #636E72; font-size: 0.875rem;">Find nearby restaurants serving your dish.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-center p-4 h-100" style="border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <div class="card-body">
-                    <div class="mb-3" style="font-size: 80px;">🚀</div>
-                    <h3 class="card-title fw-bold" style="color: #FF6B6B;">Order</h3>
-                    <p class="card-text" style="color: #666;">Order through Uber Eats, DoorDash, or Grubhub. Food delivered to your door.</p>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div style="width: 60px; height: 60px; background: #FDACAC; border-radius: 8px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-shopping-bag" style="font-size: 1.5rem; color: #FD7979;"></i>
+                    </div>
+                    <h5 style="color: #FD7979; font-weight: 600;">Order</h5>
+                    <p style="color: #636E72; font-size: 0.875rem;">Order through your favorite delivery app.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Extra Features -->
-    <div class="row mt-5 mb-5 p-5 rounded" style="background: white; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: 16px;">
-        <div class="col-md-12 text-center mb-5">
-            <h2 class="display-6 fw-bold" style="color: #21262E;">More Ways to Connect with Food</h2>
-        </div>
-
-        <div class="col-md-6 mb-4">
-            <div class="d-flex align-items-start">
-                <div style="font-size: 40px; margin-right: 20px;">🤖</div>
-                <div>
-                    <h5 class="fw-bold" style="color: #FF6B6B;">AI Food Assistant</h5>
-                    <p style="color: #666;">Ask about ingredients, nutrition, and get personalized recommendations. Your foodie BFF.</p>
-                </div>
+    <div class="card my-4">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <h2 style="font-weight: 600; color: #2D3436;">More Features</h2>
             </div>
-        </div>
 
-        <div class="col-md-6 mb-4">
-            <div class="d-flex align-items-start">
-                <div style="font-size: 40px; margin-right: 20px;">🔥</div>
-                <div>
-                    <h5 class="fw-bold" style="color: #FF6B6B;">Trending Dishes</h5>
-                    <p style="color: #666;">See what's hot in your area. Weekly top 10 rankings and community favorites.</p>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div style="width: 40px; height: 40px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 1rem;">
+                            <i class="fas fa-robot" style="color: #FD7979;"></i>
+                        </div>
+                        <div>
+                            <h6 style="color: #FD7979; font-weight: 600; margin-bottom: 0.25rem;">AI Food Assistant</h6>
+                            <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Get personalized recommendations based on your preferences.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-md-6 mb-4">
-            <div class="d-flex align-items-start">
-                <div style="font-size: 40px; margin-right: 20px;">💕</div>
-                <div>
-                    <h5 class="fw-bold" style="color: #FF6B6B;">Save Your Matches</h5>
-                    <p style="color: #666;">Build your collection of favorite dishes and restaurants. Never lose a good match.</p>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div style="width: 40px; height: 40px; background: #FFCDC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 1rem;">
+                            <i class="fas fa-chart-line" style="color: #FD7979;"></i>
+                        </div>
+                        <div>
+                            <h6 style="color: #FD7979; font-weight: 600; margin-bottom: 0.25rem;">Trending Dishes</h6>
+                            <p style="color: #636E72; font-size: 0.875rem; margin: 0;">See what's popular in your area right now.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-md-6 mb-4">
-            <div class="d-flex align-items-start">
-                <div style="font-size: 40px; margin-right: 20px;">🎯</div>
-                <div>
-                    <h5 class="fw-bold" style="color: #FF6B6B;">Smart Filters</h5>
-                    <p style="color: #666;">Filter by diet, allergies, calories, price, and distance. Your preferences matter.</p>
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div style="width: 40px; height: 40px; background: #FDACAC; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 1rem;">
+                            <i class="fas fa-bookmark" style="color: #FD7979;"></i>
+                        </div>
+                        <div>
+                            <h6 style="color: #FD7979; font-weight: 600; margin-bottom: 0.25rem;">Save Your Matches</h6>
+                            <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Build your collection of favorite dishes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="d-flex align-items-start">
+                        <div style="width: 40px; height: 40px; background: #FD7979; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 1rem;">
+                            <i class="fas fa-filter" style="color: #FFFFFF;"></i>
+                        </div>
+                        <div>
+                            <h6 style="color: #FD7979; font-weight: 600; margin-bottom: 0.25rem;">Smart Filters</h6>
+                            <p style="color: #636E72; font-size: 0.875rem; margin: 0;">Filter by diet, allergies, calories, and distance.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- CTA Section -->
-    <div class="row mt-5 mb-5">
-        <div class="col-md-12 text-center p-5 rounded text-white" style="background: #FF6B6B; border-radius: 16px; box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);">
-            <h2 class="display-4 fw-bold mb-3">Ready to Swipe Right on Food?</h2>
-            <p class="lead mb-4">Join thousands discovering their next favorite dish</p>
-            {% if not user.is_authenticated %}
-                <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg" style="color: #FF6B6B; font-weight: 600; padding: 15px 40px; font-size: 1.2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                    <i class="fas fa-fire"></i> Get Started Free
-                </a>
-            {% else %}
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-light btn-lg" style="color: #FF6B6B; font-weight: 600; padding: 15px 40px; font-size: 1.2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                    <i class="fas fa-fire"></i> Start Swiping Now
-                </a>
-            {% endif %}
-        </div>
+    <div class="text-center p-4 my-4" style="background: #FD7979; border-radius: 8px;">
+        <h2 style="color: #FFFFFF; font-weight: 600; margin-bottom: 0.5rem;">Ready to Start?</h2>
+        <p style="color: rgba(255,255,255,0.9); margin-bottom: 1rem;">Join thousands discovering their next favorite dish</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:register' %}" class="btn" style="background: #FFFFFF; color: #FD7979; font-weight: 600;">
+                <i class="fas fa-fire"></i> Get Started Free
+            </a>
+        {% else %}
+            <a href="{% url 'swipes:swipe_feed' %}" class="btn" style="background: #FFFFFF; color: #FD7979; font-weight: 600;">
+                <i class="fas fa-fire"></i> Start Swiping Now
+            </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
