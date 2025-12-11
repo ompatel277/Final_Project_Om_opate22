@@ -11,116 +11,213 @@
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/swipe&bite.css' %}">
 
     <style>
-        :root {
-            --tinder-primary: #FE3C72;
-            --tinder-gradient: linear-gradient(135deg, #FE3C72 0%, #FF655B 100%);
-        }
+        /* Clean Solid Color Base */
         body {
-            font-family: 'Poppins', sans-serif;
-            background: #F8F8F8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #FAFAFA;
             min-height: 100vh;
+            color: #2D3436;
         }
+
+        /* Clean Navbar */
         .navbar {
-            background: var(--tinder-gradient) !important;
-            box-shadow: 0 2px 15px rgba(254, 60, 114, 0.3);
-            padding: 10px 0;
+            background: #FFFFFF !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid #E9ECEF;
+            padding: 0.875rem 0;
         }
+
         .navbar-brand {
             font-weight: 800;
-            font-size: 1.6rem;
-            color: white !important;
+            font-size: 1.5rem;
+            color: #FF6B6B !important;
+            letter-spacing: -0.5px;
+            transition: all 200ms ease-in-out;
         }
+
+        .navbar-brand:hover {
+            color: #EE5A52 !important;
+            transform: translateY(-1px);
+        }
+
         .nav-link {
-            color: rgba(255,255,255,0.95) !important;
-            font-weight: 500;
-            padding: 6px 12px !important;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .nav-link.active {
-            background: rgba(255, 255, 255, 0.3);
+            color: #636E72 !important;
             font-weight: 600;
+            padding: 0.5rem 1rem !important;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            transition: all 200ms ease-in-out;
         }
+
+        .nav-link:hover {
+            color: #FF6B6B !important;
+            background: #FFF5F5;
+        }
+
+        .nav-link.active {
+            color: #FF6B6B !important;
+            background: #FFF5F5;
+            font-weight: 700;
+        }
+
+        .nav-link i {
+            margin-right: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        /* Clean Search Form */
         .search-form {
             display: flex;
             align-items: center;
             margin: 0 10px;
         }
+
         .search-form input {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            background: #F5F5F5;
+            border: 2px solid #E9ECEF;
+            color: #2D3436;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
             width: 200px;
+            transition: all 200ms ease-in-out;
         }
+
         .search-form input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: #95A5A6;
         }
+
         .search-form input:focus {
-            background: rgba(255, 255, 255, 0.3);
+            background: #FFFFFF;
             outline: none;
-            border-color: rgba(255, 255, 255, 0.6);
-            color: white;
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+            color: #2D3436;
         }
+
         .search-form button {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: #FF6B6B;
+            border: none;
             color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            margin-left: 5px;
+            padding: 0.5rem 0.875rem;
+            border-radius: 10px;
+            margin-left: 0.5rem;
+            transition: all 200ms ease-in-out;
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.2);
         }
+
         .search-form button:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #EE5A52;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 107, 107, 0.3);
         }
+
+        /* Clean Location Button */
         .location-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            background: #F5F5F5;
+            border: 2px solid #E9ECEF;
+            color: #636E72;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 200ms ease-in-out;
         }
+
         .location-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            border-color: #FF6B6B;
+            color: #FF6B6B;
+            background: #FFF5F5;
         }
+
+        .location-btn i {
+            margin-right: 0.375rem;
+            color: #FF6B6B;
+        }
+
+        /* Clean Dropdown */
         .dropdown-menu {
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border-radius: 14px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E9ECEF;
+            padding: 0.75rem;
         }
+
+        .dropdown-item {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 200ms ease-in-out;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: #FFF5F5;
+            color: #FF6B6B;
+        }
+
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 1rem;
+            text-align: center;
+            color: #FF6B6B;
+        }
+
+        /* Clean Modal */
         .modal-header {
-            background: var(--tinder-gradient);
-            color: white;
-            border-radius: 20px 20px 0 0;
+            background: #FFF5F5;
+            color: #2D3436;
+            border-radius: 14px 14px 0 0;
+            border-bottom: 1px solid #E9ECEF;
         }
+
+        .modal-content {
+            border-radius: 14px;
+            border: 1px solid #E9ECEF;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .modal-title {
+            font-weight: 700;
+            color: #2D3436;
+        }
+
+        .modal-title i {
+            color: #FF6B6B;
+            margin-right: 0.5rem;
+        }
+
+        /* Clean Chatbot Widget */
         #chatbotWidget {
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 1000;
         }
+
         #chatbotToggle {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: var(--tinder-gradient);
+            background: #FF6B6B;
             border: none;
             color: white;
             font-size: 24px;
-            box-shadow: 0 4px 12px rgba(254, 60, 114, 0.5);
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
             cursor: pointer;
+            transition: all 200ms ease-in-out;
         }
+
         #chatbotToggle:hover {
+            background: #EE5A52;
             transform: scale(1.1);
+            box-shadow: 0 12px 20px rgba(255, 107, 107, 0.4);
         }
+
         #chatbotWindow {
             position: fixed;
             bottom: 90px;
@@ -128,83 +225,216 @@
             width: 350px;
             height: 500px;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border-radius: 14px;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid #E9ECEF;
             display: none;
             flex-direction: column;
         }
+
         #chatbotWindow.show {
             display: flex;
         }
+
         .chatbot-header {
-            background: var(--tinder-gradient);
+            background: #FF6B6B;
             color: white;
-            padding: 15px;
+            padding: 1rem 1.25rem;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            border-radius: 14px 14px 0 0;
         }
+
+        .chatbot-header strong {
+            font-weight: 700;
+        }
+
+        .chatbot-header i {
+            margin-right: 0.5rem;
+        }
+
         .chatbot-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
-            background: #f8f9fa;
+            padding: 1.25rem;
+            background: #FAFAFA;
         }
+
         .chat-message {
             margin-bottom: 12px;
-            padding: 10px 15px;
-            border-radius: 15px;
+            padding: 0.875rem 1.125rem;
+            border-radius: 12px;
             max-width: 80%;
+            line-height: 1.5;
+            font-size: 0.9375rem;
         }
+
         .chat-message.bot {
             background: white;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #E9ECEF;
+            color: #2D3436;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+
         .chat-message.user {
-            background: var(--tinder-gradient);
+            background: #FF6B6B;
             color: white;
             margin-left: auto;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.25);
         }
+
         .chatbot-input-area {
-            padding: 15px;
-            border-top: 1px solid #e0e0e0;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid #E9ECEF;
+            background: white;
         }
+
         .chatbot-input-area form {
             display: flex;
-            gap: 10px;
+            gap: 0.625rem;
         }
+
         .chatbot-input-area input {
             flex: 1;
-            border: 1px solid #e0e0e0;
-            border-radius: 20px;
-            padding: 10px 15px;
+            border: 2px solid #E9ECEF;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 200ms ease-in-out;
         }
+
+        .chatbot-input-area input:focus {
+            outline: none;
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+        }
+
         .chatbot-input-area button {
-            background: var(--tinder-gradient);
+            background: #FF6B6B;
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            transition: all 200ms ease-in-out;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(255, 107, 107, 0.25);
         }
+
+        .chatbot-input-area button:hover {
+            background: #EE5A52;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.35);
+        }
+
+        /* Clean Footer */
         footer {
-            background: var(--tinder-gradient);
+            background: #2D3436;
             color: white;
-            padding: 30px 0;
-            margin-top: 50px;
+            padding: 2.5rem 0;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #FF6B6B;
+        }
+
+        footer h5 {
+            font-weight: 800;
+            color: #FF6B6B;
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 0.5rem;
+        }
+
+        footer small {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        /* Clean Alerts */
+        .alert {
+            border-radius: 10px;
+            border: 1px solid;
+            font-size: 0.9375rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Clean Buttons (Bootstrap overrides) */
+        .btn {
+            border-radius: 10px;
+            font-weight: 700;
+            padding: 0.75rem 1.75rem;
+            transition: all 200ms ease-in-out;
+        }
+
+        .btn-primary {
+            background: #FF6B6B;
+            border: none;
+            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: #EE5A52;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 107, 107, 0.35);
+        }
+
+        .btn-outline-light {
+            border: 2px solid #CED4DA;
+            color: #636E72;
+            background: white;
+            font-weight: 700;
+        }
+
+        .btn-outline-light:hover {
+            background: #FFF5F5;
+            border-color: #FF6B6B;
+            color: #FF6B6B;
+        }
+
+        /* Clean Form Controls */
+        .form-control {
+            border: 2px solid #E9ECEF;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 200ms ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2D3436;
+            margin-bottom: 0.5rem;
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">🔥 Swipe&Bite</a>
+            <a class="navbar-brand" href="{% url 'home' %}">Swipe&Bite</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a></li>
 
                     {% if user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
@@ -256,8 +486,8 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-map-marker-alt"></i> Set Location</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title"><i class="fas fa-map-marker-alt"></i> Set Your Location</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <button class="btn btn-primary w-100 mb-3" onclick="autoDetectLocation()">
@@ -265,9 +495,18 @@
                     </button>
                     <hr>
                     <form id="manualLocationForm">
-                        <input type="number" step="any" class="form-control mb-2" id="manualLat" placeholder="Latitude" required>
-                        <input type="number" step="any" class="form-control mb-2" id="manualLng" placeholder="Longitude" required>
-                        <input type="text" class="form-control mb-3" id="manualCity" placeholder="City (optional)">
+                        <div class="mb-3">
+                            <label for="manualLat" class="form-label">Latitude</label>
+                            <input type="number" step="any" class="form-control" id="manualLat" placeholder="Enter latitude" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="manualLng" class="form-label">Longitude</label>
+                            <input type="number" step="any" class="form-control" id="manualLng" placeholder="Enter longitude" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="manualCity" class="form-label">City (Optional)</label>
+                            <input type="text" class="form-control" id="manualCity" placeholder="Enter city name">
+                        </div>
                         <button type="submit" class="btn btn-primary w-100">Set Location</button>
                     </form>
                     <div id="locationStatus" class="mt-3"></div>
@@ -280,14 +519,14 @@
         <div id="chatbotWindow">
             <div class="chatbot-header">
                 <strong><i class="fas fa-robot"></i> AI Assistant</strong>
-                <button onclick="toggleChatbot()" style="background:none;border:none;color:white;"><i class="fas fa-times"></i></button>
+                <button onclick="toggleChatbot()" style="background:none;border:none;color:white;cursor:pointer;"><i class="fas fa-times"></i></button>
             </div>
             <div class="chatbot-messages" id="chatMessages">
-                <div class="chat-message bot">Hi! Ask me anything about dishes or restaurants!</div>
+                <div class="chat-message bot">Hi! How can I help you discover great food today?</div>
             </div>
             <div class="chatbot-input-area">
                 <form onsubmit="sendChat(event)">
-                    <input type="text" id="chatInput" placeholder="Ask me..." autocomplete="off">
+                    <input type="text" id="chatInput" placeholder="Ask me anything..." autocomplete="off">
                     <button type="submit"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
@@ -312,7 +551,7 @@
 
     <footer class="text-center">
         <div class="container">
-            <h5>🔥 Swipe&Bite</h5>
+            <h5>Swipe&Bite</h5>
             <p>Discover your next favorite dish</p>
             <small>&copy; 2024 Swipe&Bite by Om Opate</small>
         </div>
@@ -335,7 +574,7 @@
 
         function autoDetectLocation() {
             if (!navigator.geolocation) {
-                alert('Geolocation not supported');
+                alert('Geolocation is not supported by your browser');
                 return;
             }
             navigator.geolocation.getCurrentPosition(
@@ -351,7 +590,7 @@
                         .catch(() => saveLocation(lat, lng, 'Unknown'));
                 },
                 function(error) {
-                    alert('Location access denied');
+                    alert('Unable to retrieve your location');
                 }
             );
         }
@@ -374,12 +613,12 @@
             })
             .then(r => r.json())
             .then(data => {
-                alert('Location saved!');
+                alert('Location saved successfully!');
                 window.location.reload();
             });
             {% else %}
             document.getElementById('navLocationText').textContent = city;
-            alert('Location saved! Log in to sync across devices.');
+            alert('Location saved! Please log in to sync across devices.');
             {% endif %}
         }
 
@@ -399,7 +638,7 @@
             div.scrollTop = div.scrollHeight;
 
             setTimeout(() => {
-                div.innerHTML += `<div class="chat-message bot">I'm still learning! Connect me to AI endpoint.</div>`;
+                div.innerHTML += `<div class="chat-message bot">I'm processing your request. This feature is coming soon!</div>`;
                 div.scrollTop = div.scrollHeight;
             }, 500);
         }

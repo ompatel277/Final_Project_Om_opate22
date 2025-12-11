@@ -5,53 +5,113 @@
 
 {% block extra_css %}
 <style>
+/* Vibrant Community Container */
 .community-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 2rem 1rem;
 }
 
+/* Vibrant Page Header */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .page-header h1 {
     margin: 0;
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 50%, #FFA94D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-header h1 i {
+    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .location-badge {
-    padding: 8px 20px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.15);
 }
 
+.location-badge.bg-success {
+    background: linear-gradient(135deg, #20C997 0%, #51CF66 100%) !important;
+    border: none;
+}
+
+.location-badge.bg-warning {
+    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%) !important;
+    border: none;
+}
+
+.location-badge i {
+    font-size: 1.125rem;
+}
+
+/* Vibrant Search Bar */
 .search-bar {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background: var(--bg-primary, #FFFFFF);
+    padding: 1.75rem;
+    border-radius: 16px;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--border-light, #E9ECEF);
     position: relative;
+    overflow: hidden;
+}
+
+.search-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FF385C 0%, #FF6B6B 33%, #FFA94D 66%, #51CF66 100%);
 }
 
 .search-bar input {
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-size: 16px;
+    border: 2px solid var(--border-light, #E9ECEF);
+    border-radius: 12px;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    font-size: 1.0625rem;
     width: 100%;
+    transition: all 200ms ease-in-out;
+    font-weight: 500;
 }
 
 .search-bar input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    border-color: var(--primary-red, #FF385C);
+    box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.1);
     outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 2.75rem;
+    top: 2.75rem;
+    color: var(--primary-red, #FF385C);
+    pointer-events: none;
+    font-size: 1.125rem;
 }
 
 #searchResults {
@@ -60,113 +120,176 @@
     left: 0;
     right: 0;
     z-index: 100;
-    margin-top: 10px;
+    margin-top: 0.75rem;
 }
 
 .search-result-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-light, #E9ECEF);
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: all 200ms ease-in-out;
 }
 
 .search-result-item:hover {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, rgba(255, 56, 92, 0.05) 0%, rgba(255, 107, 107, 0.05) 100%);
+    transform: translateX(8px);
 }
 
 .search-result-item:last-child {
     border-bottom: none;
 }
 
+/* Vibrant Section Styles */
 .trending-section {
-    margin-bottom: 50px;
+    margin-bottom: 3.5rem;
 }
 
 .section-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 20px;
+    font-size: 1.875rem;
+    font-weight: 900;
+    margin-bottom: 1.75rem;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.75rem;
+    color: var(--text-primary, #2C3E50);
+    flex-wrap: wrap;
+}
+
+.section-title i {
+    font-size: 1.875rem;
+    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .section-subtitle {
-    font-size: 14px;
-    color: #666;
-    font-weight: 400;
+    font-size: 1rem;
+    color: var(--text-secondary, #5A6C7D);
+    font-weight: 600;
 }
 
+/* Vibrant Trending Grid */
 .trending-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 1.75rem;
 }
 
 .trending-card {
-    background: white;
-    border-radius: 15px;
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--border-light, #E9ECEF);
+    transition: all 300ms ease-in-out;
     cursor: pointer;
+    position: relative;
+}
+
+.trending-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FF385C 0%, #FFA94D 100%);
+    transform: scaleX(0);
+    transition: transform 300ms ease-in-out;
+}
+
+.trending-card:hover::before {
+    transform: scaleX(1);
 }
 
 .trending-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -10px rgba(255, 56, 92, 0.2);
+    border-color: rgba(255, 56, 92, 0.3);
 }
 
 .trending-card img {
     width: 100%;
     height: 200px;
     object-fit: cover;
+    background: var(--gray-200, #EEEEEE);
 }
 
 .trending-card-body {
-    padding: 20px;
+    padding: 1.5rem;
 }
 
 .trending-card h5 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    font-weight: 700;
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary, #2C3E50);
 }
 
 .trending-card .cuisine {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-
-.rating-badge {
-    background: #ffc107;
-    color: #000;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 14px;
+    color: var(--text-secondary, #5A6C7D);
+    font-size: 1rem;
+    margin-bottom: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 600;
-    display: inline-block;
 }
 
+.trending-card .cuisine i {
+    color: var(--primary-red, #FF385C);
+}
+
+/* Vibrant Rating Badge */
+.rating-badge {
+    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 10px -2px rgba(255, 142, 83, 0.4);
+}
+
+/* Vibrant Ranking List */
 .ranking-list {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--border-light, #E9ECEF);
+    position: relative;
+    overflow: hidden;
+}
+
+.ranking-list::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FFD700 0%, #FF385C 50%, #FFA94D 100%);
 }
 
 .ranking-item {
     display: flex;
     align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    transition: background 0.2s ease;
+    padding: 1.25rem;
+    border-bottom: 2px solid var(--border-light, #E9ECEF);
+    transition: all 200ms ease-in-out;
     cursor: pointer;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
 }
 
 .ranking-item:hover {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, rgba(255, 56, 92, 0.05) 0%, rgba(255, 107, 107, 0.05) 100%);
+    transform: translateX(8px);
 }
 
 .ranking-item:last-child {
@@ -174,31 +297,50 @@
 }
 
 .rank-number {
-    font-size: 24px;
-    font-weight: 700;
-    color: #667eea;
-    width: 50px;
+    font-size: 1.875rem;
+    font-weight: 900;
+    width: 70px;
     text-align: center;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .rank-number.gold {
-    color: #ffd700;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
 }
 
 .rank-number.silver {
-    color: #c0c0c0;
+    background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(192, 192, 192, 0.3));
 }
 
 .rank-number.bronze {
-    color: #cd7f32;
+    background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(205, 127, 50, 0.3));
 }
 
 .ranking-item img {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px;
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
     object-fit: cover;
-    margin: 0 15px;
+    margin: 0 1.25rem;
+    flex-shrink: 0;
+    background: var(--gray-200, #EEEEEE);
+    border: 2px solid var(--border-light, #E9ECEF);
 }
 
 .ranking-info {
@@ -206,219 +348,277 @@
 }
 
 .ranking-info h6 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--text-primary, #2C3E50);
+}
+
+.ranking-info small {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 600;
 }
 
+.ranking-info small i {
+    color: var(--primary-red, #FF385C);
+}
+
+/* Vibrant Review Card */
 .review-card {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--border-light, #E9ECEF);
+    transition: all 200ms ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.review-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #FF385C 0%, #FFA94D 100%);
+}
+
+.review-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(255, 56, 92, 0.15);
+    transform: translateY(-2px);
 }
 
 .review-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    margin-bottom: 0.875rem;
+    gap: 1rem;
 }
 
 .review-author {
-    font-weight: 600;
-    font-size: 16px;
+    font-weight: 800;
+    font-size: 1.0625rem;
+    color: var(--text-primary, #2C3E50);
+}
+
+.review-author i {
+    color: var(--primary-red, #FF385C);
+    margin-right: 0.5rem;
 }
 
 .review-date {
-    color: #999;
-    font-size: 13px;
+    color: var(--text-tertiary, #95A5A6);
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
 .review-content {
-    color: #555;
-    line-height: 1.6;
+    color: var(--text-secondary, #5A6C7D);
+    line-height: 1.8;
+    font-size: 1rem;
 }
 
+/* Vibrant Challenge Card */
 .challenge-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 50%, #FFA94D 100%);
     color: white;
-    border-radius: 15px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 18px;
+    padding: 2.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 15px 35px -5px rgba(255, 56, 92, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.challenge-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
 }
 
 .challenge-card h5 {
-    margin: 0 0 10px 0;
-    font-size: 20px;
-    font-weight: 700;
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 900;
+    position: relative;
+    z-index: 1;
 }
 
 .challenge-card p {
-    margin: 0 0 15px 0;
-    opacity: 0.9;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.95;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+    font-size: 1.0625rem;
 }
 
 .challenge-card .btn {
     background: white;
-    color: #667eea;
+    color: var(--primary-red, #FF385C);
     border: none;
-    font-weight: 600;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.2);
 }
 
 .challenge-card .btn:hover {
-    background: #f8f9fa;
+    background: #FFFBF8;
+    color: var(--primary-red-dark, #E31C5F);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
-/* AI Chatbot Styles */
-.ai-chatbot {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.chatbot-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.chatbot-button:hover {
-    transform: scale(1.1);
-}
-
-.chatbot-window {
-    display: none;
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 350px;
-    height: 500px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-    flex-direction: column;
-}
-
-.chatbot-window.active {
-    display: flex;
-}
-
-.chatbot-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px;
-    border-radius: 15px 15px 0 0;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chatbot-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.chatbot-messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-}
-
-.chatbot-input {
-    padding: 15px;
-    border-top: 1px solid #e9ecef;
-    display: flex;
-    gap: 10px;
-}
-
-.chatbot-input input {
-    flex: 1;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 10px;
-}
-
-.chatbot-input input:focus {
-    border-color: #667eea;
-    outline: none;
-}
-
-.chatbot-input button {
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.chatbot-input button:hover {
-    background: #5568d3;
-}
-
-.message {
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border-radius: 10px;
-    max-width: 80%;
-    word-wrap: break-word;
-}
-
-.message.user {
-    background: #667eea;
-    color: white;
-    margin-left: auto;
-}
-
-.message.bot {
-    background: #f0f0f0;
-    color: #333;
-}
-
+/* Vibrant Empty State */
 .empty-state {
     text-align: center;
-    padding: 40px;
-    color: #999;
+    padding: 3.5rem 2rem;
+    color: var(--text-tertiary, #95A5A6);
+}
+
+.empty-state i {
+    font-size: 5rem;
+    background: linear-gradient(135deg, #FF385C 0%, #FFA94D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
 }
 
 .empty-state h5 {
-    color: #666;
-    margin-bottom: 10px;
+    color: var(--text-secondary, #5A6C7D);
+    margin-bottom: 0.875rem;
+    font-weight: 800;
+    font-size: 1.375rem;
 }
 
+.empty-state p {
+    font-size: 1.0625rem;
+}
+
+/* Vibrant Quick Links Cards */
+.quick-link-card {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 16px;
+    border: 2px solid var(--border-light, #E9ECEF);
+    transition: all 300ms ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-link-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FF385C 0%, #FFA94D 100%);
+    transform: scaleX(0);
+    transition: transform 300ms ease-in-out;
+}
+
+.quick-link-card:hover::before {
+    transform: scaleX(1);
+}
+
+.quick-link-card:hover {
+    box-shadow: 0 20px 40px -10px rgba(255, 56, 92, 0.2);
+    transform: translateY(-6px);
+    border-color: rgba(255, 56, 92, 0.3);
+}
+
+.quick-link-card .card-body {
+    padding: 2.5rem 1.75rem;
+}
+
+.quick-link-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2.25rem;
+    box-shadow: 0 10px 25px -5px rgba(255, 56, 92, 0.4);
+    transition: all 300ms ease-in-out;
+}
+
+.quick-link-card:nth-child(2) .quick-link-icon {
+    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%);
+    box-shadow: 0 10px 25px -5px rgba(255, 142, 83, 0.4);
+}
+
+.quick-link-card:nth-child(3) .quick-link-icon {
+    background: linear-gradient(135deg, #20C997 0%, #51CF66 100%);
+    box-shadow: 0 10px 25px -5px rgba(32, 201, 151, 0.4);
+}
+
+.quick-link-card:hover .quick-link-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.quick-link-card h5 {
+    font-weight: 900;
+    color: var(--text-primary, #2C3E50);
+    margin-bottom: 0.625rem;
+    font-size: 1.375rem;
+}
+
+.quick-link-card p {
+    color: var(--text-secondary, #5A6C7D);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .trending-grid {
         grid-template-columns: 1fr;
     }
 
-    .chatbot-window {
-        width: 90%;
-        right: 5%;
-    }
-
     .page-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 1.5rem;
     }
 }
 </style>
@@ -428,28 +628,35 @@
 <div class="community-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1>🌟 Community Feed</h1>
+        <h1>
+            <i class="fas fa-users"></i>
+            Community Feed
+        </h1>
         {% if has_location %}
             <div class="badge bg-success location-badge">
-                📍 {{ user_location.city }}
+                <i class="fas fa-map-marker-alt"></i>
+                {{ user_location.city }}
             </div>
         {% else %}
             <div class="badge bg-warning text-dark location-badge">
-                📍 Location not set
+                <i class="fas fa-map-marker-alt"></i>
+                Location not set
             </div>
         {% endif %}
     </div>
 
     <!-- Search Bar -->
     <div class="search-bar">
-        <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search dishes or restaurants...">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search dishes or restaurants...">
         <div id="searchResults"></div>
     </div>
 
     <!-- Trending Dishes Section -->
     <div class="trending-section">
         <div class="section-title">
-            🔥 Trending Dishes
+            <i class="fas fa-fire"></i>
+            Trending Dishes
             {% if has_location %}
                 <span class="section-subtitle">in {{ user_location.city }}</span>
             {% endif %}
@@ -458,29 +665,41 @@
         {% if trending_dishes %}
             <div class="trending-grid">
                 {% for trending in trending_dishes %}
+                    {% if trending.dish and trending.dish.id %}
                     <div class="trending-card" onclick="window.location.href='{% url 'community:dish_reviews' trending.dish.id %}'">
                         <img src="{{ trending.dish.display_image }}" alt="{{ trending.dish.name }}">
                         <div class="trending-card-body">
                             <h5>{{ trending.dish.name }}</h5>
-                            <p class="cuisine">{{ trending.dish.cuisine.emoji }} {{ trending.dish.cuisine.name }}</p>
+                            <p class="cuisine">
+                                <i class="fas fa-utensils"></i>
+                                {{ trending.dish.cuisine.name }}
+                            </p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="rating-badge">⭐ {{ trending.dish.average_rating|floatformat:1 }}</span>
-                                <span class="text-muted" style="font-size: 14px;">
+                                <span class="rating-badge">
+                                    <i class="fas fa-star"></i>
+                                    {{ trending.dish.average_rating|floatformat:1 }}
+                                </span>
+                                <span class="text-muted" style="font-size: 0.875rem; font-weight: 600;">
                                     {{ trending.dish.total_ratings }} reviews
                                 </span>
                             </div>
                             <div class="mt-2">
-                                <small class="text-muted">🔥 Score: {{ trending.trending_score }}</small>
+                                <small class="text-muted" style="font-weight: 600;">
+                                    <i class="fas fa-chart-line" style="color: var(--primary-red, #FF385C);"></i>
+                                    Score: {{ trending.trending_score }}
+                                </small>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
+                <i class="fas fa-utensils"></i>
                 <h5>No trending dishes yet</h5>
                 <p>Be the first to review dishes in your area!</p>
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">Start Swiping</a>
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-professional-primary">Start Swiping</a>
             </div>
         {% endif %}
     </div>
@@ -488,7 +707,8 @@
     <!-- Trending Restaurants Section -->
     <div class="trending-section">
         <div class="section-title">
-            🏆 Trending Restaurants
+            <i class="fas fa-trophy"></i>
+            Trending Restaurants
             {% if has_location %}
                 <span class="section-subtitle">in {{ user_location.city }}</span>
             {% endif %}
@@ -497,34 +717,43 @@
         {% if trending_restaurants %}
             <div class="trending-grid">
                 {% for restaurant in trending_restaurants %}
+                    {% if restaurant and restaurant.id %}
                     <div class="trending-card" onclick="window.location.href='{% url 'community:restaurant_reviews' restaurant.id %}'">
                         <div class="trending-card-body">
                             <h5>{{ restaurant.name }}</h5>
-                            <p class="text-muted mb-2">
-                                📍 {{ restaurant.address|truncatewords:8 }}
+                            <p class="text-muted mb-2" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                <i class="fas fa-map-marker-alt" style="color: var(--primary-red, #FF385C);"></i>
+                                {{ restaurant.address|truncatewords:8 }}
                             </p>
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="rating-badge">⭐ {{ restaurant.avg_rating|floatformat:1 }}</span>
-                                <span class="text-muted" style="font-size: 14px;">
+                                <span class="rating-badge">
+                                    <i class="fas fa-star"></i>
+                                    {{ restaurant.avg_rating|floatformat:1 }}
+                                </span>
+                                <span class="text-muted" style="font-size: 0.875rem; font-weight: 600;">
                                     {{ restaurant.review_count }} reviews
                                 </span>
                             </div>
                             {% if restaurant.distance %}
-                                <p class="mb-0" style="font-size: 13px; color: #666;">
-                                    📏 {{ restaurant.distance|floatformat:1 }} miles away
+                                <p class="mb-0" style="font-size: 0.875rem; color: var(--text-secondary, #5A6C7D); display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                    <i class="fas fa-route" style="color: var(--primary-red, #FF385C);"></i>
+                                    {{ restaurant.distance|floatformat:1 }} miles away
                                 </p>
                             {% endif %}
                             {% if restaurant.price_range %}
-                                <p class="mb-0 mt-1" style="font-size: 13px; color: #666;">
-                                    💰 {{ restaurant.price_range }}
+                                <p class="mb-0 mt-1" style="font-size: 0.875rem; color: var(--text-secondary, #5A6C7D); display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                    <i class="fas fa-dollar-sign" style="color: var(--primary-red, #FF385C);"></i>
+                                    {{ restaurant.price_range }}
                                 </p>
                             {% endif %}
                         </div>
                     </div>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
+                <i class="fas fa-store"></i>
                 <h5>No trending restaurants yet</h5>
                 <p>Be the first to review restaurants in your area!</p>
             </div>
@@ -534,13 +763,15 @@
     <!-- Weekly Rankings Section -->
     <div class="trending-section">
         <div class="section-title">
-            📊 This Week's Top Dishes
-            <a href="{% url 'community:rankings' %}" class="btn btn-sm btn-outline-primary ms-3">View All Rankings</a>
+            <i class="fas fa-chart-bar"></i>
+            This Week's Top Dishes
+            <a href="{% url 'community:rankings' %}" class="btn btn-sm btn-outline-primary ms-auto" style="font-weight: 700;">View All Rankings</a>
         </div>
 
         {% if current_week_rankings %}
             <div class="ranking-list">
                 {% for ranking in current_week_rankings|slice:":5" %}
+                    {% if ranking.dish and ranking.dish.id %}
                     <div class="ranking-item" onclick="window.location.href='{% url 'community:dish_reviews' ranking.dish.id %}'">
                         <div class="rank-number {% if ranking.rank == 1 %}gold{% elif ranking.rank == 2 %}silver{% elif ranking.rank == 3 %}bronze{% endif %}">
                             #{{ ranking.rank }}
@@ -548,14 +779,22 @@
                         <img src="{{ ranking.dish.display_image }}" alt="{{ ranking.dish.name }}">
                         <div class="ranking-info">
                             <h6>{{ ranking.dish.name }}</h6>
-                            <small class="text-muted">{{ ranking.dish.cuisine.emoji }} {{ ranking.dish.cuisine.name }}</small>
+                            <small class="text-muted">
+                                <i class="fas fa-utensils"></i>
+                                {{ ranking.dish.cuisine.name }}
+                            </small>
                         </div>
-                        <span class="rating-badge">⭐ {{ ranking.dish.average_rating|floatformat:1 }}</span>
+                        <span class="rating-badge">
+                            <i class="fas fa-star"></i>
+                            {{ ranking.dish.average_rating|floatformat:1 }}
+                        </span>
                     </div>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
                 <h5>No rankings yet this week</h5>
                 <p>Rankings are calculated based on reviews and engagement.</p>
             </div>
@@ -566,8 +805,9 @@
     {% if active_challenges %}
         <div class="trending-section">
             <div class="section-title">
-                🎯 Active Challenges
-                <a href="{% url 'community:challenges' %}" class="btn btn-sm btn-outline-primary ms-3">View All</a>
+                <i class="fas fa-bullseye"></i>
+                Active Challenges
+                <a href="{% url 'community:challenges' %}" class="btn btn-sm btn-outline-primary ms-auto" style="font-weight: 700;">View All</a>
             </div>
 
             {% for challenge in active_challenges|slice:":2" %}
@@ -575,7 +815,7 @@
                     <h5>{{ challenge.title }}</h5>
                     <p>{{ challenge.description }}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                        <span>{{ challenge.participants.count }} participants</span>
+                        <span style="font-weight: 700;"><i class="fas fa-users"></i> {{ challenge.participants.count }} participants</span>
                         <a href="{% url 'community:join_challenge' challenge.id %}" class="btn btn-sm">
                             Join Challenge
                         </a>
@@ -588,42 +828,54 @@
     <!-- Recent Reviews Section -->
     <div class="trending-section">
         <div class="section-title">
-            💬 Recent Reviews
+            <i class="fas fa-comments"></i>
+            Recent Reviews
         </div>
 
         {% if recent_reviews %}
             {% for review in recent_reviews %}
+                {% if review.dish and review.dish.id %}
                 <div class="review-card">
                     <div class="review-header">
                         <div>
-                            <div class="review-author">{{ review.user.username }}</div>
-                            <small class="text-muted">
+                            <div class="review-author">
+                                <i class="fas fa-user-circle"></i>
+                                {{ review.user.username }}
+                            </div>
+                            <small class="text-muted" style="font-weight: 600;">
                                 reviewed <strong>{{ review.dish.name }}</strong>
                             </small>
                         </div>
                         <div class="text-end">
-                            <span class="rating-badge">⭐ {{ review.rating }}/5</span>
+                            <span class="rating-badge">
+                                <i class="fas fa-star"></i>
+                                {{ review.rating }}/5
+                            </span>
                             <div class="review-date">{{ review.created_at|timesince }} ago</div>
                         </div>
                     </div>
                     {% if review.title %}
-                        <h6 class="mt-2 mb-1">{{ review.title }}</h6>
+                        <h6 class="mt-2 mb-1" style="font-weight: 800; color: var(--text-primary, #2C3E50);">{{ review.title }}</h6>
                     {% endif %}
                     <div class="review-content">
                         {{ review.content|truncatewords:30 }}
                     </div>
                     {% if review.image %}
-                        <img src="{{ review.image.url }}" alt="Review" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 10px; margin-top: 10px;">
+                        <img src="{{ review.image.url }}" alt="Review" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-top: 1rem; border: 2px solid var(--border-light, #E9ECEF);">
                     {% endif %}
                     <div class="mt-2">
                         <a href="{% url 'community:dish_reviews' review.dish.id %}" class="text-decoration-none">
-                            <small class="text-primary">View all reviews →</small>
+                            <small class="text-primary" style="font-weight: 700;">
+                                View all reviews <i class="fas fa-arrow-right"></i>
+                            </small>
                         </a>
                     </div>
                 </div>
+                {% endif %}
             {% endfor %}
         {% else %}
             <div class="empty-state">
+                <i class="fas fa-comment"></i>
                 <h5>No reviews yet</h5>
                 <p>Be the first to share your thoughts!</p>
             </div>
@@ -633,60 +885,46 @@
     <!-- Quick Links -->
     <div class="row mb-5">
         <div class="col-md-4 mb-3">
-            <div class="card h-100">
+            <div class="card quick-link-card h-100">
                 <div class="card-body text-center">
-                    <h3>🏅</h3>
+                    <div class="quick-link-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
                     <h5>Leaderboard</h5>
                     <p class="text-muted">See top reviewers and food explorers</p>
-                    <a href="{% url 'community:leaderboard' %}" class="btn btn-outline-primary btn-sm">
+                    <a href="{% url 'community:leaderboard' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
                         View Leaderboard
                     </a>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card h-100">
+            <div class="card quick-link-card h-100">
                 <div class="card-body text-center">
-                    <h3>🎖️</h3>
+                    <div class="quick-link-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
                     <h5>My Badges</h5>
                     <p class="text-muted">Track your achievements</p>
-                    <a href="{% url 'community:my_badges' %}" class="btn btn-outline-primary btn-sm">
+                    <a href="{% url 'community:my_badges' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
                         View Badges
                     </a>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card h-100">
+            <div class="card quick-link-card h-100">
                 <div class="card-body text-center">
-                    <h3>🔥</h3>
+                    <div class="quick-link-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
                     <h5>Trending</h5>
                     <p class="text-muted">Discover what's hot right now</p>
-                    <a href="{% url 'community:trending' %}" class="btn btn-outline-primary btn-sm">
+                    <a href="{% url 'community:trending' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
                         View Trending
                     </a>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- AI Chatbot -->
-<div class="ai-chatbot">
-    <button class="chatbot-button" onclick="toggleChatbot()">🤖</button>
-    <div class="chatbot-window" id="chatbotWindow">
-        <div class="chatbot-header">
-            <span>AI Food Assistant</span>
-            <button class="chatbot-close" onclick="toggleChatbot()">×</button>
-        </div>
-        <div class="chatbot-messages" id="chatMessages">
-            <div class="message bot">
-                Hi! I'm your AI food assistant. Ask me anything about dishes, restaurants, or cuisines!
-            </div>
-        </div>
-        <div class="chatbot-input">
-            <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
-            <button onclick="sendMessage()">Send</button>
         </div>
     </div>
 </div>
@@ -723,31 +961,31 @@ function displaySearchResults(data) {
         return;
     }
 
-    let html = '<div style="background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto;">';
+    let html = '<div style="background: white; padding: 1.25rem; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); max-height: 400px; overflow-y: auto; border: 2px solid var(--border-light, #E9ECEF);">';
 
     if (data.dishes.length > 0) {
-        html += '<h6 class="mb-2"><strong>Dishes</strong></h6>';
+        html += '<h6 class="mb-2" style="font-weight: 800; color: var(--text-primary, #2C3E50);"><i class="fas fa-utensils" style="color: var(--primary-red, #FF385C); margin-right: 0.5rem;"></i>Dishes</h6>';
         data.dishes.forEach(dish => {
             html += `
                 <div class="search-result-item" onclick="window.location.href='/community/dish/${dish.id}/reviews/'">
-                    <strong>${dish.name}</strong>
+                    <strong style="font-weight: 700;">${dish.name}</strong>
                     <span class="text-muted">- ${dish.cuisine}</span>
-                    <span class="badge bg-warning ms-2">⭐ ${dish.avg_rating}</span>
-                    <small class="text-muted ms-2">(${dish.review_count} reviews)</small>
+                    <span class="badge ms-2" style="background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%); color: white; font-weight: 700;"><i class="fas fa-star"></i> ${dish.avg_rating}</span>
+                    <small class="text-muted ms-2" style="font-weight: 600;">(${dish.review_count} reviews)</small>
                 </div>
             `;
         });
     }
 
     if (data.restaurants.length > 0) {
-        html += '<h6 class="mt-3 mb-2"><strong>Restaurants</strong></h6>';
+        html += '<h6 class="mt-3 mb-2" style="font-weight: 800; color: var(--text-primary, #2C3E50);"><i class="fas fa-store" style="color: var(--primary-red, #FF385C); margin-right: 0.5rem;"></i>Restaurants</h6>';
         data.restaurants.forEach(restaurant => {
             html += `
                 <div class="search-result-item" onclick="window.location.href='/community/restaurant/${restaurant.id}/reviews/'">
-                    <strong>${restaurant.name}</strong>
-                    <br><small class="text-muted">${restaurant.address}</small>
-                    <span class="badge bg-warning ms-2">⭐ ${restaurant.avg_rating}</span>
-                    <small class="text-muted ms-2">(${restaurant.review_count} reviews)</small>
+                    <strong style="font-weight: 700;">${restaurant.name}</strong>
+                    <br><small class="text-muted" style="font-weight: 600;">${restaurant.address}</small>
+                    <span class="badge ms-2" style="background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%); color: white; font-weight: 700;"><i class="fas fa-star"></i> ${restaurant.avg_rating}</span>
+                    <small class="text-muted ms-2" style="font-weight: 600;">(${restaurant.review_count} reviews)</small>
                 </div>
             `;
         });
@@ -761,79 +999,6 @@ function displaySearchResults(data) {
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.search-bar')) {
         document.getElementById('searchResults').innerHTML = '';
-    }
-});
-
-// Chatbot functionality
-function toggleChatbot() {
-    const chatWindow = document.getElementById('chatbotWindow');
-    chatWindow.classList.toggle('active');
-
-    // Focus input when opening
-    if (chatWindow.classList.contains('active')) {
-        document.getElementById('chatInput').focus();
-    }
-}
-
-function sendMessage() {
-    const input = document.getElementById('chatInput');
-    const message = input.value.trim();
-
-    if (!message) return;
-
-    // Add user message
-    addMessage(message, 'user');
-    input.value = '';
-
-    // Show typing indicator
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot';
-    typingDiv.textContent = 'Typing...';
-    typingDiv.id = 'typing-indicator';
-    document.getElementById('chatMessages').appendChild(typingDiv);
-
-    // Send to AI
-    fetch('/community/ai-chat/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: `message=${encodeURIComponent(message)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Remove typing indicator
-        const typing = document.getElementById('typing-indicator');
-        if (typing) typing.remove();
-
-        if (data.status === 'success') {
-            addMessage(data.response, 'bot');
-        } else {
-            addMessage('Sorry, I had trouble responding. Please try again.', 'bot');
-        }
-    })
-    .catch(error => {
-        console.error('Chat error:', error);
-        const typing = document.getElementById('typing-indicator');
-        if (typing) typing.remove();
-        addMessage('Sorry, I had trouble connecting. Please try again.', 'bot');
-    });
-}
-
-function addMessage(text, sender) {
-    const container = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}`;
-    messageDiv.textContent = text;
-    container.appendChild(messageDiv);
-    container.scrollTop = container.scrollHeight;
-}
-
-// Allow Enter key to send messages
-document.getElementById('chatInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        sendMessage();
     }
 });
 </script>

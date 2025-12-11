@@ -10,27 +10,27 @@
         <div class="col-md-6">
             <h1 class="display-2 fw-bold mb-4" style="color: #21262E;">
                 Find Your<br>
-                <span style="background: linear-gradient(135deg, #FE3C72 0%, #FF655B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <span style="color: #FF6B6B; font-weight: 800;">
                     Perfect Match
                 </span>
             </h1>
             <p class="lead mb-4" style="color: #666; font-size: 1.3rem;">
                 Swipe right on dishes you crave. Discover restaurants nearby.
-                Order instantly. It's like Tinder, but for food! 🔥
+                Order instantly. It's like Tinder, but for food!
             </p>
 
             {% if user.is_authenticated %}
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary btn-lg me-3" style="font-size: 1.2rem; padding: 15px 40px;">
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary btn-lg me-3" style="font-size: 1.2rem; padding: 15px 40px; background: #FF6B6B; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);">
                     <i class="fas fa-fire"></i> Start Swiping
                 </a>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary btn-lg" style="font-size: 1.2rem; padding: 15px 40px;">
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary btn-lg" style="font-size: 1.2rem; padding: 15px 40px; color: #FF6B6B; border-color: #FF6B6B; border-radius: 12px;">
                     <i class="fas fa-user"></i> My Profile
                 </a>
             {% else %}
-                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg me-3" style="font-size: 1.2rem; padding: 15px 40px;">
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg me-3" style="font-size: 1.2rem; padding: 15px 40px; background: #FF6B6B; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);">
                     <i class="fas fa-heart"></i> Join Free
                 </a>
-                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg" style="font-size: 1.2rem; padding: 15px 40px;">
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg" style="font-size: 1.2rem; padding: 15px 40px; color: #FF6B6B; border-color: #FF6B6B; border-radius: 12px;">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </a>
             {% endif %}
@@ -48,30 +48,30 @@
         </div>
 
         <div class="col-md-4 mb-4">
-            <div class="card text-center p-4 h-100">
+            <div class="card text-center p-4 h-100" style="border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                 <div class="card-body">
                     <div class="mb-3" style="font-size: 80px;">👆</div>
-                    <h3 class="card-title fw-bold text-tinder">Swipe</h3>
+                    <h3 class="card-title fw-bold" style="color: #FF6B6B;">Swipe</h3>
                     <p class="card-text" style="color: #666;">Browse delicious dishes. Right for yes, left for nope. Just like dating, but tastier.</p>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4 mb-4">
-            <div class="card text-center p-4 h-100">
+            <div class="card text-center p-4 h-100" style="border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                 <div class="card-body">
                     <div class="mb-3" style="font-size: 80px;">💘</div>
-                    <h3 class="card-title fw-bold text-tinder">Match</h3>
+                    <h3 class="card-title fw-bold" style="color: #FF6B6B;">Match</h3>
                     <p class="card-text" style="color: #666;">Found a match! See nearby restaurants serving your dish with ratings and reviews.</p>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4 mb-4">
-            <div class="card text-center p-4 h-100">
+            <div class="card text-center p-4 h-100" style="border: none; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                 <div class="card-body">
                     <div class="mb-3" style="font-size: 80px;">🚀</div>
-                    <h3 class="card-title fw-bold text-tinder">Order</h3>
+                    <h3 class="card-title fw-bold" style="color: #FF6B6B;">Order</h3>
                     <p class="card-text" style="color: #666;">Order through Uber Eats, DoorDash, or Grubhub. Food delivered to your door.</p>
                 </div>
             </div>
@@ -79,7 +79,7 @@
     </div>
 
     <!-- Extra Features -->
-    <div class="row mt-5 mb-5 p-5 rounded" style="background: white; box-shadow: 0 8px 25px rgba(0,0,0,0.08);">
+    <div class="row mt-5 mb-5 p-5 rounded" style="background: white; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-radius: 16px;">
         <div class="col-md-12 text-center mb-5">
             <h2 class="display-6 fw-bold" style="color: #21262E;">More Ways to Connect with Food</h2>
         </div>
@@ -88,7 +88,7 @@
             <div class="d-flex align-items-start">
                 <div style="font-size: 40px; margin-right: 20px;">🤖</div>
                 <div>
-                    <h5 class="fw-bold text-tinder">AI Food Assistant</h5>
+                    <h5 class="fw-bold" style="color: #FF6B6B;">AI Food Assistant</h5>
                     <p style="color: #666;">Ask about ingredients, nutrition, and get personalized recommendations. Your foodie BFF.</p>
                 </div>
             </div>
@@ -98,7 +98,7 @@
             <div class="d-flex align-items-start">
                 <div style="font-size: 40px; margin-right: 20px;">🔥</div>
                 <div>
-                    <h5 class="fw-bold text-tinder">Trending Dishes</h5>
+                    <h5 class="fw-bold" style="color: #FF6B6B;">Trending Dishes</h5>
                     <p style="color: #666;">See what's hot in your area. Weekly top 10 rankings and community favorites.</p>
                 </div>
             </div>
@@ -108,7 +108,7 @@
             <div class="d-flex align-items-start">
                 <div style="font-size: 40px; margin-right: 20px;">💕</div>
                 <div>
-                    <h5 class="fw-bold text-tinder">Save Your Matches</h5>
+                    <h5 class="fw-bold" style="color: #FF6B6B;">Save Your Matches</h5>
                     <p style="color: #666;">Build your collection of favorite dishes and restaurants. Never lose a good match.</p>
                 </div>
             </div>
@@ -118,7 +118,7 @@
             <div class="d-flex align-items-start">
                 <div style="font-size: 40px; margin-right: 20px;">🎯</div>
                 <div>
-                    <h5 class="fw-bold text-tinder">Smart Filters</h5>
+                    <h5 class="fw-bold" style="color: #FF6B6B;">Smart Filters</h5>
                     <p style="color: #666;">Filter by diet, allergies, calories, price, and distance. Your preferences matter.</p>
                 </div>
             </div>
@@ -127,15 +127,15 @@
 
     <!-- CTA Section -->
     <div class="row mt-5 mb-5">
-        <div class="col-md-12 text-center p-5 rounded text-white" style="background: linear-gradient(135deg, #FE3C72 0%, #FF655B 100%);">
+        <div class="col-md-12 text-center p-5 rounded text-white" style="background: #FF6B6B; border-radius: 16px; box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);">
             <h2 class="display-4 fw-bold mb-3">Ready to Swipe Right on Food?</h2>
             <p class="lead mb-4">Join thousands discovering their next favorite dish</p>
             {% if not user.is_authenticated %}
-                <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg" style="color: #FE3C72; font-weight: 600; padding: 15px 40px; font-size: 1.2rem;">
+                <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg" style="color: #FF6B6B; font-weight: 600; padding: 15px 40px; font-size: 1.2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                     <i class="fas fa-fire"></i> Get Started Free
                 </a>
             {% else %}
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-light btn-lg" style="color: #FE3C72; font-weight: 600; padding: 15px 40px; font-size: 1.2rem;">
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-light btn-lg" style="color: #FF6B6B; font-weight: 600; padding: 15px 40px; font-size: 1.2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                     <i class="fas fa-fire"></i> Start Swiping Now
                 </a>
             {% endif %}
