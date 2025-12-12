@@ -4,14 +4,21 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Avg, Count, Q
 from dishes.models import Dish, Restaurant, Cuisine
-from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request, haversine_distance
+from dishes.location_utils import (
+    DEFAULT_MAX_DISTANCE_MILES,
+    get_dishes_from_nearby_restaurants,
+    get_user_location_from_request,
+    haversine_distance,
+)
 from dishes.maps_service import GoogleMapsService
 from dishes.ai_service import AIService, DeliveryAppService
+from dishes.time_utils import get_current_meal_type
 from .models import Review, ReviewHelpful
 
 
 def community_home_view(request):
     """Community homepage with rankings and trending - personalized for each user"""
+    current_meal_type = get_current_meal_type()
 
     # ✅ LOCATION FILTER - Get location-based dishes
     user_location = get_user_location_from_request(request)
@@ -20,7 +27,7 @@ def community_home_view(request):
 
     if user_location and request.user.is_authenticated:
         has_location = True
-        max_distance = request.user.profile.max_distance_miles or 50
+        max_distance = DEFAULT_MAX_DISTANCE_MILES
         location_dish_ids = get_dishes_from_nearby_restaurants(
             user_location['latitude'],
             user_location['longitude'],
@@ -28,7 +35,7 @@ def community_home_view(request):
         )
 
     # ✅ PERSONALIZED TRENDING DISHES - Tailored to user profile
-    trending_query = Dish.objects.filter(is_active=True).select_related('cuisine')
+    trending_query = Dish.objects.filter(is_active=True, meal_type=current_meal_type).select_related('cuisine')
 
     # Filter by user preferences if authenticated
     if request.user.is_authenticated and hasattr(request.user, 'profile'):
@@ -75,6 +82,7 @@ def community_home_view(request):
 
     # Calculate distance for restaurants if location available
     if user_location:
+        filtered_restaurants = []
         for restaurant in trending_restaurants:
             if restaurant.latitude and restaurant.longitude:
                 restaurant.distance = haversine_distance(
@@ -83,6 +91,9 @@ def community_home_view(request):
                     restaurant.latitude,
                     restaurant.longitude
                 )
+                if restaurant.distance <= DEFAULT_MAX_DISTANCE_MILES:
+                    filtered_restaurants.append(restaurant)
+        trending_restaurants = filtered_restaurants
 
     # Get recent reviews (filtered by location if available)
     recent_reviews = Review.objects.select_related('user', 'dish').order_by('-created_at')
@@ -106,6 +117,7 @@ def community_home_view(request):
 
 def trending_view(request):
     """View all trending dishes - personalized and location-aware"""
+    current_meal_type = get_current_meal_type()
 
     # ✅ LOCATION FILTER
     user_location = get_user_location_from_request(request)
@@ -114,7 +126,7 @@ def trending_view(request):
 
     if user_location and request.user.is_authenticated:
         has_location = True
-        max_distance = request.user.profile.max_distance_miles or 50
+        max_distance = DEFAULT_MAX_DISTANCE_MILES
         location_dish_ids = get_dishes_from_nearby_restaurants(
             user_location['latitude'],
             user_location['longitude'],
@@ -122,7 +134,7 @@ def trending_view(request):
         )
 
     # ✅ PERSONALIZED TRENDING DISHES
-    trending_query = Dish.objects.filter(is_active=True).select_related('cuisine')
+    trending_query = Dish.objects.filter(is_active=True, meal_type=current_meal_type).select_related('cuisine')
 
     # Filter by user preferences if authenticated
     if request.user.is_authenticated and hasattr(request.user, 'profile'):
@@ -406,6 +418,7 @@ def mark_helpful_view(request, review_id):
 def search_community(request):
     """Search for dishes and restaurants"""
     query = request.GET.get('q', '')
+    current_meal_type = get_current_meal_type()
 
     if not query:
         return JsonResponse({'dishes': [], 'restaurants': []})
@@ -415,7 +428,7 @@ def search_community(request):
     location_dish_ids = None
 
     if user_location and request.user.is_authenticated:
-        max_distance = request.user.profile.max_distance_miles or 50
+        max_distance = DEFAULT_MAX_DISTANCE_MILES
         location_dish_ids = get_dishes_from_nearby_restaurants(
             user_location['latitude'],
             user_location['longitude'],
@@ -425,7 +438,8 @@ def search_community(request):
     # Search dishes
     dishes = Dish.objects.filter(
         Q(name__icontains=query) | Q(description__icontains=query),
-        is_active=True
+        is_active=True,
+        meal_type=current_meal_type
     ).annotate(
         avg_rating=Avg('reviews__rating'),
         review_count=Count('reviews')
@@ -441,6 +455,21 @@ def search_community(request):
         Q(name__icontains=query) | Q(address__icontains=query),
         is_active=True
     ).order_by('-rating', '-total_reviews')[:10]
+
+    if user_location:
+        filtered_restaurants = []
+        for restaurant in restaurants:
+            if restaurant.latitude and restaurant.longitude:
+                distance = haversine_distance(
+                    user_location['latitude'],
+                    user_location['longitude'],
+                    restaurant.latitude,
+                    restaurant.longitude
+                )
+                if distance <= DEFAULT_MAX_DISTANCE_MILES:
+                    restaurant.distance = distance
+                    filtered_restaurants.append(restaurant)
+        restaurants = filtered_restaurants
 
     dishes_data = [{
         'id': d.id,

@@ -26,7 +26,10 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return miles
 
 
-def filter_nearby_restaurants(restaurants_queryset, user_lat, user_lng, max_distance_miles=25):
+DEFAULT_MAX_DISTANCE_MILES = 10
+
+
+def filter_nearby_restaurants(restaurants_queryset, user_lat, user_lng, max_distance_miles=DEFAULT_MAX_DISTANCE_MILES):
     """
     Filter restaurants within max_distance_miles of user location
     Returns queryset with annotated 'distance' field
@@ -49,7 +52,7 @@ def filter_nearby_restaurants(restaurants_queryset, user_lat, user_lng, max_dist
     return nearby_restaurants
 
 
-def get_dishes_from_nearby_restaurants(user_lat, user_lng, max_distance_miles=25):
+def get_dishes_from_nearby_restaurants(user_lat, user_lng, max_distance_miles=DEFAULT_MAX_DISTANCE_MILES):
     """
     Get all dishes available at nearby restaurants
     Returns list of dish IDs
