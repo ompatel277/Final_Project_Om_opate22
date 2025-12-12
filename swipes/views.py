@@ -3,10 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
-from django.utils import timezone
 from dishes.models import Dish, Restaurant, Cuisine
-from dishes.location_utils import get_dishes_from_nearby_restaurants, get_user_location_from_request, haversine_distance
+from dishes.location_utils import (
+    DEFAULT_MAX_DISTANCE_MILES,
+    get_dishes_from_nearby_restaurants,
+    get_user_location_from_request,
+    haversine_distance,
+)
 from dishes.maps_service import GoogleMapsService
+from dishes.time_utils import get_current_meal_type, get_current_meal_window
 from .models import SwipeAction, Favorite, FavoriteRestaurant, Blacklist, SwipeSession
 import random
 
@@ -15,6 +20,7 @@ import random
 def swipe_feed_view(request):
     """Main swipe interface - shows dishes based on local restaurants"""
     user_location = get_user_location_from_request(request)
+    current_meal_type = get_current_meal_type()
 
     # Get user's blacklisted items
     blacklist = Blacklist.objects.filter(user=request.user)
@@ -29,7 +35,8 @@ def swipe_feed_view(request):
 
     # Build base query
     available_dishes = Dish.objects.filter(
-        is_active=True
+        is_active=True,
+        meal_type=current_meal_type
     ).exclude(
         id__in=right_swiped_dish_ids  # Only exclude liked dishes
     ).exclude(
@@ -72,7 +79,7 @@ def swipe_feed_view(request):
 
     if user_location:
         maps_service = GoogleMapsService()
-        max_distance = profile.max_distance_miles or 25
+        max_distance = DEFAULT_MAX_DISTANCE_MILES
 
         # Fetch real local restaurants from Google Maps
         local_restaurants = maps_service.search_restaurants(
@@ -83,9 +90,26 @@ def swipe_feed_view(request):
             num_results=50
         )
 
+        filtered_local_restaurants = []
+        for restaurant_data in local_restaurants:
+            coords = restaurant_data.get('gps_coordinates') or {}
+            lat = coords.get('latitude')
+            lng = coords.get('longitude')
+            if lat is None or lng is None:
+                continue
+            distance = haversine_distance(
+                user_location['latitude'],
+                user_location['longitude'],
+                lat,
+                lng
+            )
+            if distance <= max_distance:
+                restaurant_data['distance'] = distance
+                filtered_local_restaurants.append(restaurant_data)
+
         # Extract cuisine types from local restaurants
         cuisine_keywords = set()
-        for restaurant_data in local_restaurants:
+        for restaurant_data in filtered_local_restaurants:
             rest_type = restaurant_data.get('type', '').lower()
             rest_name = restaurant_data.get('title', '').lower()
 
@@ -223,6 +247,8 @@ def block_dish_view(request, dish_id):
 @login_required
 def matches_view(request):
     """View matches (right swipes) - restaurants loaded on demand"""
+    meal_window_start, current_meal_type = get_current_meal_window()
+
     # Get filter parameters
     cuisine_filter = request.GET.get('cuisine')
     dietary_filter = request.GET.get('dietary')
@@ -230,8 +256,25 @@ def matches_view(request):
     # Get all right swipes - NO LIMIT
     right_swipes = SwipeAction.objects.filter(
         user=request.user,
-        direction='right'
+        direction='right',
+        created_at__gte=meal_window_start,
+        dish__meal_type=current_meal_type
     ).select_related('dish', 'dish__cuisine').order_by('-created_at')
+
+    user_location = get_user_location_from_request(request)
+
+    if user_location:
+        nearby_dish_ids = get_dishes_from_nearby_restaurants(
+            user_location['latitude'],
+            user_location['longitude'],
+            DEFAULT_MAX_DISTANCE_MILES
+        )
+
+        # Only narrow the query if we actually have nearby dishes; otherwise keep
+        # the full set of swipes so newly-liked dishes don't disappear when
+        # location lookups return no restaurant matches.
+        if nearby_dish_ids:
+            right_swipes = right_swipes.filter(dish_id__in=nearby_dish_ids)
 
     # Convert to list of dishes and apply filters
     matches = []
@@ -282,8 +325,6 @@ def matches_view(request):
 
             ai_recommendations = list(potential_dishes.order_by('-average_rating', '-total_right_swipes')[:10])
 
-    user_location = get_user_location_from_request(request)
-
     # Get all cuisines from matched dishes for filter dropdown
     matched_cuisine_ids = set(swipe.dish.cuisine_id for swipe in right_swipes if swipe.dish and swipe.dish.cuisine_id)
     available_cuisines = list(Cuisine.objects.filter(id__in=matched_cuisine_ids).order_by('name'))
@@ -304,6 +345,25 @@ def matches_view(request):
         'selected_dietary': dietary_filter or 'all',
     }
     return render(request, 'swipes/matches.html', context)
+
+
+@login_required
+def delete_match_view(request, dish_id):
+    """Allow a user to remove a matched dish (delete the right swipe)."""
+    swipe = SwipeAction.objects.filter(
+        user=request.user,
+        dish_id=dish_id,
+        direction='right'
+    ).first()
+
+    if swipe:
+        dish_name = swipe.dish.name
+        swipe.delete()
+        messages.success(request, f"Removed {dish_name} from your matches.")
+    else:
+        messages.info(request, "Match not found or already removed.")
+
+    return redirect('swipes:matches')
 
 
 @login_required
@@ -344,7 +404,8 @@ def get_dish_restaurants_view(request, dish_id):
                 parsed['latitude'],
                 parsed['longitude']
             )
-            local_restaurants.append(parsed)
+            if parsed['distance'] <= DEFAULT_MAX_DISTANCE_MILES:
+                local_restaurants.append(parsed)
 
     # Sort by distance
     local_restaurants.sort(key=lambda x: x.get('distance', 999))

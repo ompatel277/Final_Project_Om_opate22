@@ -164,16 +164,16 @@
 <div class="matches-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <h1>✨ Your Matches</h1>
+            <h1>Your Matches</h1>
             <span class="badge-count">{{ total_matches }}</span>
         </div>
         {% if has_location %}
             <div class="badge bg-success">
-                📍 {{ user_location.city }}
+                {{ user_location.city }}
             </div>
         {% else %}
             <div class="badge bg-warning text-dark">
-                📍 Location not set
+                Location not set
             </div>
         {% endif %}
     </div>
@@ -191,23 +191,23 @@
         <form method="get" action="{% url 'swipes:matches' %}" class="filter-form">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="cuisine" class="form-label">🍽️ Filter by Cuisine</label>
+                    <label for="cuisine" class="form-label">Filter by Cuisine</label>
                     <select name="cuisine" id="cuisine" class="form-select" onchange="this.form.submit()">
                         <option value="all" {% if selected_cuisine == 'all' %}selected{% endif %}>All Cuisines</option>
                         {% for cuisine in available_cuisines %}
                             <option value="{{ cuisine.id }}" {% if selected_cuisine == cuisine.id|stringformat:'s' %}selected{% endif %}>
-                                {{ cuisine.emoji }} {{ cuisine.name }}
+                                {{ cuisine.name }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label for="dietary" class="form-label">🌱 Filter by Dietary</label>
+                    <label for="dietary" class="form-label">Filter by Dietary</label>
                     <select name="dietary" id="dietary" class="form-select" onchange="this.form.submit()">
                         <option value="all" {% if selected_dietary == 'all' %}selected{% endif %}>All</option>
-                        <option value="vegetarian" {% if selected_dietary == 'vegetarian' %}selected{% endif %}>🌱 Vegetarian</option>
-                        <option value="vegan" {% if selected_dietary == 'vegan' %}selected{% endif %}>🥬 Vegan</option>
-                        <option value="non_veg" {% if selected_dietary == 'non_veg' %}selected{% endif %}>🍖 Non-Vegetarian</option>
+                        <option value="vegetarian" {% if selected_dietary == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                        <option value="vegan" {% if selected_dietary == 'vegan' %}selected{% endif %}>Vegan</option>
+                        <option value="non_veg" {% if selected_dietary == 'non_veg' %}selected{% endif %}>Non-Vegetarian</option>
                     </select>
                 </div>
             </div>
@@ -216,14 +216,14 @@
 
     {% if not has_location %}
         <div class="alert alert-warning mb-4">
-            📍 Enable location to see local restaurants for your matched dishes!
+            Enable location to see local restaurants for your matched dishes.
         </div>
     {% endif %}
 
     <!-- Matched Dishes -->
     {% if matches %}
         <div class="section-header">
-            <h2>💚 Dishes You Liked</h2>
+            <h2>Dishes You Liked</h2>
         </div>
         <p class="text-muted mb-4">Click on a dish to see where you can get it near you</p>
 
@@ -233,7 +233,7 @@
                     <img src="{{ dish.display_image }}" alt="{{ dish.name }}">
                     <div class="dish-card-body">
                         <h5>{{ dish.name }}</h5>
-                        <p class="cuisine">{{ dish.cuisine.emoji }} {{ dish.cuisine.name }}</p>
+                        <p class="cuisine">{{ dish.cuisine.name }}</p>
                         <small class="text-muted">
                             {% if has_location %}
                                 Click to find nearby restaurants
@@ -241,6 +241,12 @@
                                 Enable location to find restaurants
                             {% endif %}
                         </small>
+                        <div class="mt-3 d-flex gap-2">
+                            <form method="post" action="{% url 'swipes:delete_match' dish.id %}" onsubmit="event.stopPropagation();">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Remove Match</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
@@ -259,7 +265,7 @@
     <!-- AI Recommendations -->
     {% if ai_recommendations %}
         <div class="section-header mt-5">
-            <h2>🤖 AI Recommended For You</h2>
+            <h2>AI Recommended For You</h2>
             <span class="badge-count">{{ ai_recommendations|length }}</span>
         </div>
         <p class="text-muted mb-4">Based on your preferences and previous likes</p>
@@ -271,8 +277,8 @@
                         <img src="{{ dish.display_image }}" alt="{{ dish.name }}">
                         <div class="dish-card-body">
                             <h5>{{ dish.name }}</h5>
-                            <p class="cuisine mb-2">{{ dish.cuisine.emoji }} {{ dish.cuisine.name }}</p>
-                            <span class="ai-badge">🤖 AI Recommended</span>
+                            <p class="cuisine mb-2">{{ dish.cuisine.name }}</p>
+                            <span class="ai-badge">AI Recommended</span>
                         </div>
                     </div>
                 </a>

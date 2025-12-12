@@ -1,4 +1,6 @@
 from datetime import timedelta
+import csv
+import io
 import json
 
 from django.contrib import messages
@@ -7,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
@@ -15,6 +18,95 @@ from swipes.models import Favorite, SwipeAction
 
 from .forms import UserProfileForm, UserRegistrationForm, UserUpdateForm
 from .models import UserProfile
+
+
+def _build_dashboard_payload(user):
+    """Gather dashboard metrics for reuse across multiple responses."""
+    profile = user.profile
+
+    total_swipes = SwipeAction.objects.filter(user=user).count()
+    total_matches = SwipeAction.objects.filter(user=user, direction='right').count()
+    total_favorites = Favorite.objects.filter(user=user).count()
+    total_reviews = Review.objects.filter(user=user).count()
+
+    recent_swipes = (
+        SwipeAction.objects.filter(user=user)
+        .select_related('dish')
+        .order_by('-created_at')[:5]
+    )
+    recent_favorites = (
+        Favorite.objects.filter(user=user)
+        .select_related('dish')
+        .order_by('-created_at')[:5]
+    )
+
+    start_date = timezone.now().date() - timedelta(days=6)
+    swipe_activity = {start_date + timedelta(days=i): {'right': 0, 'left': 0} for i in range(7)}
+
+    aggregated_swipes = (
+        SwipeAction.objects.filter(user=user, created_at__date__gte=start_date)
+        .annotate(day=TruncDate('created_at'))
+        .values('day')
+        .annotate(
+            right_count=Count('id', filter=Q(direction='right')),
+            left_count=Count('id', filter=Q(direction='left')),
+        )
+    )
+
+    for entry in aggregated_swipes:
+        day = entry['day']
+        swipe_activity[day]['right'] = entry['right_count']
+        swipe_activity[day]['left'] = entry['left_count']
+
+    chart_labels = [day.strftime('%b %d') for day in swipe_activity.keys()]
+    chart_right = [counts['right'] for counts in swipe_activity.values()]
+    chart_left = [counts['left'] for counts in swipe_activity.values()]
+
+    profile_completion_fields = [
+        bool(profile.city),
+        bool(profile.bio),
+        bool(profile.favorite_cuisines),
+        bool(profile.allergies),
+        bool(profile.profile_picture),
+    ]
+    profile_completion = int((sum(profile_completion_fields) / len(profile_completion_fields)) * 100)
+
+    return {
+        'user': user,
+        'profile': profile,
+        'recent_swipes_qs': recent_swipes,
+        'recent_favorites_qs': recent_favorites,
+        'totals': {
+            'swipes': total_swipes,
+            'matches': total_matches,
+            'favorites': total_favorites,
+            'reviews': total_reviews,
+        },
+        'recent_swipes': [
+            {
+                'dish': swipe.dish.name,
+                'image': swipe.dish.display_image,
+                'direction': swipe.direction,
+                'created_at': swipe.created_at.isoformat(),
+            }
+            for swipe in recent_swipes
+        ],
+        'recent_favorites': [
+            {
+                'dish': favorite.dish.name,
+                'image': favorite.dish.display_image,
+                'created_at': favorite.created_at.isoformat(),
+            }
+            for favorite in recent_favorites
+        ],
+        'chart': {
+            'labels': chart_labels,
+            'right_swipes': chart_right,
+            'left_swipes': chart_left,
+        },
+        'profile_completion': profile_completion,
+        'swipe_activity': swipe_activity,
+    }
 
 
 def register_view(request):
@@ -130,74 +222,56 @@ def profile_setup_view(request):
 @login_required
 def dashboard_view(request):
     """User dashboard with stats and overview"""
-    user = request.user
-    profile = user.profile
-
-    total_swipes = SwipeAction.objects.filter(user=user).count()
-    total_matches = SwipeAction.objects.filter(user=user, direction='right').count()
-    total_favorites = Favorite.objects.filter(user=user).count()
-    total_reviews = Review.objects.filter(user=user).count()
-
-    recent_swipes = (
-        SwipeAction.objects.filter(user=user)
-        .select_related('dish')
-        .order_by('-created_at')[:5]
-    )
-    recent_favorites = (
-        Favorite.objects.filter(user=user)
-        .select_related('dish')
-        .order_by('-created_at')[:5]
-    )
-
-    # Build swipe activity for the last 7 days
-    start_date = timezone.now().date() - timedelta(days=6)
-    swipe_activity = {start_date + timedelta(days=i): {'right': 0, 'left': 0} for i in range(7)}
-
-    aggregated_swipes = (
-        SwipeAction.objects.filter(user=user, created_at__date__gte=start_date)
-        .annotate(day=TruncDate('created_at'))
-        .values('day')
-        .annotate(
-            right_count=Count('id', filter=Q(direction='right')),
-            left_count=Count('id', filter=Q(direction='left')),
-        )
-    )
-
-    for entry in aggregated_swipes:
-        day = entry['day']
-        swipe_activity[day]['right'] = entry['right_count']
-        swipe_activity[day]['left'] = entry['left_count']
-
-    chart_labels = [day.strftime('%b %d') for day in swipe_activity.keys()]
-    chart_right = [counts['right'] for counts in swipe_activity.values()]
-    chart_left = [counts['left'] for counts in swipe_activity.values()]
-
-    profile_completion_fields = [
-        bool(profile.city),
-        bool(profile.bio),
-        bool(profile.favorite_cuisines),
-        bool(profile.allergies),
-        bool(profile.profile_picture),
-    ]
-    profile_completion = int((sum(profile_completion_fields) / len(profile_completion_fields)) * 100)
+    dashboard_payload = _build_dashboard_payload(request.user)
 
     context = {
-        'user': user,
-        'profile': profile,
-        'total_swipes': total_swipes,
-        'total_matches': total_matches,
-        'total_favorites': total_favorites,
-        'total_reviews': total_reviews,
-        'recent_swipes': recent_swipes,
-        'recent_favorites': recent_favorites,
-        'profile_completion': profile_completion,
-        'swipe_chart_data': json.dumps(
-            {
-                'labels': chart_labels,
-                'right_swipes': chart_right,
-                'left_swipes': chart_left,
-            }
-        ),
+        'user': dashboard_payload['user'],
+        'profile': dashboard_payload['profile'],
+        'total_swipes': dashboard_payload['totals']['swipes'],
+        'total_matches': dashboard_payload['totals']['matches'],
+        'total_favorites': dashboard_payload['totals']['favorites'],
+        'total_reviews': dashboard_payload['totals']['reviews'],
+        'recent_swipes': dashboard_payload['recent_swipes_qs'],
+        'recent_favorites': dashboard_payload['recent_favorites_qs'],
+        'profile_completion': dashboard_payload['profile_completion'],
+        'swipe_chart_data': json.dumps(dashboard_payload['chart']),
     }
 
     return render(request, 'accounts/dashboard.html', context)
+
+
+@login_required
+def dashboard_data_json(request):
+    """Expose dashboard metrics as a JSON API."""
+    dashboard_payload = _build_dashboard_payload(request.user)
+
+    return JsonResponse(
+        {
+            'totals': dashboard_payload['totals'],
+            'chart': dashboard_payload['chart'],
+            'recent_swipes': dashboard_payload['recent_swipes'],
+            'recent_favorites': dashboard_payload['recent_favorites'],
+            'profile_completion': dashboard_payload['profile_completion'],
+        }
+    )
+
+
+@login_required
+def dashboard_data_csv(request):
+    """Download swipe activity in CSV format for external analysis."""
+    dashboard_payload = _build_dashboard_payload(request.user)
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(['Date', 'Right Swipes', 'Left Swipes'])
+
+    for label, right, left in zip(
+        dashboard_payload['chart']['labels'],
+        dashboard_payload['chart']['right_swipes'],
+        dashboard_payload['chart']['left_swipes'],
+    ):
+        writer.writerow([label, right, left])
+
+    response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="swipe_activity.csv"'
+    return response

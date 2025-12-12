@@ -4,9 +4,15 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from swipes.models import Favorite
 from .models import Dish, Restaurant, Cuisine, RestaurantDish
-from .location_utils import filter_nearby_restaurants, get_user_location_from_request, set_user_location_in_session, \
-    haversine_distance
+from .location_utils import (
+    DEFAULT_MAX_DISTANCE_MILES,
+    filter_nearby_restaurants,
+    get_user_location_from_request,
+    set_user_location_in_session,
+    haversine_distance,
+)
 from .maps_service import GoogleMapsService
+from .time_utils import get_current_meal_type
 
 
 def dish_list_view(request):
@@ -262,15 +268,13 @@ def nearby_restaurants(request):
     user_location = get_user_location_from_request(request)
     has_location = user_location is not None
     restaurants = []
+    current_meal_type = get_current_meal_type()
 
     # Get filters
-    distance_filter = request.GET.get('distance', '10')
+    distance_filter = str(DEFAULT_MAX_DISTANCE_MILES)
     price_filter = request.GET.get('price')
     rating_filter = request.GET.get('rating')
-    try:
-        max_distance = float(distance_filter)
-    except (ValueError, TypeError):
-        max_distance = 10
+    max_distance = DEFAULT_MAX_DISTANCE_MILES
     if has_location:
         maps_service = GoogleMapsService()
 
@@ -315,6 +319,11 @@ def nearby_restaurants(request):
                             continue
                     except (ValueError, TypeError):
                         pass
+                related_dishes = db_restaurant.restaurant_dishes.all()
+                if related_dishes.exists():
+                    if not related_dishes.filter(dish__meal_type=current_meal_type, is_available=True).exists():
+                        continue
+
                 restaurants.append(db_restaurant)
 
         # Sort by distance
