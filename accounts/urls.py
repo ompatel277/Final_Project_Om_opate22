@@ -16,4 +16,6 @@ urlpatterns = [
 
     # Dashboard
     path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/data/json/', views.dashboard_data_json, name='dashboard_data_json'),
+    path('dashboard/data/csv/', views.dashboard_data_csv, name='dashboard_data_csv'),
 ]
