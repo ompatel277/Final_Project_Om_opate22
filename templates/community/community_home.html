@@ -5,14 +5,14 @@
 
 {% block extra_css %}
 <style>
-/* Vibrant Community Container */
+/* Community Container */
 .community-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
-/* Vibrant Page Header */
+/* Page Header */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -25,41 +25,40 @@
 .page-header h1 {
     margin: 0;
     font-size: 2.5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 50%, #FFA94D 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-weight: 700;
+    color: #2D3436;
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
+.page-header h1 span {
+    color: #FD7979;
+}
+
 .page-header h1 i {
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #FD7979;
 }
 
 .location-badge {
     padding: 0.75rem 1.5rem;
-    border-radius: 12px;
+    border-radius: 8px;
     font-size: 0.9375rem;
-    font-weight: 700;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
-    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.15);
 }
 
 .location-badge.bg-success {
-    background: linear-gradient(135deg, #20C997 0%, #51CF66 100%) !important;
+    background: #FD7979 !important;
+    color: #FFFFFF;
     border: none;
 }
 
 .location-badge.bg-warning {
-    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%) !important;
+    background: #FEEAC9 !important;
+    color: #2D3436;
     border: none;
 }
 
@@ -67,41 +66,30 @@
     font-size: 1.125rem;
 }
 
-/* Vibrant Search Bar */
+/* Search Bar */
 .search-bar {
-    background: var(--bg-primary, #FFFFFF);
+    background: #FFFFFF;
     padding: 1.75rem;
-    border-radius: 16px;
+    border-radius: 8px;
     margin-bottom: 2.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--border-light, #E9ECEF);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E9ECEF;
     position: relative;
-    overflow: hidden;
-}
-
-.search-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #FF385C 0%, #FF6B6B 33%, #FFA94D 66%, #51CF66 100%);
 }
 
 .search-bar input {
-    border: 2px solid var(--border-light, #E9ECEF);
-    border-radius: 12px;
+    border: 2px solid #E9ECEF;
+    border-radius: 8px;
     padding: 0.875rem 1rem 0.875rem 3rem;
-    font-size: 1.0625rem;
+    font-size: 1rem;
     width: 100%;
     transition: all 200ms ease-in-out;
     font-weight: 500;
 }
 
 .search-bar input:focus {
-    border-color: var(--primary-red, #FF385C);
-    box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.1);
+    border-color: #FD7979;
+    box-shadow: 0 0 0 4px rgba(253, 121, 121, 0.1);
     outline: none;
 }
 
@@ -109,7 +97,7 @@
     position: absolute;
     left: 2.75rem;
     top: 2.75rem;
-    color: var(--primary-red, #FF385C);
+    color: #FD7979;
     pointer-events: none;
     font-size: 1.125rem;
 }
@@ -125,13 +113,13 @@
 
 .search-result-item {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border-light, #E9ECEF);
+    border-bottom: 1px solid #E9ECEF;
     cursor: pointer;
     transition: all 200ms ease-in-out;
 }
 
 .search-result-item:hover {
-    background: linear-gradient(135deg, rgba(255, 56, 92, 0.05) 0%, rgba(255, 107, 107, 0.05) 100%);
+    background: #FEEAC9;
     transform: translateX(8px);
 }
 
@@ -139,37 +127,34 @@
     border-bottom: none;
 }
 
-/* Vibrant Section Styles */
+/* Section Styles */
 .trending-section {
     margin-bottom: 3.5rem;
 }
 
 .section-title {
-    font-size: 1.875rem;
-    font-weight: 900;
+    font-size: 1.75rem;
+    font-weight: 700;
     margin-bottom: 1.75rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--text-primary, #2C3E50);
+    color: #2D3436;
     flex-wrap: wrap;
 }
 
 .section-title i {
-    font-size: 1.875rem;
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 1.75rem;
+    color: #FD7979;
 }
 
 .section-subtitle {
     font-size: 1rem;
-    color: var(--text-secondary, #5A6C7D);
+    color: #636E72;
     font-weight: 600;
 }
 
-/* Vibrant Trending Grid */
+/* Trending Grid */
 .trending-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -177,43 +162,26 @@
 }
 
 .trending-card {
-    background: var(--bg-primary, #FFFFFF);
-    border-radius: 16px;
+    background: #FFFFFF;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--border-light, #E9ECEF);
-    transition: all 300ms ease-in-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E9ECEF;
+    transition: all 200ms ease-in-out;
     cursor: pointer;
-    position: relative;
-}
-
-.trending-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #FF385C 0%, #FFA94D 100%);
-    transform: scaleX(0);
-    transition: transform 300ms ease-in-out;
-}
-
-.trending-card:hover::before {
-    transform: scaleX(1);
 }
 
 .trending-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px -10px rgba(255, 56, 92, 0.2);
-    border-color: rgba(255, 56, 92, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(253, 121, 121, 0.15);
+    border-color: #FD7979;
 }
 
 .trending-card img {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    background: var(--gray-200, #EEEEEE);
+    background: #E9ECEF;
 }
 
 .trending-card-body {
@@ -223,12 +191,12 @@
 .trending-card h5 {
     margin: 0 0 0.75rem 0;
     font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--text-primary, #2C3E50);
+    font-weight: 700;
+    color: #2D3436;
 }
 
 .trending-card .cuisine {
-    color: var(--text-secondary, #5A6C7D);
+    color: #636E72;
     font-size: 1rem;
     margin-bottom: 0.875rem;
     display: flex;
@@ -238,48 +206,35 @@
 }
 
 .trending-card .cuisine i {
-    color: var(--primary-red, #FF385C);
+    color: #FD7979;
 }
 
-/* Vibrant Rating Badge */
+/* Rating Badge */
 .rating-badge {
-    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%);
+    background: #FD7979;
     color: white;
     padding: 0.5rem 1rem;
-    border-radius: 10px;
-    font-size: 0.9375rem;
-    font-weight: 800;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 10px -2px rgba(255, 142, 83, 0.4);
 }
 
-/* Vibrant Review Card */
+/* Review Card */
 .review-card {
-    background: var(--bg-primary, #FFFFFF);
-    border-radius: 16px;
+    background: #FFFFFF;
+    border-radius: 8px;
     padding: 1.75rem;
     margin-bottom: 1.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--border-light, #E9ECEF);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E9ECEF;
     transition: all 200ms ease-in-out;
-    position: relative;
-    overflow: hidden;
-}
-
-.review-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(to bottom, #FF385C 0%, #FFA94D 100%);
 }
 
 .review-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(255, 56, 92, 0.15);
+    box-shadow: 0 8px 24px rgba(253, 121, 121, 0.1);
     transform: translateY(-2px);
 }
 
@@ -292,145 +247,123 @@
 }
 
 .review-author {
-    font-weight: 800;
-    font-size: 1.0625rem;
-    color: var(--text-primary, #2C3E50);
+    font-weight: 700;
+    font-size: 1rem;
+    color: #2D3436;
 }
 
 .review-author i {
-    color: var(--primary-red, #FF385C);
+    color: #FD7979;
     margin-right: 0.5rem;
 }
 
 .review-date {
-    color: var(--text-tertiary, #95A5A6);
+    color: #636E72;
     font-size: 0.875rem;
     font-weight: 500;
 }
 
 .review-content {
-    color: var(--text-secondary, #5A6C7D);
+    color: #636E72;
     line-height: 1.8;
     font-size: 1rem;
 }
 
-/* Vibrant Empty State */
+/* Empty State */
 .empty-state {
     text-align: center;
     padding: 3.5rem 2rem;
-    color: var(--text-tertiary, #95A5A6);
+    color: #636E72;
 }
 
 .empty-state i {
-    font-size: 5rem;
-    background: linear-gradient(135deg, #FF385C 0%, #FFA94D 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 4rem;
+    color: #FD7979;
     margin-bottom: 1.5rem;
 }
 
 .empty-state h5 {
-    color: var(--text-secondary, #5A6C7D);
+    color: #2D3436;
     margin-bottom: 0.875rem;
-    font-weight: 800;
-    font-size: 1.375rem;
+    font-weight: 700;
+    font-size: 1.25rem;
 }
 
 .empty-state p {
-    font-size: 1.0625rem;
+    font-size: 1rem;
+    color: #636E72;
 }
 
-/* Vibrant Quick Links Cards */
+/* Quick Links Cards */
 .quick-link-card {
-    background: var(--bg-primary, #FFFFFF);
-    border-radius: 16px;
-    border: 2px solid var(--border-light, #E9ECEF);
-    transition: all 300ms ease-in-out;
-    position: relative;
-    overflow: hidden;
-}
-
-.quick-link-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #FF385C 0%, #FFA94D 100%);
-    transform: scaleX(0);
-    transition: transform 300ms ease-in-out;
-}
-
-.quick-link-card:hover::before {
-    transform: scaleX(1);
+    background: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #E9ECEF;
+    transition: all 200ms ease-in-out;
 }
 
 .quick-link-card:hover {
-    box-shadow: 0 20px 40px -10px rgba(255, 56, 92, 0.2);
-    transform: translateY(-6px);
-    border-color: rgba(255, 56, 92, 0.3);
+    box-shadow: 0 8px 24px rgba(253, 121, 121, 0.15);
+    transform: translateY(-4px);
+    border-color: #FD7979;
 }
 
 .quick-link-card .card-body {
-    padding: 2.5rem 1.75rem;
+    padding: 2rem 1.5rem;
 }
 
 .quick-link-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: #FEEAC9;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
-    color: white;
-    font-size: 2.25rem;
-    box-shadow: 0 10px 25px -5px rgba(255, 56, 92, 0.4);
-    transition: all 300ms ease-in-out;
+    color: #FD7979;
+    font-size: 1.75rem;
+    transition: all 200ms ease-in-out;
 }
 
 .quick-link-card:nth-child(2) .quick-link-icon {
-    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%);
-    box-shadow: 0 10px 25px -5px rgba(255, 142, 83, 0.4);
+    background: #FFCDC9;
 }
 
 .quick-link-card:nth-child(3) .quick-link-icon {
-    background: linear-gradient(135deg, #20C997 0%, #51CF66 100%);
-    box-shadow: 0 10px 25px -5px rgba(32, 201, 151, 0.4);
+    background: #FDACAC;
 }
 
 .quick-link-card:hover .quick-link-icon {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.1);
 }
 
 .quick-link-card h5 {
-    font-weight: 900;
-    color: var(--text-primary, #2C3E50);
+    font-weight: 700;
+    color: #FD7979;
     margin-bottom: 0.625rem;
-    font-size: 1.375rem;
+    font-size: 1.25rem;
 }
 
 .quick-link-card p {
-    color: var(--text-secondary, #5A6C7D);
-    font-size: 1rem;
+    color: #636E72;
+    font-size: 0.875rem;
     margin-bottom: 1.5rem;
 }
 
-/* Write Review Card */
+/* Write Review Section */
 .write-review-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
+    background: #FD7979;
+    border-radius: 8px;
     padding: 2rem;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
     color: white;
 }
 
 .write-review-section h3 {
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 1rem;
+    color: #FFFFFF;
 }
 
 .write-review-section p {
@@ -443,9 +376,9 @@
     border: 2px solid rgba(255, 255, 255, 0.3);
     color: white;
     padding: 1rem 1.5rem;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: all 0.3s ease;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -453,10 +386,38 @@
 }
 
 .review-type-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: white;
+    background: #FFFFFF;
+    border-color: #FFFFFF;
+    color: #FD7979;
     transform: translateY(-2px);
+}
+
+/* Buttons */
+.btn-primary {
+    background: #FD7979;
+    border: none;
+    color: #FFFFFF;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+}
+
+.btn-primary:hover {
+    background: #e86969;
+    color: #FFFFFF;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border: 2px solid #FD7979;
+    color: #FD7979;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.btn-outline-primary:hover {
+    background: #FD7979;
+    color: #FFFFFF;
 }
 
 /* Responsive Design */
@@ -490,14 +451,16 @@
     <div class="page-header">
         <h1>
             <i class="fas fa-users"></i>
-            Community Feed
+            <span>Community</span> Feed
         </h1>
         {% if has_location %}
             <div class="badge bg-success location-badge">
+                <i class="fas fa-map-marker-alt"></i>
                 {{ user_location.city }}
             </div>
         {% else %}
-            <div class="badge bg-warning text-dark location-badge">
+            <div class="badge bg-warning location-badge">
+                <i class="fas fa-map-marker-alt"></i>
                 Location not set
             </div>
         {% endif %}
@@ -553,13 +516,13 @@
                                     <i class="fas fa-star"></i>
                                     {{ dish.average_rating|floatformat:1 }}
                                 </span>
-                                <span class="text-muted" style="font-size: 0.875rem; font-weight: 600;">
+                                <span style="color: #636E72; font-size: 0.875rem; font-weight: 600;">
                                     {{ dish.total_ratings }} reviews
                                 </span>
                             </div>
                             <div class="mt-2">
-                                <small class="text-muted" style="font-weight: 600;">
-                                    <i class="fas fa-heart" style="color: var(--primary-red, #FF385C);"></i>
+                                <small style="color: #636E72; font-weight: 600;">
+                                    <i class="fas fa-heart" style="color: #FD7979;"></i>
                                     {{ dish.total_right_swipes }} likes
                                 </small>
                             </div>
@@ -595,8 +558,8 @@
                     <div class="trending-card" onclick="window.location.href='{% url 'dishes:restaurant_detail' restaurant.id %}'">
                         <div class="trending-card-body">
                             <h5>{{ restaurant.name }}</h5>
-                            <p class="text-muted mb-2" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                                <i class="fas fa-map-marker-alt" style="color: var(--primary-red, #FF385C);"></i>
+                            <p style="color: #636E72; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                <i class="fas fa-map-marker-alt" style="color: #FD7979;"></i>
                                 {{ restaurant.address|truncatewords:8 }}
                             </p>
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -604,19 +567,19 @@
                                     <i class="fas fa-star"></i>
                                     {{ restaurant.rating|floatformat:1 }}
                                 </span>
-                                <span class="text-muted" style="font-size: 0.875rem; font-weight: 600;">
+                                <span style="color: #636E72; font-size: 0.875rem; font-weight: 600;">
                                     {{ restaurant.total_reviews }} reviews
                                 </span>
                             </div>
                             {% if restaurant.distance %}
-                                <p class="mb-0" style="font-size: 0.875rem; color: var(--text-secondary, #5A6C7D); display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                                    <i class="fas fa-route" style="color: var(--primary-red, #FF385C);"></i>
+                                <p style="margin-bottom: 0; font-size: 0.875rem; color: #636E72; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                    <i class="fas fa-route" style="color: #FD7979;"></i>
                                     {{ restaurant.distance|floatformat:1 }} miles away
                                 </p>
                             {% endif %}
                             {% if restaurant.price_range %}
-                                <p class="mb-0 mt-1" style="font-size: 0.875rem; color: var(--text-secondary, #5A6C7D); display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                                    <i class="fas fa-dollar-sign" style="color: var(--primary-red, #FF385C);"></i>
+                                <p style="margin-bottom: 0; margin-top: 0.25rem; font-size: 0.875rem; color: #636E72; display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                    <i class="fas fa-dollar-sign" style="color: #FD7979;"></i>
                                     {{ restaurant.price_range }}
                                 </p>
                             {% endif %}
@@ -651,8 +614,8 @@
                                 <i class="fas fa-user-circle"></i>
                                 {{ review.user.username }}
                             </div>
-                            <small class="text-muted" style="font-weight: 600;">
-                                reviewed <strong>{{ review.dish.name }}</strong>
+                            <small style="color: #636E72; font-weight: 600;">
+                                reviewed <strong style="color: #2D3436;">{{ review.dish.name }}</strong>
                             </small>
                         </div>
                         <div class="text-end">
@@ -664,17 +627,17 @@
                         </div>
                     </div>
                     {% if review.title %}
-                        <h6 class="mt-2 mb-1" style="font-weight: 800; color: var(--text-primary, #2C3E50);">{{ review.title }}</h6>
+                        <h6 style="margin-top: 0.5rem; margin-bottom: 0.25rem; font-weight: 700; color: #2D3436;">{{ review.title }}</h6>
                     {% endif %}
                     <div class="review-content">
                         {{ review.content|truncatewords:30 }}
                     </div>
                     {% if review.image %}
-                        <img src="{{ review.image.url }}" alt="Review" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-top: 1rem; border: 2px solid var(--border-light, #E9ECEF);">
+                        <img src="{{ review.image.url }}" alt="Review" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 1rem; border: 1px solid #E9ECEF;">
                     {% endif %}
                     <div class="mt-2">
-                        <a href="{% url 'community:dish_reviews' review.dish.id %}" class="text-decoration-none">
-                            <small class="text-primary" style="font-weight: 700;">
+                        <a href="{% url 'community:dish_reviews' review.dish.id %}" style="text-decoration: none;">
+                            <small style="color: #FD7979; font-weight: 600;">
                                 View all reviews <i class="fas fa-arrow-right"></i>
                             </small>
                         </a>
@@ -700,8 +663,8 @@
                         <i class="fas fa-fire"></i>
                     </div>
                     <h5>Trending</h5>
-                    <p class="text-muted">Discover what's hot right now</p>
-                    <a href="{% url 'community:trending' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
+                    <p>Discover what's hot right now</p>
+                    <a href="{% url 'community:trending' %}" class="btn btn-outline-primary btn-sm">
                         View Trending
                     </a>
                 </div>
@@ -714,8 +677,8 @@
                         <i class="fas fa-store"></i>
                     </div>
                     <h5>Restaurants</h5>
-                    <p class="text-muted">Find restaurants near you</p>
-                    <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
+                    <p>Find restaurants near you</p>
+                    <a href="{% url 'dishes:restaurant_list' %}" class="btn btn-outline-primary btn-sm">
                         Browse Restaurants
                     </a>
                 </div>
@@ -728,8 +691,8 @@
                         <i class="fas fa-heart"></i>
                     </div>
                     <h5>Your Matches</h5>
-                    <p class="text-muted">Review dishes you've liked</p>
-                    <a href="{% url 'swipes:matches' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
+                    <p>Review dishes you've liked</p>
+                    <a href="{% url 'swipes:matches' %}" class="btn btn-outline-primary btn-sm">
                         View Matches
                     </a>
                 </div>
@@ -770,31 +733,31 @@ function displaySearchResults(data) {
         return;
     }
 
-    let html = '<div style="background: white; padding: 1.25rem; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); max-height: 400px; overflow-y: auto; border: 2px solid var(--border-light, #E9ECEF);">';
+    let html = '<div style="background: #FFFFFF; padding: 1.25rem; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); max-height: 400px; overflow-y: auto; border: 1px solid #E9ECEF;">';
 
     if (data.dishes.length > 0) {
-        html += '<h6 class="mb-2" style="font-weight: 800; color: var(--text-primary, #2C3E50);"><i class="fas fa-utensils" style="color: var(--primary-red, #FF385C); margin-right: 0.5rem;"></i>Dishes</h6>';
+        html += '<h6 style="margin-bottom: 0.5rem; font-weight: 700; color: #2D3436;"><i class="fas fa-utensils" style="color: #FD7979; margin-right: 0.5rem;"></i>Dishes</h6>';
         data.dishes.forEach(dish => {
             html += `
                 <div class="search-result-item" onclick="window.location.href='/community/dish/${dish.id}/reviews/'">
-                    <strong style="font-weight: 700;">${dish.name}</strong>
-                    <span class="text-muted">- ${dish.cuisine}</span>
-                    <span class="badge ms-2" style="background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%); color: white; font-weight: 700;"><i class="fas fa-star"></i> ${dish.avg_rating}</span>
-                    <small class="text-muted ms-2" style="font-weight: 600;">(${dish.review_count} reviews)</small>
+                    <strong style="font-weight: 700; color: #2D3436;">${dish.name}</strong>
+                    <span style="color: #636E72;">- ${dish.cuisine}</span>
+                    <span style="background: #FD7979; color: white; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem;"><i class="fas fa-star"></i> ${dish.avg_rating}</span>
+                    <small style="color: #636E72; margin-left: 0.5rem; font-weight: 600;">(${dish.review_count} reviews)</small>
                 </div>
             `;
         });
     }
 
     if (data.restaurants.length > 0) {
-        html += '<h6 class="mt-3 mb-2" style="font-weight: 800; color: var(--text-primary, #2C3E50);"><i class="fas fa-store" style="color: var(--primary-red, #FF385C); margin-right: 0.5rem;"></i>Restaurants</h6>';
+        html += '<h6 style="margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 700; color: #2D3436;"><i class="fas fa-store" style="color: #FD7979; margin-right: 0.5rem;"></i>Restaurants</h6>';
         data.restaurants.forEach(restaurant => {
             html += `
                 <div class="search-result-item" onclick="window.location.href='/dishes/restaurant/${restaurant.id}/'">
-                    <strong style="font-weight: 700;">${restaurant.name}</strong>
-                    <br><small class="text-muted" style="font-weight: 600;">${restaurant.address}</small>
-                    <span class="badge ms-2" style="background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%); color: white; font-weight: 700;"><i class="fas fa-star"></i> ${restaurant.avg_rating}</span>
-                    <small class="text-muted ms-2" style="font-weight: 600;">(${restaurant.review_count} reviews)</small>
+                    <strong style="font-weight: 700; color: #2D3436;">${restaurant.name}</strong>
+                    <br><small style="color: #636E72; font-weight: 600;">${restaurant.address}</small>
+                    <span style="background: #FD7979; color: white; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem;"><i class="fas fa-star"></i> ${restaurant.avg_rating}</span>
+                    <small style="color: #636E72; margin-left: 0.5rem; font-weight: 600;">(${restaurant.review_count} reviews)</small>
                 </div>
             `;
         });
