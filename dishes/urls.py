@@ -23,26 +23,25 @@ urlpatterns = [
     # Web Pages - Search
     path('search/', views.search_view, name='search'),
 
-    # Web Pages - Nearby Restaurants (NEW)
+    # Web Pages - Nearby Restaurants
     path('nearby/', views.nearby_restaurants, name='nearby_restaurants'),
 
     # REST API - ViewSets
     path('api/', include(router.urls)),
 
-    # REST API - Custom Endpoints (NEW)
+    # REST API - Custom Endpoints
     path('api/dishes/<int:dish_id>/restaurants/', api_views.DishRestaurantsView.as_view(),
          name='api_dish_restaurants_detail'),
 
-    # REST API - Location Management (NEW)
-    path('api/set-location/', views.set_location_view, name='set_location'),
+    # Location Management
+    path('set-location/', views.set_location_view, name='set_location'),
+    path('geocode/', views.geocode_location_view, name='geocode_location'),
 
-    # REST API - Google Maps Integration (NEW)
+    # REST API - Google Maps Integration
     path('api/restaurants/nearby/', api_views.find_nearby_restaurants, name='api_nearby_restaurants'),
     path('api/dishes/<int:dish_id>/restaurants/nearby/', api_views.find_restaurants_for_dish,
          name='api_dish_restaurants'),
     path('api/places/details/', api_views.get_place_details, name='api_place_details'),
     path('api/places/reviews/', api_views.get_place_reviews, name='api_place_reviews'),
     path('api/directions/', api_views.get_directions, name='api_directions'),
-    path('api/set-location/', views.set_location_view, name='set_location'),
-
 ]

@@ -18,54 +18,59 @@ import random
 
 @login_required
 def swipe_feed_view(request):
-    """Main swipe interface - shows dishes based on local restaurants"""
+    """Main swipe interface - shows dishes based on location and preferences"""
     user_location = get_user_location_from_request(request)
     current_meal_type = get_current_meal_type()
 
     # Get user's blacklisted items
     blacklist = Blacklist.objects.filter(user=request.user)
     blacklisted_dish_ids = blacklist.filter(blacklist_type='dish', dish__isnull=False).values_list('dish_id', flat=True)
-    blacklisted_ingredients = blacklist.filter(blacklist_type='ingredient').values_list('item_name', flat=True)
 
-    # ✅ ONLY exclude RIGHT swipes and blacklisted dishes (left swipes can come back)
+    # Only exclude RIGHT swipes and blacklisted dishes (left swipes can come back)
     right_swiped_dish_ids = SwipeAction.objects.filter(
         user=request.user,
         direction='right'
     ).values_list('dish_id', flat=True)
 
-    # Build base query
-    available_dishes = Dish.objects.filter(
-        is_active=True,
-        meal_type=current_meal_type
-    ).exclude(
-        id__in=right_swiped_dish_ids  # Only exclude liked dishes
-    ).exclude(
-        id__in=blacklisted_dish_ids  # And blocked dishes
-    )
+    # Get filter parameters from request
+    cuisine_filter = request.GET.get('cuisine')
+    dietary_filter = request.GET.get('dietary')
+    meal_filter = request.GET.get('meal')  # NEW: Allow user to filter by meal type
 
     # Apply user preferences from profile
     profile = request.user.profile
 
-    # Get filter parameters from request
-    cuisine_filter = request.GET.get('cuisine')
-    dietary_filter = request.GET.get('dietary')
+    # Start with ALL active dishes, then apply filters progressively
+    available_dishes = Dish.objects.filter(is_active=True).exclude(
+        id__in=right_swiped_dish_ids
+    ).exclude(
+        id__in=blacklisted_dish_ids
+    )
+
+    # Apply meal type filter - use current meal type or user selection
+    if meal_filter and meal_filter != 'all':
+        available_dishes = available_dishes.filter(meal_type=meal_filter)
+    else:
+        # Default: show current meal type, but fall back to all if no dishes
+        current_meal_dishes = available_dishes.filter(meal_type=current_meal_type)
+        if current_meal_dishes.exists():
+            available_dishes = current_meal_dishes
+        # else: keep all dishes (no meal filter)
 
     # Filter by dietary preferences (profile default or user filter)
-    if dietary_filter:
+    if dietary_filter and dietary_filter != 'all':
         if dietary_filter == 'vegetarian':
             available_dishes = available_dishes.filter(is_vegetarian=True)
         elif dietary_filter == 'vegan':
             available_dishes = available_dishes.filter(is_vegan=True)
         elif dietary_filter == 'non_veg':
             available_dishes = available_dishes.filter(is_vegetarian=False, is_vegan=False)
-    else:
-        # Apply profile defaults if no filter selected
-        if profile.diet_type == 'vegetarian':
-            available_dishes = available_dishes.filter(is_vegetarian=True)
-        elif profile.diet_type == 'vegan':
-            available_dishes = available_dishes.filter(is_vegan=True)
+    elif profile.diet_type == 'vegetarian':
+        available_dishes = available_dishes.filter(is_vegetarian=True)
+    elif profile.diet_type == 'vegan':
+        available_dishes = available_dishes.filter(is_vegan=True)
 
-    # Filter by allergies
+    # Filter by allergies from profile
     if profile.allergies:
         allergies = profile.get_allergies_list()
         for allergy in allergies:
@@ -74,115 +79,96 @@ def swipe_feed_view(request):
                 ingredients__is_allergen=True
             )
 
-    # ✅ FILTER DISHES BASED ON LOCAL RESTAURANT CUISINES
+    # Apply cuisine filter if selected
+    if cuisine_filter and cuisine_filter != 'all':
+        try:
+            selected_cuisine = Cuisine.objects.get(id=cuisine_filter)
+            available_dishes = available_dishes.filter(cuisine=selected_cuisine)
+        except Cuisine.DoesNotExist:
+            pass
+
+    # Location-based filtering (OPTIONAL - only if we get results)
     relevant_cuisines = []
-
     if user_location:
-        maps_service = GoogleMapsService()
-        max_distance = DEFAULT_MAX_DISTANCE_MILES
-
-        # Fetch real local restaurants from Google Maps
-        local_restaurants = maps_service.search_restaurants(
-            query="restaurants",
-            latitude=user_location['latitude'],
-            longitude=user_location['longitude'],
-            zoom=14,
-            num_results=50
+        # Try to get dishes from nearby restaurants in our database first
+        nearby_dish_ids = get_dishes_from_nearby_restaurants(
+            user_location['latitude'],
+            user_location['longitude'],
+            DEFAULT_MAX_DISTANCE_MILES
         )
 
-        filtered_local_restaurants = []
-        for restaurant_data in local_restaurants:
-            coords = restaurant_data.get('gps_coordinates') or {}
-            lat = coords.get('latitude')
-            lng = coords.get('longitude')
-            if lat is None or lng is None:
-                continue
-            distance = haversine_distance(
-                user_location['latitude'],
-                user_location['longitude'],
-                lat,
-                lng
-            )
-            if distance <= max_distance:
-                restaurant_data['distance'] = distance
-                filtered_local_restaurants.append(restaurant_data)
+        if nearby_dish_ids:
+            # Check if filtering by nearby dishes would give us results
+            nearby_dishes = available_dishes.filter(id__in=nearby_dish_ids)
+            if nearby_dishes.exists():
+                available_dishes = nearby_dishes
 
-        # Extract cuisine types from local restaurants
-        cuisine_keywords = set()
-        for restaurant_data in filtered_local_restaurants:
-            rest_type = restaurant_data.get('type', '').lower()
-            rest_name = restaurant_data.get('title', '').lower()
-
-            cuisine_words = [
-                'italian', 'pizza', 'mexican', 'chinese', 'japanese', 'sushi',
-                'indian', 'thai', 'vietnamese', 'korean', 'american', 'burger',
-                'french', 'mediterranean', 'greek', 'spanish', 'bbq', 'steakhouse',
-                'seafood', 'asian', 'latin', 'middle eastern', 'ethiopian', 'caribbean'
-            ]
-
-            for word in cuisine_words:
-                if word in rest_type or word in rest_name:
-                    cuisine_keywords.add(word)
-
-        # Map keywords to our Cuisine objects
-        if cuisine_keywords:
-            for keyword in cuisine_keywords:
-                matching_cuisines = Cuisine.objects.filter(Q(name__icontains=keyword))
-                relevant_cuisines.extend(matching_cuisines)
-
-            relevant_cuisines = list(set(relevant_cuisines))
-
-        # Filter dishes by relevant cuisines
-        if relevant_cuisines:
-            # Apply cuisine filter if selected
-            if cuisine_filter and cuisine_filter != 'all':
-                try:
-                    selected_cuisine = Cuisine.objects.get(id=cuisine_filter)
-                    available_dishes = available_dishes.filter(cuisine=selected_cuisine)
-                except Cuisine.DoesNotExist:
-                    pass
-            else:
-                available_dishes = available_dishes.filter(cuisine__in=relevant_cuisines)
-        else:
-            nearby_dish_ids = get_dishes_from_nearby_restaurants(
-                user_location['latitude'],
-                user_location['longitude'],
-                max_distance
-            )
-            if nearby_dish_ids:
-                available_dishes = available_dishes.filter(id__in=nearby_dish_ids)
-    else:
-        # No location - still allow cuisine filtering from all cuisines
-        if cuisine_filter and cuisine_filter != 'all':
+        # Try Google Maps API for cuisine relevance (but don't require it)
+        if not cuisine_filter or cuisine_filter == 'all':
             try:
-                selected_cuisine = Cuisine.objects.get(id=cuisine_filter)
-                available_dishes = available_dishes.filter(cuisine=selected_cuisine)
-            except Cuisine.DoesNotExist:
-                pass
+                maps_service = GoogleMapsService()
+                local_restaurants = maps_service.search_restaurants(
+                    query="restaurants",
+                    latitude=user_location['latitude'],
+                    longitude=user_location['longitude'],
+                    zoom=14,
+                    num_results=30
+                )
 
-    # Get random dish
+                # Extract cuisine keywords from local restaurants
+                cuisine_keywords = set()
+                for restaurant_data in local_restaurants:
+                    rest_type = restaurant_data.get('type', '').lower()
+                    rest_name = restaurant_data.get('title', '').lower()
+
+                    cuisine_words = [
+                        'italian', 'pizza', 'mexican', 'chinese', 'japanese', 'sushi',
+                        'indian', 'thai', 'vietnamese', 'korean', 'american', 'burger',
+                        'french', 'mediterranean', 'greek', 'spanish', 'bbq', 'steakhouse',
+                        'seafood', 'asian', 'latin', 'middle eastern', 'ethiopian', 'caribbean',
+                        'fast food', 'cafe', 'diner', 'grill', 'bakery', 'deli'
+                    ]
+
+                    for word in cuisine_words:
+                        if word in rest_type or word in rest_name:
+                            cuisine_keywords.add(word)
+
+                # Map keywords to our Cuisine objects
+                if cuisine_keywords:
+                    for keyword in cuisine_keywords:
+                        matching_cuisines = Cuisine.objects.filter(Q(name__icontains=keyword))
+                        relevant_cuisines.extend(matching_cuisines)
+                    relevant_cuisines = list(set(relevant_cuisines))
+
+            except Exception as e:
+                # If Google Maps fails, continue without location-based cuisine filtering
+                print(f"Google Maps search error (continuing anyway): {e}")
+
+    # Get random dish from available dishes
     dish = None
+    total_available = available_dishes.count()
 
-    if available_dishes.exists():
-        count = available_dishes.count()
-        random_index = random.randint(0, count - 1)
+    if total_available > 0:
+        random_index = random.randint(0, total_available - 1)
         dish = available_dishes[random_index]
 
-    # Get all cuisines for filter dropdown (either relevant or all)
-    if user_location and relevant_cuisines:
+    # Get all cuisines for filter dropdown
+    if relevant_cuisines:
         available_cuisines = relevant_cuisines
     else:
         available_cuisines = list(Cuisine.objects.all())
 
     context = {
         'dish': dish,
-        'total_available': available_dishes.count() if available_dishes else 0,
+        'total_available': total_available,
         'has_location': user_location is not None,
         'user_location': user_location,
         'relevant_cuisines': relevant_cuisines,
         'available_cuisines': available_cuisines,
         'selected_cuisine': cuisine_filter or 'all',
         'selected_dietary': dietary_filter or 'all',
+        'selected_meal': meal_filter or 'all',
+        'current_meal_type': current_meal_type,
     }
 
     return render(request, 'swipes/swipe_feed.html', context)
@@ -253,28 +239,21 @@ def matches_view(request):
     cuisine_filter = request.GET.get('cuisine')
     dietary_filter = request.GET.get('dietary')
 
-    # Get all right swipes - NO LIMIT
+    # Get all right swipes (not limited to current meal window for better UX)
     right_swipes = SwipeAction.objects.filter(
         user=request.user,
-        direction='right',
-        created_at__gte=meal_window_start,
-        dish__meal_type=current_meal_type
+        direction='right'
     ).select_related('dish', 'dish__cuisine').order_by('-created_at')
 
     user_location = get_user_location_from_request(request)
 
-    if user_location:
-        nearby_dish_ids = get_dishes_from_nearby_restaurants(
-            user_location['latitude'],
-            user_location['longitude'],
-            DEFAULT_MAX_DISTANCE_MILES
-        )
-        right_swipes = right_swipes.filter(dish_id__in=nearby_dish_ids)
+    # Don't filter matches by location - show all matches
+    # Location filtering was too restrictive
 
     # Convert to list of dishes and apply filters
     matches = []
     for swipe in right_swipes:
-        if swipe.dish and swipe.dish.is_active:  # Make sure dish still exists and is active
+        if swipe.dish and swipe.dish.is_active:
             dish = swipe.dish
 
             # Apply cuisine filter
@@ -286,7 +265,7 @@ def matches_view(request):
                     continue
 
             # Apply dietary filter
-            if dietary_filter:
+            if dietary_filter and dietary_filter != 'all':
                 if dietary_filter == 'vegetarian' and not dish.is_vegetarian:
                     continue
                 elif dietary_filter == 'vegan' and not dish.is_vegan:
@@ -321,12 +300,8 @@ def matches_view(request):
             ai_recommendations = list(potential_dishes.order_by('-average_rating', '-total_right_swipes')[:10])
 
     # Get all cuisines from matched dishes for filter dropdown
-    matched_cuisine_ids = set(swipe.dish.cuisine_id for swipe in right_swipes if swipe.dish and swipe.dish.cuisine_id)
+    matched_cuisine_ids = set(dish.cuisine_id for dish in matches if dish.cuisine_id)
     available_cuisines = list(Cuisine.objects.filter(id__in=matched_cuisine_ids).order_by('name'))
-
-    # Debug info
-    print(f"DEBUG: User {request.user.username} has {right_swipes.count()} right swipes")
-    print(f"DEBUG: Showing {len(matches)} matches")
 
     context = {
         'matches': matches,
@@ -334,7 +309,7 @@ def matches_view(request):
         'total_matches': len(matches),
         'has_location': user_location is not None,
         'user_location': user_location,
-        'total_right_swipes': right_swipes.count(),  # For debugging
+        'total_right_swipes': right_swipes.count(),
         'available_cuisines': available_cuisines,
         'selected_cuisine': cuisine_filter or 'all',
         'selected_dietary': dietary_filter or 'all',
@@ -379,13 +354,19 @@ def get_dish_restaurants_view(request, dish_id):
     maps_service = GoogleMapsService()
 
     # Fetch local restaurants serving this dish
-    restaurants_data = maps_service.search_restaurants_by_dish(
-        dish_name=dish.name,
-        latitude=user_location['latitude'],
-        longitude=user_location['longitude'],
-        zoom=14,
-        num_results=5
-    )
+    try:
+        restaurants_data = maps_service.search_restaurants_by_dish(
+            dish_name=dish.name,
+            latitude=user_location['latitude'],
+            longitude=user_location['longitude'],
+            zoom=14,
+            num_results=5
+        )
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error searching restaurants: {str(e)}'
+        }, status=500)
 
     # Parse and calculate distances
     local_restaurants = []

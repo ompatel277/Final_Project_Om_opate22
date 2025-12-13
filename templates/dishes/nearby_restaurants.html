@@ -9,7 +9,7 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h1 style="color: #2D3436; font-weight: 700; margin-bottom: 0.25rem;">
-                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1.5rem; margin-right: 0.25rem;"></i> Nearby Restaurants
+                <i class="fas fa-store" style="color: #FD7979; font-size: 1.5rem; margin-right: 0.25rem;"></i> Nearby Restaurants
             </h1>
             <p style="color: #636E72;">Discover restaurants close to you</p>
         </div>
@@ -27,13 +27,11 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
                         <div style="width: 50px; height: 50px; background: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1.25rem;"></i>
+                            <i class="fas fa-check-circle" style="color: #20C997; font-size: 1.25rem;"></i>
                         </div>
                         <div>
                             <h5 style="color: #2D3436; font-weight: 600; margin: 0;">{{ user_location.city }}</h5>
-                            <small style="color: #636E72;">
-                                {{ user_location.latitude|floatformat:4 }}, {{ user_location.longitude|floatformat:4 }}
-                            </small>
+                            <small style="color: #636E72;">Location enabled</small>
                         </div>
                     </div>
                     <button class="btn" style="background: #FFFFFF; color: #FD7979; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#locationModal">
@@ -46,7 +44,7 @@
         <div class="card mb-4">
             <div class="card-body text-center p-5">
                 <div style="width: 80px; height: 80px; background: #FEEAC9; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 2rem;"></i>
+                    <i class="fas fa-crosshairs" style="color: #FD7979; font-size: 2rem;"></i>
                 </div>
                 <h4 style="color: #2D3436; font-weight: 600;">Set Your Location</h4>
                 <p style="color: #636E72; margin-bottom: 1rem;">We need your location to show nearby restaurants</p>
@@ -124,7 +122,6 @@
                                     <div style="flex: 1;">
                                         <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 0.5rem;">{{ restaurant.name }}</h5>
                                         <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.25rem;">
-                                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i>
                                             {{ restaurant.address|truncatewords:5 }}
                                         </p>
                                         <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.75rem;">
@@ -150,17 +147,6 @@
                                         </span>
                                     {% endif %}
                                 </div>
-
-                                <!-- Cuisines -->
-                                {% if restaurant.cuisines.all %}
-                                    <div class="mb-3">
-                                        {% for cuisine in restaurant.cuisines.all|slice:":3" %}
-                                            <span style="background: #FAFAFA; color: #636E72; padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.75rem; margin-right: 0.25rem;">
-                                                {{ cuisine.emoji }} {{ cuisine.name }}
-                                            </span>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
 
                                 <!-- Actions -->
                                 <div class="d-flex gap-2">

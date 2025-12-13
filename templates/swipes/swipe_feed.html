@@ -6,20 +6,6 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/swipe&bite.css' %}">
 <style>
-.location-badge {
-    position: fixed;
-    top: 70px;
-    right: 20px;
-    background: #FD7979;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(253, 121, 121, 0.3);
-    z-index: 1000;
-}
-
 .cuisine-badges {
     margin-top: 15px;
     display: flex;
@@ -195,29 +181,38 @@
     border-color: #FD7979;
     box-shadow: 0 0 0 0.2rem rgba(253, 121, 121, 0.15);
 }
+
+.meal-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.meal-badge.breakfast { background: #FEEAC9; color: #B8860B; }
+.meal-badge.lunch { background: #FFCDC9; color: #CD5C5C; }
+.meal-badge.dinner { background: #FDACAC; color: #8B0000; }
+.meal-badge.snack { background: #E8F5E9; color: #2E7D32; }
+.meal-badge.dessert { background: #FCE4EC; color: #C2185B; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="swipe-container">
-    {% if has_location %}
-        <div class="location-badge">
-            <i class="fas fa-map-marker-alt" style="color: white; font-size: 1rem; margin-right: 0.25rem;"></i> {{ user_location.city }}
-            <span style="margin-left: 10px; opacity: 0.9;">LIVE</span>
-        </div>
-    {% endif %}
-
     <div class="swipe-header text-center mb-4">
         <h1 style="color: #FD7979;">Swipe & Bite</h1>
         <p class="text-muted">Like, Pass, or Block dishes</p>
         {% if has_location %}
             <p class="fw-bold" style="color: #20C997;">
-                Showing dishes from local restaurants
+                Showing dishes near {{ user_location.city }}
+                <span class="meal-badge {{ current_meal_type }}">{{ current_meal_type|title }}</span>
             </p>
         {% else %}
-            <div class="alert" style="background: #FEEAC9; border: 1px solid #FDACAC; color: #333;">
-                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Enable location to see dishes from nearby restaurants
-            </div>
+            <p class="fw-bold" style="color: #FD7979;">
+                <span class="meal-badge {{ current_meal_type }}">{{ current_meal_type|title }}</span>
+            </p>
         {% endif %}
     </div>
 
@@ -225,7 +220,18 @@
     <div class="filters-container">
         <form method="get" action="{% url 'swipes:swipe_feed' %}" class="filter-form">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label for="meal" class="form-label">Meal Type</label>
+                    <select name="meal" id="meal" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if selected_meal == 'all' %}selected{% endif %}>All Meals</option>
+                        <option value="breakfast" {% if selected_meal == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                        <option value="lunch" {% if selected_meal == 'lunch' %}selected{% endif %}>Lunch</option>
+                        <option value="dinner" {% if selected_meal == 'dinner' %}selected{% endif %}>Dinner</option>
+                        <option value="snack" {% if selected_meal == 'snack' %}selected{% endif %}>Snack</option>
+                        <option value="dessert" {% if selected_meal == 'dessert' %}selected{% endif %}>Dessert</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label for="cuisine" class="form-label">Cuisine</label>
                     <select name="cuisine" id="cuisine" class="form-select" onchange="this.form.submit()">
                         <option value="all" {% if selected_cuisine == 'all' %}selected{% endif %}>All Cuisines</option>
@@ -236,8 +242,8 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <label for="dietary" class="form-label">Dietary Preference</label>
+                <div class="col-md-4">
+                    <label for="dietary" class="form-label">Dietary</label>
                     <select name="dietary" id="dietary" class="form-select" onchange="this.form.submit()">
                         <option value="all" {% if selected_dietary == 'all' %}selected{% endif %}>All</option>
                         <option value="vegetarian" {% if selected_dietary == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
@@ -257,7 +263,10 @@
 
             <div class="dish-info">
                 <h2>{{ dish.name }}</h2>
-                <p class="cuisine">{{ dish.cuisine.emoji }} {{ dish.cuisine.name }}</p>
+                <p class="cuisine">
+                    {{ dish.cuisine.emoji }} {{ dish.cuisine.name }}
+                    <span class="meal-badge {{ dish.meal_type }}">{{ dish.meal_type|title }}</span>
+                </p>
                 <p class="description">{{ dish.description }}</p>
 
                 <div class="dish-stats">
@@ -266,13 +275,13 @@
                     {% endif %}
                     <span>Spice: {{ dish.spice_level }}/5</span>
                     {% if dish.is_vegetarian %}
-                        <span>Vegetarian</span>
+                        <span style="background: #E8F5E9; color: #2E7D32;">Vegetarian</span>
                     {% endif %}
                     {% if dish.is_vegan %}
-                        <span>Vegan</span>
+                        <span style="background: #C8E6C9; color: #1B5E20;">Vegan</span>
                     {% endif %}
                     {% if dish.is_gluten_free %}
-                        <span>Gluten Free</span>
+                        <span style="background: #FFF3E0; color: #E65100;">Gluten Free</span>
                     {% endif %}
                 </div>
             </div>
@@ -295,22 +304,19 @@
         </div>
     {% else %}
         <div class="no-dishes">
-            <h3>No more dishes available!</h3>
-            <p>You've swiped through all available dishes.</p>
-            {% if not has_location %}
-                <div class="alert mt-3" style="background: #FEEAC9; border: 1px solid #FDACAC; color: #333;">
-                    <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Enable location services to see dishes from nearby restaurants!
-                </div>
-            {% endif %}
-            <a href="{% url 'swipes:matches' %}" class="btn mt-3" style="background: #20C997; color: white;">View Matches</a>
-            <a href="{% url 'swipes:favorites' %}" class="btn mt-3" style="background: #FD7979; color: white;">View Favorites</a>
+            <h3>No dishes available!</h3>
+            <p>Try changing your filters or check back later.</p>
+            <div class="mt-3">
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn" style="background: #FD7979; color: white;">Reset Filters</a>
+                <a href="{% url 'swipes:matches' %}" class="btn mt-2" style="background: #20C997; color: white;">View Matches</a>
+            </div>
         </div>
     {% endif %}
 
     <!-- Show available cuisines from local restaurants -->
     {% if relevant_cuisines %}
         <div class="available-cuisines">
-            <h5>Available cuisines in your area:</h5>
+            <h5>Popular cuisines in your area:</h5>
             <div class="cuisine-badges">
                 {% for cuisine in relevant_cuisines %}
                     <span class="cuisine-badge">{{ cuisine.emoji }} {{ cuisine.name }}</span>

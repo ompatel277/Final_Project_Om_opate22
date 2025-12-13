@@ -384,3 +384,166 @@ def set_location_view(request):
             }, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+def geocode_location_view(request):
+    """AJAX endpoint to geocode a city name or ZIP code using Google Maps"""
+    if request.method == 'GET':
+        query = request.GET.get('q', '').strip()
+
+        if not query:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Please enter a city or ZIP code'
+            }, status=400)
+
+        try:
+            from serpapi import GoogleSearch
+            from django.conf import settings
+
+            api_key = settings.SERPAPI_KEY
+            if not api_key:
+                # Fallback to Nominatim if no SerpApi key
+                import urllib.request
+                import json
+
+                url = f"https://nominatim.openstreetmap.org/search?format=json&q={urllib.parse.quote(query)}&limit=1"
+                req = urllib.request.Request(url, headers={'User-Agent': 'SwipeBite/1.0'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode())
+
+                if data:
+                    result = data[0]
+                    lat = float(result['lat'])
+                    lng = float(result['lon'])
+                    # Extract city name
+                    display_parts = result.get('display_name', '').split(',')
+                    city = display_parts[0].strip() if display_parts else query
+
+                    return JsonResponse({
+                        'status': 'success',
+                        'latitude': lat,
+                        'longitude': lng,
+                        'city': city
+                    })
+                else:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Location not found'
+                    }, status=404)
+
+            # Use Google Maps via SerpApi
+            params = {
+                "engine": "google_maps",
+                "q": query,
+                "type": "search",
+                "api_key": api_key
+            }
+
+            search = GoogleSearch(params)
+            results = search.get_dict()
+
+            # Try to get location from place_results or local_results
+            place_results = results.get('place_results', {})
+            local_results = results.get('local_results', [])
+
+            lat = None
+            lng = None
+            city = query
+
+            # First check place_results
+            if place_results:
+                gps = place_results.get('gps_coordinates', {})
+                lat = gps.get('latitude')
+                lng = gps.get('longitude')
+                city = place_results.get('title', query)
+
+            # If not found, try local_results
+            if (lat is None or lng is None) and local_results:
+                first_result = local_results[0]
+                gps = first_result.get('gps_coordinates', {})
+                lat = gps.get('latitude')
+                lng = gps.get('longitude')
+                city = first_result.get('title', query).split(' - ')[0]
+
+            # If still not found, try the search_information
+            if lat is None or lng is None:
+                search_info = results.get('search_information', {})
+                if 'location' in search_info:
+                    # Make another search specifically for the location
+                    location_params = {
+                        "engine": "google_maps",
+                        "q": f"{query} city",
+                        "type": "search",
+                        "api_key": api_key
+                    }
+                    location_search = GoogleSearch(location_params)
+                    location_results = location_search.get_dict()
+
+                    local = location_results.get('local_results', [])
+                    if local:
+                        gps = local[0].get('gps_coordinates', {})
+                        lat = gps.get('latitude')
+                        lng = gps.get('longitude')
+
+            if lat is not None and lng is not None:
+                return JsonResponse({
+                    'status': 'success',
+                    'latitude': lat,
+                    'longitude': lng,
+                    'city': city
+                })
+            else:
+                # Fallback to Nominatim
+                import urllib.request
+                import urllib.parse
+                import json
+
+                url = f"https://nominatim.openstreetmap.org/search?format=json&q={urllib.parse.quote(query)}&limit=1"
+                req = urllib.request.Request(url, headers={'User-Agent': 'SwipeBite/1.0'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode())
+
+                if data:
+                    result = data[0]
+                    return JsonResponse({
+                        'status': 'success',
+                        'latitude': float(result['lat']),
+                        'longitude': float(result['lon']),
+                        'city': result.get('display_name', '').split(',')[0].strip()
+                    })
+
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Location not found. Please try a different search.'
+                }, status=404)
+
+        except Exception as e:
+            # Final fallback to Nominatim
+            try:
+                import urllib.request
+                import urllib.parse
+                import json
+
+                url = f"https://nominatim.openstreetmap.org/search?format=json&q={urllib.parse.quote(query)}&limit=1"
+                req = urllib.request.Request(url, headers={'User-Agent': 'SwipeBite/1.0'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode())
+
+                if data:
+                    result = data[0]
+                    return JsonResponse({
+                        'status': 'success',
+                        'latitude': float(result['lat']),
+                        'longitude': float(result['lon']),
+                        'city': result.get('display_name', '').split(',')[0].strip()
+                    })
+            except:
+                pass
+
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error finding location: {str(e)}'
+            }, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

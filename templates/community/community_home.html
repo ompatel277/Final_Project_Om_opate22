@@ -5,421 +5,375 @@
 
 {% block extra_css %}
 <style>
-/* Vibrant Community Container */
+/* Community Container - Matching Home Page Theme */
 .community-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
-/* Vibrant Page Header */
+/* Page Header */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1rem;
 }
 
 .page-header h1 {
     margin: 0;
-    font-size: 2.5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 50%, #FFA94D 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2D3436;
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
 .page-header h1 i {
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #FD7979;
 }
 
 .location-badge {
-    padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    font-size: 0.9375rem;
-    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 0.625rem;
-    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.15);
+    gap: 0.5rem;
 }
 
-.location-badge.bg-success {
-    background: linear-gradient(135deg, #20C997 0%, #51CF66 100%) !important;
-    border: none;
+.location-badge.active {
+    background: #FEEAC9;
+    color: #FD7979;
 }
 
-.location-badge.bg-warning {
-    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%) !important;
-    border: none;
+.location-badge.inactive {
+    background: #E9ECEF;
+    color: #636E72;
 }
 
-.location-badge i {
-    font-size: 1.125rem;
-}
-
-/* Vibrant Search Bar */
+/* Search Bar */
 .search-bar {
-    background: var(--bg-primary, #FFFFFF);
-    padding: 1.75rem;
-    border-radius: 16px;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--border-light, #E9ECEF);
+    background: #FFFFFF;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #E9ECEF;
     position: relative;
-    overflow: hidden;
-}
-
-.search-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #FF385C 0%, #FF6B6B 33%, #FFA94D 66%, #51CF66 100%);
 }
 
 .search-bar input {
-    border: 2px solid var(--border-light, #E9ECEF);
-    border-radius: 12px;
-    padding: 0.875rem 1rem 0.875rem 3rem;
-    font-size: 1.0625rem;
+    border: 1px solid #E9ECEF;
+    border-radius: 8px;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    font-size: 0.875rem;
     width: 100%;
     transition: all 200ms ease-in-out;
-    font-weight: 500;
 }
 
 .search-bar input:focus {
-    border-color: var(--primary-red, #FF385C);
-    box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.1);
+    border-color: #FD7979;
+    box-shadow: 0 0 0 3px rgba(253, 121, 121, 0.1);
     outline: none;
 }
 
 .search-icon {
     position: absolute;
-    left: 2.75rem;
-    top: 2.75rem;
-    color: var(--primary-red, #FF385C);
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #FD7979;
     pointer-events: none;
-    font-size: 1.125rem;
 }
 
-#searchResults {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    margin-top: 0.75rem;
-}
-
-.search-result-item {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border-light, #E9ECEF);
-    cursor: pointer;
-    transition: all 200ms ease-in-out;
-}
-
-.search-result-item:hover {
-    background: linear-gradient(135deg, rgba(255, 56, 92, 0.05) 0%, rgba(255, 107, 107, 0.05) 100%);
-    transform: translateX(8px);
-}
-
-.search-result-item:last-child {
-    border-bottom: none;
-}
-
-/* Vibrant Section Styles */
+/* Section Styles */
 .trending-section {
-    margin-bottom: 3.5rem;
+    margin-bottom: 2.5rem;
 }
 
 .section-title {
-    font-size: 1.875rem;
-    font-weight: 900;
-    margin-bottom: 1.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--text-primary, #2C3E50);
-    flex-wrap: wrap;
+    color: #2D3436;
 }
 
 .section-title i {
-    font-size: 1.875rem;
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #FD7979;
 }
 
 .section-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary, #5A6C7D);
-    font-weight: 600;
+    font-size: 0.875rem;
+    color: #636E72;
+    font-weight: 500;
 }
 
-/* Vibrant Trending Grid */
+/* Trending Grid */
 .trending-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 
 .trending-card {
-    background: var(--bg-primary, #FFFFFF);
-    border-radius: 16px;
+    background: #FFFFFF;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--border-light, #E9ECEF);
-    transition: all 300ms ease-in-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #E9ECEF;
+    transition: all 200ms ease-in-out;
     cursor: pointer;
-    position: relative;
-}
-
-.trending-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #FF385C 0%, #FFA94D 100%);
-    transform: scaleX(0);
-    transition: transform 300ms ease-in-out;
-}
-
-.trending-card:hover::before {
-    transform: scaleX(1);
 }
 
 .trending-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px -10px rgba(255, 56, 92, 0.2);
-    border-color: rgba(255, 56, 92, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(253, 121, 121, 0.15);
+    border-color: #FDACAC;
 }
 
 .trending-card img {
     width: 100%;
-    height: 200px;
+    height: 180px;
     object-fit: cover;
-    background: var(--gray-200, #EEEEEE);
+    background: #FAFAFA;
 }
 
 .trending-card-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
 }
 
 .trending-card h5 {
-    margin: 0 0 0.75rem 0;
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--text-primary, #2C3E50);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #2D3436;
 }
 
 .trending-card .cuisine {
-    color: var(--text-secondary, #5A6C7D);
-    font-size: 1rem;
-    margin-bottom: 0.875rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
+    color: #636E72;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
 }
 
-.trending-card .cuisine i {
-    color: var(--primary-red, #FF385C);
-}
-
-/* Vibrant Rating Badge */
+/* Rating Badge */
 .rating-badge {
-    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    font-size: 0.9375rem;
-    font-weight: 800;
+    background: #FEEAC9;
+    color: #FD7979;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 10px -2px rgba(255, 142, 83, 0.4);
+    gap: 0.375rem;
 }
 
-/* Vibrant Review Card */
+/* Review Card */
 .review-card {
-    background: var(--bg-primary, #FFFFFF);
-    border-radius: 16px;
-    padding: 1.75rem;
-    margin-bottom: 1.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border: 2px solid var(--border-light, #E9ECEF);
+    background: #FFFFFF;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #E9ECEF;
     transition: all 200ms ease-in-out;
-    position: relative;
-    overflow: hidden;
-}
-
-.review-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(to bottom, #FF385C 0%, #FFA94D 100%);
 }
 
 .review-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(255, 56, 92, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(253, 121, 121, 0.1);
 }
 
 .review-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.875rem;
-    gap: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .review-author {
-    font-weight: 800;
-    font-size: 1.0625rem;
-    color: var(--text-primary, #2C3E50);
+    font-weight: 600;
+    color: #2D3436;
 }
 
 .review-author i {
-    color: var(--primary-red, #FF385C);
+    color: #FD7979;
     margin-right: 0.5rem;
 }
 
 .review-date {
-    color: var(--text-tertiary, #95A5A6);
-    font-size: 0.875rem;
-    font-weight: 500;
+    color: #636E72;
+    font-size: 0.75rem;
 }
 
 .review-content {
-    color: var(--text-secondary, #5A6C7D);
-    line-height: 1.8;
+    color: #636E72;
+    line-height: 1.6;
+    font-size: 0.875rem;
+}
+
+/* Engagement Actions */
+.engagement-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E9ECEF;
+}
+
+.engagement-btn {
+    background: none;
+    border: none;
+    color: #636E72;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    transition: all 200ms ease-in-out;
+}
+
+.engagement-btn:hover {
+    background: #FEEAC9;
+    color: #FD7979;
+}
+
+.engagement-btn.liked {
+    color: #FD7979;
+}
+
+.engagement-btn i {
     font-size: 1rem;
 }
 
-/* Vibrant Empty State */
+/* Empty State */
 .empty-state {
     text-align: center;
-    padding: 3.5rem 2rem;
-    color: var(--text-tertiary, #95A5A6);
+    padding: 3rem 2rem;
+    color: #636E72;
 }
 
 .empty-state i {
-    font-size: 5rem;
-    background: linear-gradient(135deg, #FF385C 0%, #FFA94D 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1.5rem;
+    font-size: 3rem;
+    color: #FDACAC;
+    margin-bottom: 1rem;
 }
 
 .empty-state h5 {
-    color: var(--text-secondary, #5A6C7D);
-    margin-bottom: 0.875rem;
-    font-weight: 800;
-    font-size: 1.375rem;
+    color: #2D3436;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 
-.empty-state p {
-    font-size: 1.0625rem;
-}
-
-/* Vibrant Quick Links Cards */
+/* Quick Links Cards */
 .quick-link-card {
-    background: var(--bg-primary, #FFFFFF);
-    border-radius: 16px;
-    border: 2px solid var(--border-light, #E9ECEF);
-    transition: all 300ms ease-in-out;
-    position: relative;
-    overflow: hidden;
-}
-
-.quick-link-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #FF385C 0%, #FFA94D 100%);
-    transform: scaleX(0);
-    transition: transform 300ms ease-in-out;
-}
-
-.quick-link-card:hover::before {
-    transform: scaleX(1);
+    background: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #E9ECEF;
+    transition: all 200ms ease-in-out;
 }
 
 .quick-link-card:hover {
-    box-shadow: 0 20px 40px -10px rgba(255, 56, 92, 0.2);
-    transform: translateY(-6px);
-    border-color: rgba(255, 56, 92, 0.3);
+    box-shadow: 0 8px 25px rgba(253, 121, 121, 0.15);
+    transform: translateY(-4px);
+    border-color: #FDACAC;
 }
 
 .quick-link-card .card-body {
-    padding: 2.5rem 1.75rem;
+    padding: 2rem 1.5rem;
 }
 
 .quick-link-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #FF385C 0%, #FF6B6B 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1.5rem;
-    color: white;
-    font-size: 2.25rem;
-    box-shadow: 0 10px 25px -5px rgba(255, 56, 92, 0.4);
-    transition: all 300ms ease-in-out;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
 }
 
-.quick-link-card:nth-child(2) .quick-link-icon {
-    background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%);
-    box-shadow: 0 10px 25px -5px rgba(255, 142, 83, 0.4);
-}
-
-.quick-link-card:nth-child(3) .quick-link-icon {
-    background: linear-gradient(135deg, #20C997 0%, #51CF66 100%);
-    box-shadow: 0 10px 25px -5px rgba(32, 201, 151, 0.4);
-}
-
-.quick-link-card:hover .quick-link-icon {
-    transform: scale(1.1) rotate(5deg);
-}
+.quick-link-icon.fire { background: #FEEAC9; color: #FD7979; }
+.quick-link-icon.pen { background: #FFCDC9; color: #FD7979; }
+.quick-link-icon.star { background: #FDACAC; color: #FD7979; }
 
 .quick-link-card h5 {
-    font-weight: 900;
-    color: var(--text-primary, #2C3E50);
-    margin-bottom: 0.625rem;
-    font-size: 1.375rem;
+    font-weight: 600;
+    color: #2D3436;
+    margin-bottom: 0.5rem;
 }
 
 .quick-link-card p {
-    color: var(--text-secondary, #5A6C7D);
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    color: #636E72;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
 }
 
-/* Responsive Design */
+/* Write Review Button */
+.write-review-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 80px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #FD7979;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 16px rgba(253, 121, 121, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 200ms ease-in-out;
+    z-index: 100;
+}
+
+.write-review-btn:hover {
+    background: #FDACAC;
+    transform: scale(1.1);
+}
+
+/* Review Modal */
+.review-modal .modal-header {
+    background: #FEEAC9;
+    border-bottom: 1px solid #E9ECEF;
+}
+
+.review-modal .modal-title {
+    color: #2D3436;
+    font-weight: 600;
+}
+
+.star-rating {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.star-rating i {
+    font-size: 1.5rem;
+    color: #E9ECEF;
+    cursor: pointer;
+    transition: color 200ms ease-in-out;
+}
+
+.star-rating i.active,
+.star-rating i:hover {
+    color: #FD7979;
+}
+
 @media (max-width: 768px) {
     .trending-grid {
         grid-template-columns: 1fr;
@@ -430,15 +384,9 @@
         align-items: flex-start;
     }
 
-    .page-header h1 {
-        font-size: 2rem;
-    }
-
-    .section-title {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        font-size: 1.5rem;
+    .write-review-btn {
+        bottom: 20px;
+        right: 20px;
     }
 }
 </style>
@@ -453,14 +401,14 @@
             Community Feed
         </h1>
         {% if has_location %}
-            <div class="badge bg-success location-badge">
-                <i class="fas fa-map-marker-alt"></i>
+            <div class="location-badge active">
+                <i class="fas fa-check-circle"></i>
                 {{ user_location.city }}
             </div>
         {% else %}
-            <div class="badge bg-warning text-dark location-badge">
-                <i class="fas fa-map-marker-alt"></i>
-                Location not set
+            <div class="location-badge inactive">
+                <i class="fas fa-crosshairs"></i>
+                Set location for local content
             </div>
         {% endif %}
     </div>
@@ -470,6 +418,46 @@
         <i class="fas fa-search search-icon"></i>
         <input type="text" id="searchInput" class="form-control" placeholder="Search dishes or restaurants...">
         <div id="searchResults"></div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card quick-link-card h-100">
+                <div class="card-body text-center">
+                    <div class="quick-link-icon fire">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h5>Trending</h5>
+                    <p>Discover what's popular now</p>
+                    <a href="{% url 'community:trending' %}" class="btn btn-outline-primary btn-sm">View Trending</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card quick-link-card h-100">
+                <div class="card-body text-center">
+                    <div class="quick-link-icon pen">
+                        <i class="fas fa-pen"></i>
+                    </div>
+                    <h5>Write Review</h5>
+                    <p>Share your experience</p>
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#writeReviewModal">Write Review</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card quick-link-card h-100">
+                <div class="card-body text-center">
+                    <div class="quick-link-icon star">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h5>Top Rated</h5>
+                    <p>Best dishes near you</p>
+                    <a href="{% url 'dishes:dish_list' %}" class="btn btn-outline-primary btn-sm">Browse Dishes</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Trending Dishes Section -->
@@ -491,7 +479,7 @@
                         <div class="trending-card-body">
                             <h5>{{ trending.dish.name }}</h5>
                             <p class="cuisine">
-                                <i class="fas fa-utensils"></i>
+                                <i class="fas fa-utensils" style="color: #FD7979;"></i>
                                 {{ trending.dish.cuisine.name }}
                             </p>
                             <div class="d-flex justify-content-between align-items-center">
@@ -499,15 +487,9 @@
                                     <i class="fas fa-star"></i>
                                     {{ trending.dish.average_rating|floatformat:1 }}
                                 </span>
-                                <span class="text-muted" style="font-size: 0.875rem; font-weight: 600;">
+                                <span style="color: #636E72; font-size: 0.875rem;">
                                     {{ trending.dish.total_ratings }} reviews
                                 </span>
-                            </div>
-                            <div class="mt-2">
-                                <small class="text-muted" style="font-weight: 600;">
-                                    <i class="fas fa-chart-line" style="color: var(--primary-red, #FF385C);"></i>
-                                    Score: {{ trending.trending_score }}
-                                </small>
                             </div>
                         </div>
                     </div>
@@ -519,7 +501,7 @@
                 <i class="fas fa-utensils"></i>
                 <h5>No trending dishes yet</h5>
                 <p>Be the first to review dishes in your area!</p>
-                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-professional-primary">Start Swiping</a>
+                <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary">Start Swiping</a>
             </div>
         {% endif %}
     </div>
@@ -527,7 +509,7 @@
     <!-- Trending Restaurants Section -->
     <div class="trending-section">
         <div class="section-title">
-            <i class="fas fa-trophy"></i>
+            <i class="fas fa-store"></i>
             Trending Restaurants
             {% if has_location %}
                 <span class="section-subtitle">in {{ user_location.city }}</span>
@@ -541,8 +523,7 @@
                     <div class="trending-card" onclick="window.location.href='{% url 'community:restaurant_reviews' restaurant.id %}'">
                         <div class="trending-card-body">
                             <h5>{{ restaurant.name }}</h5>
-                            <p class="text-muted mb-2" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                                <i class="fas fa-map-marker-alt" style="color: var(--primary-red, #FF385C);"></i>
+                            <p style="color: #636E72; font-size: 0.875rem; margin-bottom: 0.75rem;">
                                 {{ restaurant.address|truncatewords:8 }}
                             </p>
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -550,20 +531,14 @@
                                     <i class="fas fa-star"></i>
                                     {{ restaurant.avg_rating|floatformat:1 }}
                                 </span>
-                                <span class="text-muted" style="font-size: 0.875rem; font-weight: 600;">
+                                <span style="color: #636E72; font-size: 0.875rem;">
                                     {{ restaurant.review_count }} reviews
                                 </span>
                             </div>
                             {% if restaurant.distance %}
-                                <p class="mb-0" style="font-size: 0.875rem; color: var(--text-secondary, #5A6C7D); display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                                    <i class="fas fa-route" style="color: var(--primary-red, #FF385C);"></i>
+                                <p style="color: #636E72; font-size: 0.75rem; margin: 0;">
+                                    <i class="fas fa-route" style="color: #FD7979;"></i>
                                     {{ restaurant.distance|floatformat:1 }} miles away
-                                </p>
-                            {% endif %}
-                            {% if restaurant.price_range %}
-                                <p class="mb-0 mt-1" style="font-size: 0.875rem; color: var(--text-secondary, #5A6C7D); display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                                    <i class="fas fa-dollar-sign" style="color: var(--primary-red, #FF385C);"></i>
-                                    {{ restaurant.price_range }}
                                 </p>
                             {% endif %}
                         </div>
@@ -575,12 +550,12 @@
             <div class="empty-state">
                 <i class="fas fa-store"></i>
                 <h5>No trending restaurants yet</h5>
-                <p>Be the first to review restaurants in your area!</p>
+                <p>Explore restaurants and leave reviews!</p>
             </div>
         {% endif %}
     </div>
 
-    <!-- Recent Reviews Section -->
+    <!-- Recent Reviews Section with Engagement -->
     <div class="trending-section">
         <div class="section-title">
             <i class="fas fa-comments"></i>
@@ -590,14 +565,14 @@
         {% if recent_reviews %}
             {% for review in recent_reviews %}
                 {% if review.dish and review.dish.id %}
-                <div class="review-card">
+                <div class="review-card" id="review-{{ review.id }}">
                     <div class="review-header">
                         <div>
                             <div class="review-author">
                                 <i class="fas fa-user-circle"></i>
                                 {{ review.user.username }}
                             </div>
-                            <small class="text-muted" style="font-weight: 600;">
+                            <small style="color: #636E72;">
                                 reviewed <strong>{{ review.dish.name }}</strong>
                             </small>
                         </div>
@@ -610,20 +585,44 @@
                         </div>
                     </div>
                     {% if review.title %}
-                        <h6 class="mt-2 mb-1" style="font-weight: 800; color: var(--text-primary, #2C3E50);">{{ review.title }}</h6>
+                        <h6 style="font-weight: 600; color: #2D3436; margin: 0.5rem 0;">{{ review.title }}</h6>
                     {% endif %}
                     <div class="review-content">
-                        {{ review.content|truncatewords:30 }}
+                        {{ review.content|truncatewords:50 }}
                     </div>
                     {% if review.image %}
-                        <img src="{{ review.image.url }}" alt="Review" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-top: 1rem; border: 2px solid var(--border-light, #E9ECEF);">
+                        <img src="{{ review.image.url }}" alt="Review" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 1rem;">
                     {% endif %}
-                    <div class="mt-2">
-                        <a href="{% url 'community:dish_reviews' review.dish.id %}" class="text-decoration-none">
-                            <small class="text-primary" style="font-weight: 700;">
-                                View all reviews <i class="fas fa-arrow-right"></i>
-                            </small>
+
+                    <!-- Engagement Actions -->
+                    <div class="engagement-actions">
+                        <button class="engagement-btn" onclick="likeReview({{ review.id }})" id="like-btn-{{ review.id }}">
+                            <i class="far fa-heart"></i>
+                            <span id="like-count-{{ review.id }}">{{ review.likes_count|default:0 }}</span>
+                        </button>
+                        <button class="engagement-btn" onclick="toggleComments({{ review.id }})">
+                            <i class="far fa-comment"></i>
+                            <span>{{ review.comments_count|default:0 }}</span>
+                        </button>
+                        <button class="engagement-btn" onclick="shareReview({{ review.id }}, '{{ review.dish.name|escapejs }}')">
+                            <i class="fas fa-share"></i>
+                            Share
+                        </button>
+                        <a href="{% url 'community:dish_reviews' review.dish.id %}" class="engagement-btn" style="text-decoration: none;">
+                            <i class="fas fa-arrow-right"></i>
+                            View All
                         </a>
+                    </div>
+
+                    <!-- Comments Section (hidden by default) -->
+                    <div class="comments-section" id="comments-{{ review.id }}" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E9ECEF;">
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="comment-input-{{ review.id }}" placeholder="Write a comment...">
+                            <button class="btn btn-sm btn-primary mt-2" onclick="postComment({{ review.id }})">Post</button>
+                        </div>
+                        <div id="comments-list-{{ review.id }}">
+                            <!-- Comments will be loaded here -->
+                        </div>
                     </div>
                 </div>
                 {% endif %}
@@ -632,31 +631,195 @@
             <div class="empty-state">
                 <i class="fas fa-comment"></i>
                 <h5>No reviews yet</h5>
-                <p>Be the first to share your thoughts!</p>
+                <p>Be the first to share your food experience!</p>
             </div>
         {% endif %}
     </div>
+</div>
 
-    <!-- Quick Links -->
-    <div class="row mb-5">
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card quick-link-card h-100">
-                <div class="card-body text-center">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-fire"></i>
+<!-- Write Review Floating Button -->
+{% if user.is_authenticated %}
+<button class="write-review-btn" data-bs-toggle="modal" data-bs-target="#writeReviewModal" title="Write a Review">
+    <i class="fas fa-pen"></i>
+</button>
+{% endif %}
+
+<!-- Write Review Modal -->
+<div class="modal fade review-modal" id="writeReviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-pen" style="color: #FD7979; margin-right: 0.5rem;"></i> Write a Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm" method="POST" action="{% url 'community:submit_review' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">What are you reviewing?</label>
+                        <select name="review_type" class="form-select" id="reviewType" onchange="updateReviewTarget()">
+                            <option value="dish">A Dish</option>
+                            <option value="restaurant">A Restaurant</option>
+                        </select>
                     </div>
-                    <h5>Trending</h5>
-                    <p class="text-muted">Discover what's hot right now</p>
-                    <a href="{% url 'community:trending' %}" class="btn btn-outline-primary btn-sm" style="font-weight: 700;">
-                        View Trending
-                    </a>
-                </div>
+                    <div class="mb-3" id="dishSelect">
+                        <label class="form-label">Select Dish</label>
+                        <select name="dish_id" class="form-select">
+                            <option value="">Choose a dish...</option>
+                            {% for dish in all_dishes %}
+                                <option value="{{ dish.id }}">{{ dish.name }} - {{ dish.cuisine.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3" id="restaurantSelect" style="display: none;">
+                        <label class="form-label">Select Restaurant</label>
+                        <select name="restaurant_id" class="form-select">
+                            <option value="">Choose a restaurant...</option>
+                            {% for restaurant in all_restaurants %}
+                                <option value="{{ restaurant.id }}">{{ restaurant.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Your Rating</label>
+                        <div class="star-rating" id="starRating">
+                            <i class="far fa-star" data-rating="1"></i>
+                            <i class="far fa-star" data-rating="2"></i>
+                            <i class="far fa-star" data-rating="3"></i>
+                            <i class="far fa-star" data-rating="4"></i>
+                            <i class="far fa-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" name="rating" id="ratingInput" value="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Title (optional)</label>
+                        <input type="text" name="title" class="form-control" placeholder="Summarize your experience">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Your Review</label>
+                        <textarea name="content" class="form-control" rows="4" placeholder="Share your thoughts..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// Star rating functionality
+document.querySelectorAll('#starRating i').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        document.getElementById('ratingInput').value = rating;
+
+        document.querySelectorAll('#starRating i').forEach((s, index) => {
+            if (index < rating) {
+                s.classList.remove('far');
+                s.classList.add('fas', 'active');
+            } else {
+                s.classList.remove('fas', 'active');
+                s.classList.add('far');
+            }
+        });
+    });
+
+    star.addEventListener('mouseover', function() {
+        const rating = this.dataset.rating;
+        document.querySelectorAll('#starRating i').forEach((s, index) => {
+            if (index < rating) {
+                s.style.color = '#FD7979';
+            }
+        });
+    });
+
+    star.addEventListener('mouseout', function() {
+        document.querySelectorAll('#starRating i').forEach(s => {
+            if (!s.classList.contains('active')) {
+                s.style.color = '#E9ECEF';
+            }
+        });
+    });
+});
+
+function updateReviewTarget() {
+    const type = document.getElementById('reviewType').value;
+    document.getElementById('dishSelect').style.display = type === 'dish' ? 'block' : 'none';
+    document.getElementById('restaurantSelect').style.display = type === 'restaurant' ? 'block' : 'none';
+}
+
+function likeReview(reviewId) {
+    fetch(`/community/review/${reviewId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const btn = document.getElementById(`like-btn-${reviewId}`);
+            const count = document.getElementById(`like-count-${reviewId}`);
+            if (data.liked) {
+                btn.classList.add('liked');
+                btn.querySelector('i').classList.remove('far');
+                btn.querySelector('i').classList.add('fas');
+            } else {
+                btn.classList.remove('liked');
+                btn.querySelector('i').classList.remove('fas');
+                btn.querySelector('i').classList.add('far');
+            }
+            count.textContent = data.likes_count;
+        }
+    });
+}
+
+function toggleComments(reviewId) {
+    const section = document.getElementById(`comments-${reviewId}`);
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+}
+
+function postComment(reviewId) {
+    const input = document.getElementById(`comment-input-${reviewId}`);
+    const comment = input.value.trim();
+    if (!comment) return;
+
+    fetch(`/community/review/${reviewId}/comment/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: comment })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            input.value = '';
+            const list = document.getElementById(`comments-list-${reviewId}`);
+            list.innerHTML = `<div style="background: #FAFAFA; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                <strong style="color: #2D3436;">You</strong>
+                <p style="margin: 0.25rem 0 0; color: #636E72; font-size: 0.875rem;">${comment}</p>
+            </div>` + list.innerHTML;
+        }
+    });
+}
+
+function shareReview(reviewId, dishName) {
+    const url = window.location.origin + `/community/review/${reviewId}/`;
+    if (navigator.share) {
+        navigator.share({
+            title: `Review of ${dishName}`,
+            text: `Check out this review on Swipe&Bite!`,
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert('Link copied to clipboard!');
+    }
+}
+
 // Search functionality
 let searchTimeout;
 document.getElementById('searchInput').addEventListener('input', function(e) {
@@ -673,9 +836,6 @@ document.getElementById('searchInput').addEventListener('input', function(e) {
             .then(response => response.json())
             .then(data => {
                 displaySearchResults(data);
-            })
-            .catch(error => {
-                console.error('Search error:', error);
             });
     }, 300);
 });
@@ -688,33 +848,25 @@ function displaySearchResults(data) {
         return;
     }
 
-    let html = '<div style="background: white; padding: 1.25rem; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); max-height: 400px; overflow-y: auto; border: 2px solid var(--border-light, #E9ECEF);">';
+    let html = '<div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); max-height: 300px; overflow-y: auto; position: absolute; top: 100%; left: 0; right: 0; z-index: 100; margin-top: 0.5rem;">';
 
     if (data.dishes.length > 0) {
-        html += '<h6 class="mb-2" style="font-weight: 800; color: var(--text-primary, #2C3E50);"><i class="fas fa-utensils" style="color: var(--primary-red, #FF385C); margin-right: 0.5rem;"></i>Dishes</h6>';
+        html += '<h6 style="color: #2D3436; font-weight: 600; margin-bottom: 0.5rem;"><i class="fas fa-utensils" style="color: #FD7979;"></i> Dishes</h6>';
         data.dishes.forEach(dish => {
-            html += `
-                <div class="search-result-item" onclick="window.location.href='/community/dish/${dish.id}/reviews/'">
-                    <strong style="font-weight: 700;">${dish.name}</strong>
-                    <span class="text-muted">- ${dish.cuisine}</span>
-                    <span class="badge ms-2" style="background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%); color: white; font-weight: 700;"><i class="fas fa-star"></i> ${dish.avg_rating}</span>
-                    <small class="text-muted ms-2" style="font-weight: 600;">(${dish.review_count} reviews)</small>
-                </div>
-            `;
+            html += `<div style="padding: 0.5rem; cursor: pointer; border-radius: 8px; transition: background 200ms;" onmouseover="this.style.background='#FEEAC9'" onmouseout="this.style.background='transparent'" onclick="window.location.href='/community/dish/${dish.id}/reviews/'">
+                <strong>${dish.name}</strong> <span style="color: #636E72;">- ${dish.cuisine}</span>
+                <span class="rating-badge" style="float: right;">${dish.avg_rating}</span>
+            </div>`;
         });
     }
 
     if (data.restaurants.length > 0) {
-        html += '<h6 class="mt-3 mb-2" style="font-weight: 800; color: var(--text-primary, #2C3E50);"><i class="fas fa-store" style="color: var(--primary-red, #FF385C); margin-right: 0.5rem;"></i>Restaurants</h6>';
+        html += '<h6 style="color: #2D3436; font-weight: 600; margin: 1rem 0 0.5rem;"><i class="fas fa-store" style="color: #FD7979;"></i> Restaurants</h6>';
         data.restaurants.forEach(restaurant => {
-            html += `
-                <div class="search-result-item" onclick="window.location.href='/community/restaurant/${restaurant.id}/reviews/'">
-                    <strong style="font-weight: 700;">${restaurant.name}</strong>
-                    <br><small class="text-muted" style="font-weight: 600;">${restaurant.address}</small>
-                    <span class="badge ms-2" style="background: linear-gradient(135deg, #FF8E53 0%, #FFA94D 100%); color: white; font-weight: 700;"><i class="fas fa-star"></i> ${restaurant.avg_rating}</span>
-                    <small class="text-muted ms-2" style="font-weight: 600;">(${restaurant.review_count} reviews)</small>
-                </div>
-            `;
+            html += `<div style="padding: 0.5rem; cursor: pointer; border-radius: 8px; transition: background 200ms;" onmouseover="this.style.background='#FEEAC9'" onmouseout="this.style.background='transparent'" onclick="window.location.href='/community/restaurant/${restaurant.id}/reviews/'">
+                <strong>${restaurant.name}</strong>
+                <span class="rating-badge" style="float: right;">${restaurant.avg_rating}</span>
+            </div>`;
         });
     }
 
@@ -722,7 +874,6 @@ function displaySearchResults(data) {
     container.innerHTML = html;
 }
 
-// Close search results when clicking outside
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.search-bar')) {
         document.getElementById('searchResults').innerHTML = '';

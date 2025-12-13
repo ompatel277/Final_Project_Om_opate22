@@ -138,7 +138,7 @@
                             <i class="fas fa-star"></i> My Favorites
                         </a>
                         <a href="{% url 'dishes:nearby_restaurants' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Nearby Restaurants
+                            <i class="fas fa-store"></i> Nearby Restaurants
                         </a>
                         <a href="{% url 'recommender:ai_chat' %}" class="btn btn-outline-primary">
                             <i class="fas fa-robot"></i> AI Assistant
@@ -153,17 +153,17 @@
             <div class="card h-100">
                 <div class="card-body">
                     <h5 style="color: #2D3436; font-weight: 600; margin-bottom: 1rem;">
-                        <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem; margin-right: 0.25rem;"></i> Your Location
+                        <i class="fas fa-crosshairs" style="color: #FD7979;"></i> Your Location
                     </h5>
                     {% if user_location %}
                         <div class="d-flex align-items-center mb-3">
                             <div style="width: 40px; height: 40px; background: #FEEAC9; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
-                                <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 1rem;"></i>
+                                <i class="fas fa-check-circle" style="color: #20C997; font-size: 1rem;"></i>
                             </div>
                             <div>
                                 <strong style="color: #2D3436;">{{ user_location.city }}</strong>
                                 <br>
-                                <small style="color: #636E72;">{{ user_location.latitude|floatformat:4 }}, {{ user_location.longitude|floatformat:4 }}</small>
+                                <small style="color: #636E72;">Location enabled</small>
                             </div>
                         </div>
                         <a href="{% url 'dishes:nearby_restaurants' %}" class="btn btn-primary w-100">
@@ -171,11 +171,11 @@
                         </a>
                     {% else %}
                         <div style="background: #FEEAC9; border-radius: 8px; padding: 1rem; text-align: center; margin-bottom: 1rem;">
-                            <i class="fas fa-map-marker-alt" style="color: #FD7979; font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <i class="fas fa-crosshairs" style="color: #FD7979; font-size: 2rem; margin-bottom: 0.5rem;"></i>
                             <p style="color: #636E72; margin: 0; font-size: 0.875rem;">Set your location to discover nearby restaurants</p>
                         </div>
                         <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#locationModal">
-                            <i class="fas fa-map-marker-alt" style="color: #FFFFFF; font-size: 1rem; margin-right: 0.25rem;"></i> Set Location
+                            <i class="fas fa-crosshairs"></i> Set Location
                         </button>
                     {% endif %}
                 </div>
