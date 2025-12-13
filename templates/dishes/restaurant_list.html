@@ -7,22 +7,11 @@
 <div class="container mt-4">
     <!-- Header -->
     <div class="row mb-4">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <h1 style="color: #2D3436; font-weight: 700; margin-bottom: 0.25rem;">
                 <i class="fas fa-store" style="color: #FD7979;"></i> Restaurants
             </h1>
             <p style="color: #636E72;">Discover amazing places to eat</p>
-        </div>
-        <div class="col-md-4 text-end">
-            {% if user_location %}
-                <a href="{% url 'dishes:nearby_restaurants' %}" class="btn btn-primary">
-                    View Nearby
-                </a>
-            {% else %}
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationModal">
-                    Set Location
-                </button>
-            {% endif %}
         </div>
     </div>
 

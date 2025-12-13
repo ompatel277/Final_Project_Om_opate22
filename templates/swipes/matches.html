@@ -167,15 +167,6 @@
             <h1>Your Matches</h1>
             <span class="badge-count">{{ total_matches }}</span>
         </div>
-        {% if has_location %}
-            <div class="badge bg-success">
-                {{ user_location.city }}
-            </div>
-        {% else %}
-            <div class="badge bg-warning text-dark">
-                Location not set
-            </div>
-        {% endif %}
     </div>
 
     <!-- Debug Info -->
@@ -359,7 +350,7 @@ function displayRestaurants(restaurants) {
         return;
     }
 
-    let html = '<h5 class="mb-3">📍 Found ' + restaurants.length + ' nearby restaurants:</h5>';
+    let html = '<h5 class="mb-3">Found ' + restaurants.length + ' nearby restaurants:</h5>';
 
     restaurants.forEach(restaurant => {
         html += `
@@ -371,7 +362,7 @@ function displayRestaurants(restaurants) {
                     ${restaurant.reviews ? `<span>(${restaurant.reviews} reviews)</span>` : ''}
                     ${restaurant.price_range ? `<span>💰 ${restaurant.price_range}</span>` : ''}
                 </div>
-                ${restaurant.address ? `<p class="text-muted mb-2" style="font-size: 13px;">📍 ${restaurant.address}</p>` : ''}
+                ${restaurant.address ? `<p class="text-muted mb-2" style="font-size: 13px;">${restaurant.address}</p>` : ''}
                 <div class="mt-2">
                     ${restaurant.google_place_id ? `
                         <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${restaurant.google_place_id}"
