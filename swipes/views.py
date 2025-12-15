@@ -12,14 +12,13 @@ from dishes.location_utils import (
     haversine_distance,
 )
 from dishes.maps_service import GoogleMapsService
+from dishes.dish_discovery_service import DishDiscoveryService
 from dishes.time_utils import get_current_meal_type, get_current_meal_window
 from .models import SwipeAction, Favorite, FavoriteRestaurant, Blacklist, SwipeSession
 import random
-from dishes.dish_discovery_service import DishDiscoveryService
 import logging
 
 logger = logging.getLogger(__name__)
-
 
 
 @login_required
@@ -158,11 +157,64 @@ def swipe_feed_view(request):
 
             except Exception as e:
                 # If Google Maps fails, continue without location-based cuisine filtering
-                print(f"Google Maps search error (continuing anyway): {e}")
+                logger.warning(f"Google Maps search error (continuing anyway): {e}")
 
     # Get random dish from available dishes
     dish = None
     total_available = available_dishes.count()
+
+    # LIVE DISH DISCOVERY: If no dishes available, fetch from Google Search API
+    if total_available == 0 and user_location:
+        logger.info("No dishes in database, attempting live discovery...")
+        try:
+            discovery_service = DishDiscoveryService()
+            city = user_location.get('city', 'nearby')
+
+            # Get cuisine name if filter is set
+            cuisine_name = None
+            if cuisine_filter and cuisine_filter != 'all':
+                try:
+                    cuisine_obj = Cuisine.objects.get(id=cuisine_filter)
+                    cuisine_name = cuisine_obj.name
+                except Cuisine.DoesNotExist:
+                    pass
+
+            # Discover dishes based on location
+            discovered_dishes = discovery_service.discover_dishes_by_location(
+                city=city,
+                meal_type=selected_meal if selected_meal != 'all' else None,
+                cuisine_name=cuisine_name,
+                num_results=30
+            )
+
+            if discovered_dishes:
+                # Filter out already swiped/blacklisted dishes
+                discovered_ids = [d.id for d in discovered_dishes]
+                available_dishes = Dish.objects.filter(
+                    id__in=discovered_ids,
+                    is_active=True
+                ).exclude(
+                    id__in=right_swiped_dish_ids
+                ).exclude(
+                    id__in=blacklisted_dish_ids
+                )
+
+                # Apply dietary filters to discovered dishes
+                if dietary_filter and dietary_filter != 'all':
+                    if dietary_filter == 'vegetarian':
+                        available_dishes = available_dishes.filter(is_vegetarian=True)
+                    elif dietary_filter == 'vegan':
+                        available_dishes = available_dishes.filter(is_vegan=True)
+                elif profile.diet_type == 'vegetarian':
+                    available_dishes = available_dishes.filter(is_vegetarian=True)
+                elif profile.diet_type == 'vegan':
+                    available_dishes = available_dishes.filter(is_vegan=True)
+
+                total_available = available_dishes.count()
+                logger.info(f"Discovered {total_available} dishes via live search")
+
+        except Exception as e:
+            logger.error(f"Live dish discovery failed: {e}")
 
     if total_available > 0:
         random_index = random.randint(0, total_available - 1)
