@@ -136,56 +136,81 @@ def dish_detail_view(request, dish_id):
 
 
 def restaurant_list_view(request):
-    """Browse restaurants with optional filters and sorting."""
+    """Browse restaurants with live data from Google Maps"""
     user_location = get_user_location_from_request(request)
+    has_location = user_location is not None
+    restaurants = []
 
     query = request.GET.get('q', '')
     price_filter = request.GET.get('price')
     rating_filter = request.GET.get('rating')
     sort = request.GET.get('sort', 'name')
 
-    restaurants_qs = Restaurant.objects.filter(is_active=True)
+    if has_location:
+        # Fetch live from Google Maps
+        maps_service = GoogleMapsService()
 
-    if query:
-        restaurants_qs = restaurants_qs.filter(
-            Q(name__icontains=query) | Q(address__icontains=query) | Q(city__icontains=query)
+        search_query = query if query else "restaurants"
+
+        api_restaurants = maps_service.search_restaurants(
+            query=search_query,
+            latitude=user_location['latitude'],
+            longitude=user_location['longitude'],
+            zoom=14,
+            num_results=40
         )
 
-    if price_filter:
-        restaurants_qs = restaurants_qs.filter(price_range=price_filter)
+        for restaurant_data in api_restaurants:
+            db_restaurant = maps_service.save_restaurant_to_db(restaurant_data)
+            if db_restaurant:
+                # Apply filters
+                if price_filter and db_restaurant.price_range != price_filter:
+                    continue
+                if rating_filter:
+                    try:
+                        if db_restaurant.rating < float(rating_filter):
+                            continue
+                    except (ValueError, TypeError):
+                        pass
 
-    if rating_filter:
-        try:
-            restaurants_qs = restaurants_qs.filter(rating__gte=float(rating_filter))
-        except (ValueError, TypeError):
-            pass
+                # Calculate distance
+                if db_restaurant.latitude and db_restaurant.longitude:
+                    db_restaurant.distance = haversine_distance(
+                        user_location['latitude'],
+                        user_location['longitude'],
+                        db_restaurant.latitude,
+                        db_restaurant.longitude
+                    )
+                restaurants.append(db_restaurant)
 
-    restaurants = list(restaurants_qs)
-
-    if user_location and sort == 'distance':
-        for restaurant in restaurants:
-            if restaurant.latitude and restaurant.longitude:
-                restaurant.distance = haversine_distance(
-                    user_location['latitude'],
-                    user_location['longitude'],
-                    restaurant.latitude,
-                    restaurant.longitude
-                )
-        restaurants = [r for r in restaurants if hasattr(r, 'distance')]
-        restaurants.sort(key=lambda r: r.distance)
+        # Sort
+        if sort == 'distance':
+            restaurants.sort(key=lambda x: x.distance if hasattr(x, 'distance') else 999)
+        elif sort == 'rating':
+            restaurants.sort(key=lambda x: x.rating or 0, reverse=True)
+        else:
+            restaurants.sort(key=lambda x: x.name)
     else:
-        if sort == 'rating':
-            restaurants_qs = restaurants_qs.order_by('-rating')
-        elif sort == 'name':
-            restaurants_qs = restaurants_qs.order_by('name')
+        # No location - show database restaurants
+        restaurants_qs = Restaurant.objects.filter(is_active=True)
+        if query:
+            restaurants_qs = restaurants_qs.filter(
+                Q(name__icontains=query) | Q(address__icontains=query)
+            )
+        if price_filter:
+            restaurants_qs = restaurants_qs.filter(price_range=price_filter)
+        if rating_filter:
+            try:
+                restaurants_qs = restaurants_qs.filter(rating__gte=float(rating_filter))
+            except (ValueError, TypeError):
+                pass
         restaurants = list(restaurants_qs)
-
-    restaurant_count = len(restaurants)
 
     context = {
         'restaurants': restaurants,
-        'restaurant_count': restaurant_count,
+        'restaurant_count': len(restaurants),
         'user_location': user_location,
+        'has_location': has_location,
         'query': query,
         'selected_price': price_filter,
         'selected_rating': rating_filter,
