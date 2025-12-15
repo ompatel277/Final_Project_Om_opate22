@@ -4,7 +4,7 @@ Swipe&Bite is a full-stack Django web application that lets users discover food 
 
 ## 🚀 Live Demo
 
-**Deployed URL:** ompate.277.pythonanywhere.com
+**Deployed URL:** ompatel277.pythonanywhere.com
 
 
 ## 📋 Features Implemented
