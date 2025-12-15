@@ -199,7 +199,6 @@ def profile_edit_view(request):
 
 
 @login_required
-@login_required
 def profile_setup_view(request):
     """Initial profile setup after registration"""
     profile = request.user.profile
@@ -285,9 +284,9 @@ def dashboard_data_csv(request):
     writer.writerow(['Date', 'Right Swipes', 'Left Swipes'])
 
     for label, right, left in zip(
-        dashboard_payload['chart']['labels'],
-        dashboard_payload['chart']['right_swipes'],
-        dashboard_payload['chart']['left_swipes'],
+            dashboard_payload['chart']['labels'],
+            dashboard_payload['chart']['right_swipes'],
+            dashboard_payload['chart']['left_swipes'],
     ):
         writer.writerow([label, right, left])
 

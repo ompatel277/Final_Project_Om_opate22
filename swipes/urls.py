@@ -17,7 +17,6 @@ urlpatterns = [
          name='add_favorite_restaurant'),
     path('favorite/restaurant/remove/<int:favorite_id>/', views.remove_favorite_restaurant_view,
          name='remove_favorite_restaurant'),
-    # NEW: Remove favorite restaurant by restaurant ID (not favorite ID)
     path('favorite/restaurant/remove-by-id/<int:restaurant_id>/', views.remove_favorite_restaurant_by_id_view,
          name='remove_favorite_restaurant_by_id'),
 
