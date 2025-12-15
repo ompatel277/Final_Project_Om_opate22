@@ -199,6 +199,7 @@ def profile_edit_view(request):
 
 
 @login_required
+@login_required
 def profile_setup_view(request):
     """Initial profile setup after registration"""
     profile = request.user.profile
@@ -207,6 +208,24 @@ def profile_setup_view(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+
+            # Save location to session if provided
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+            city = request.POST.get('city', profile.city or 'Unknown')
+
+            if latitude and longitude:
+                try:
+                    from dishes.location_utils import set_user_location_in_session
+                    set_user_location_in_session(
+                        request,
+                        float(latitude),
+                        float(longitude),
+                        city
+                    )
+                except (ValueError, TypeError):
+                    pass  # Invalid lat/lng, skip setting location
+
             messages.success(request, 'Profile setup complete! Start swiping!')
             return redirect('accounts:dashboard')
     else:

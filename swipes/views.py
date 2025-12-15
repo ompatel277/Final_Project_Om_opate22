@@ -468,6 +468,25 @@ def remove_favorite_restaurant_view(request, favorite_id):
 
 
 @login_required
+def remove_favorite_restaurant_by_id_view(request, restaurant_id):
+    """Remove restaurant from favorites by restaurant ID (not favorite ID)"""
+    favorite = FavoriteRestaurant.objects.filter(user=request.user, restaurant_id=restaurant_id).first()
+
+    if favorite:
+        restaurant_name = favorite.restaurant.name
+        favorite.delete()
+        messages.success(request, f'Removed {restaurant_name} from your favorites.')
+    else:
+        messages.info(request, 'Restaurant was not in your favorites.')
+
+    # Redirect back to the referring page, or to nearby restaurants
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+    return redirect('dishes:nearby_restaurants')
+
+
+@login_required
 def blacklist_view(request):
     """View and manage blacklist"""
     blacklist_items = Blacklist.objects.filter(user=request.user)
