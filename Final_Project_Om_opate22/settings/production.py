@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['ompatel277.pythonanywhere.com',  '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ompatel277.pythonanywhere.com']
 
 DATABASES = {
     'default': {
