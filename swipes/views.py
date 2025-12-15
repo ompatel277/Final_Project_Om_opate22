@@ -15,6 +15,11 @@ from dishes.maps_service import GoogleMapsService
 from dishes.time_utils import get_current_meal_type, get_current_meal_window
 from .models import SwipeAction, Favorite, FavoriteRestaurant, Blacklist, SwipeSession
 import random
+from dishes.dish_discovery_service import DishDiscoveryService
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 @login_required
