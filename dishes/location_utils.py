@@ -87,7 +87,7 @@ def get_dishes_from_nearby_restaurants(user_lat, user_lng, max_distance_miles=DE
 def get_user_location_from_request(request):
     """
     Get user location from session
-    Returns dict with latitude, longitude, city, or None
+    Returns dict with latitude, longitude, city, timezone or None
     """
     location = request.session.get('user_location')
     if location and location.get('latitude') and location.get('longitude'):
@@ -95,13 +95,25 @@ def get_user_location_from_request(request):
     return None
 
 
-def set_user_location_in_session(request, latitude, longitude, city=None):
+def get_user_timezone_from_request(request):
     """
-    Store user location in session
+    Get user timezone from session
+    Returns timezone string (e.g., 'America/New_York') or None
+    """
+    location = request.session.get('user_location')
+    if location:
+        return location.get('timezone')
+    return None
+
+
+def set_user_location_in_session(request, latitude, longitude, city=None, timezone=None):
+    """
+    Store user location and timezone in session
     """
     request.session['user_location'] = {
         'latitude': float(latitude),
         'longitude': float(longitude),
-        'city': city or 'Unknown'
+        'city': city or 'Unknown',
+        'timezone': timezone  # e.g., 'America/New_York'
     }
     request.session.modified = True

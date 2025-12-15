@@ -360,16 +360,18 @@ def set_location_view(request):
             latitude = data.get('latitude')
             longitude = data.get('longitude')
             city = data.get('city', 'Unknown')
+            timezone = data.get('timezone')  # Get timezone from request
 
             if latitude and longitude:
-                set_user_location_in_session(request, latitude, longitude, city)
+                set_user_location_in_session(request, latitude, longitude, city, timezone)
                 return JsonResponse({
                     'status': 'success',
                     'message': 'Location updated successfully',
                     'location': {
                         'latitude': latitude,
                         'longitude': longitude,
-                        'city': city
+                        'city': city,
+                        'timezone': timezone
                     }
                 })
             else:
@@ -377,13 +379,13 @@ def set_location_view(request):
                     'status': 'error',
                     'message': 'Missing latitude or longitude'
                 }, status=400)
-        except Exception as e:
+        except json.JSONDecodeError:
             return JsonResponse({
                 'status': 'error',
-                'message': str(e)
+                'message': 'Invalid JSON'
             }, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 def geocode_location_view(request):

@@ -8,6 +8,7 @@ from dishes.location_utils import (
     DEFAULT_MAX_DISTANCE_MILES,
     get_dishes_from_nearby_restaurants,
     get_user_location_from_request,
+    get_user_timezone_from_request,
     haversine_distance,
 )
 from dishes.maps_service import GoogleMapsService
@@ -20,7 +21,8 @@ import random
 def swipe_feed_view(request):
     """Main swipe interface - shows dishes based on location and preferences"""
     user_location = get_user_location_from_request(request)
-    current_meal_type = get_current_meal_type()
+    user_timezone = get_user_timezone_from_request(request)
+    current_meal_type = get_current_meal_type(user_timezone)
 
     # Get user's blacklisted items
     blacklist = Blacklist.objects.filter(user=request.user)
@@ -35,7 +37,7 @@ def swipe_feed_view(request):
     # Get filter parameters from request
     cuisine_filter = request.GET.get('cuisine')
     dietary_filter = request.GET.get('dietary')
-    meal_filter = request.GET.get('meal')  # NEW: Allow user to filter by meal type
+    meal_filter = request.GET.get('meal')  # Allow user to filter by meal type
 
     # Apply user preferences from profile
     profile = request.user.profile
@@ -47,15 +49,24 @@ def swipe_feed_view(request):
         id__in=blacklisted_dish_ids
     )
 
-    # Apply meal type filter - use current meal type or user selection
+    # Determine which meal filter to use and what to show as selected
     if meal_filter and meal_filter != 'all':
+        # User explicitly selected a meal type
         available_dishes = available_dishes.filter(meal_type=meal_filter)
+        selected_meal = meal_filter
+    elif meal_filter == 'all':
+        # User explicitly selected "All Meals"
+        selected_meal = 'all'
+        # Don't filter by meal type - show all
     else:
-        # Default: show current meal type, but fall back to all if no dishes
+        # No filter specified - default to current meal type based on time
         current_meal_dishes = available_dishes.filter(meal_type=current_meal_type)
         if current_meal_dishes.exists():
             available_dishes = current_meal_dishes
-        # else: keep all dishes (no meal filter)
+            selected_meal = current_meal_type  # Show current meal as selected
+        else:
+            # No dishes for current meal type, show all
+            selected_meal = 'all'
 
     # Filter by dietary preferences (profile default or user filter)
     if dietary_filter and dietary_filter != 'all':
@@ -167,7 +178,7 @@ def swipe_feed_view(request):
         'available_cuisines': available_cuisines,
         'selected_cuisine': cuisine_filter or 'all',
         'selected_dietary': dietary_filter or 'all',
-        'selected_meal': meal_filter or 'all',
+        'selected_meal': selected_meal,
         'current_meal_type': current_meal_type,
     }
 
@@ -233,7 +244,8 @@ def block_dish_view(request, dish_id):
 @login_required
 def matches_view(request):
     """View matches (right swipes) - restaurants loaded on demand"""
-    meal_window_start, current_meal_type = get_current_meal_window()
+    user_timezone = get_user_timezone_from_request(request)
+    meal_window_start, current_meal_type = get_current_meal_window(user_timezone)
 
     # Get filter parameters
     cuisine_filter = request.GET.get('cuisine')

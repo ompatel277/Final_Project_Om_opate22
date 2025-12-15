@@ -65,7 +65,7 @@
 }
 
 .badge-count {
-    background: #667eea;
+    background: #FD7979;
     color: white;
     padding: 5px 15px;
     border-radius: 20px;
@@ -74,7 +74,7 @@
 }
 
 .ai-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%);
     color: white;
     padding: 3px 10px;
     border-radius: 12px;
@@ -85,44 +85,286 @@
 
 .modal-content {
     border-radius: 20px;
+    border: none;
+    overflow: hidden;
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FD7979 0%, #FDACAC 100%);
     color: white;
-    border-radius: 20px 20px 0 0;
+    border-radius: 0;
+    border-bottom: none;
+    padding: 20px 25px;
 }
 
+.modal-header .modal-title {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 25px;
+    min-height: 200px;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee;
+    padding: 15px 25px;
+}
+
+.modal-footer .btn-secondary {
+    background: #f0f0f0;
+    border: none;
+    color: #666;
+}
+
+.modal-footer .btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.loading-spinner-wrapper {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.loading-spinner-wrapper .spinner {
+    width: 100%;
+    height: 100%;
+    border: 4px solid #FEEAC9;
+    border-top-color: #FD7979;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-container p {
+    color: #666;
+    font-size: 15px;
+    margin: 0;
+}
+
+.loading-container .loading-subtitle {
+    color: #999;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* Restaurant Items */
 .restaurant-item {
-    background: #f8f9fa;
-    border-left: 4px solid #667eea;
-    padding: 15px;
+    background: #FFF9F7;
+    border-left: 4px solid #FD7979;
+    padding: 18px;
     margin-bottom: 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.3s ease;
+    animation: slideIn 0.3s ease forwards;
+    opacity: 0;
 }
 
 .restaurant-item:hover {
-    background: #e9ecef;
+    background: #FEEAC9;
     transform: translateX(5px);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .restaurant-name {
     font-weight: 600;
-    font-size: 18px;
-    margin-bottom: 8px;
+    font-size: 17px;
+    margin-bottom: 10px;
+    color: #2D3436;
 }
 
-.loading-spinner {
+.restaurant-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.restaurant-meta i {
+    margin-right: 4px;
+}
+
+.restaurant-meta .rating-star {
+    color: #FFC107;
+}
+
+.restaurant-address {
+    color: #888;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.restaurant-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.restaurant-actions .btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.restaurant-actions .btn-primary {
+    background: #FD7979;
+    border-color: #FD7979;
+}
+
+.restaurant-actions .btn-primary:hover {
+    background: #fc5c5c;
+    border-color: #fc5c5c;
+}
+
+.restaurant-actions .btn-success {
+    background: #20C997;
+    border-color: #20C997;
+}
+
+.restaurant-actions .btn-success:hover {
+    background: #1ab386;
+    border-color: #1ab386;
+}
+
+.restaurant-actions .btn-outline-secondary {
+    color: #666;
+    border-color: #ddd;
+}
+
+.restaurant-actions .btn-outline-secondary:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+/* Results Header */
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #FEEAC9;
+}
+
+.results-header h5 {
+    margin: 0;
+    color: #2D3436;
+    font-weight: 600;
+}
+
+.results-count {
+    background: #20C997;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* No Results State */
+.no-results {
     text-align: center;
-    padding: 40px;
+    padding: 40px 20px;
 }
 
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
+.no-results-icon {
+    width: 80px;
+    height: 80px;
+    background: #FFF0EE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
 }
 
+.no-results-icon i {
+    font-size: 32px;
+    color: #FDACAC;
+}
+
+.no-results h5 {
+    color: #2D3436;
+    margin-bottom: 10px;
+}
+
+.no-results p {
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Error State */
+.error-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-icon {
+    width: 70px;
+    height: 70px;
+    background: #FFEBEE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.error-icon i {
+    font-size: 28px;
+    color: #EF5350;
+}
+
+.error-container h5 {
+    color: #C62828;
+    margin-bottom: 10px;
+}
+
+.error-container p {
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Filter Section */
 .debug-info {
     background: #f8f9fa;
     padding: 10px;
@@ -146,7 +388,7 @@
 }
 
 .filter-form .form-select {
-    border: 2px solid #e9ecef;
+    border: 2px solid #FFCDC9;
     border-radius: 10px;
     padding: 10px 15px;
     font-size: 14px;
@@ -154,8 +396,23 @@
 }
 
 .filter-form .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    border-color: #FD7979;
+    box-shadow: 0 0 0 0.2rem rgba(253, 121, 121, 0.15);
+}
+
+/* Alerts */
+.alert-warning {
+    background: #FFF3E0;
+    border-color: #FFE0B2;
+    color: #E65100;
+    border-radius: 10px;
+}
+
+.alert-info {
+    background: #FFF9F7;
+    border-color: #FFCDC9;
+    color: #2D3436;
+    border-radius: 10px;
 }
 </style>
 {% endblock %}
@@ -207,6 +464,7 @@
 
     {% if not has_location %}
         <div class="alert alert-warning mb-4">
+            <i class="fas fa-location-crosshairs me-2"></i>
             Enable location to see local restaurants for your matched dishes.
         </div>
     {% endif %}
@@ -249,7 +507,7 @@
             {% if total_right_swipes > 0 %}
                 <p class="text-warning mb-2">You have {{ total_right_swipes }} right swipe(s), but the dishes may have been removed or deactivated.</p>
             {% endif %}
-            <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-primary btn-sm">Start Swiping</a>
+            <a href="{% url 'swipes:swipe_feed' %}" class="btn btn-sm" style="background: #FD7979; color: white;">Start Swiping</a>
         </div>
     {% endif %}
 
@@ -280,19 +538,14 @@
 
 <!-- Restaurants Modal -->
 <div class="modal fade" id="restaurantsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalDishName">Restaurants</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="restaurantsContent">
-                <div class="loading-spinner">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3">Finding nearby restaurants...</p>
-                </div>
+                <!-- Content loaded dynamically -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -302,82 +555,119 @@
 </div>
 
 <script>
+let currentModal = null;
+let isLoading = false;
+
 function showRestaurants(dishId, dishName) {
     {% if not has_location %}
         alert('Please enable location services to see nearby restaurants!');
         return;
     {% endif %}
 
-    document.getElementById('modalDishName').textContent = dishName;
+    // Prevent multiple simultaneous requests
+    if (isLoading) return;
+    isLoading = true;
 
-    const modal = new bootstrap.Modal(document.getElementById('restaurantsModal'));
-    modal.show();
+    // Update modal title
+    document.getElementById('modalDishName').textContent = 'Where to get ' + dishName;
 
+    // Show loading state immediately
     document.getElementById('restaurantsContent').innerHTML = `
-        <div class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+        <div class="loading-container">
+            <div class="loading-spinner-wrapper">
+                <div class="spinner"></div>
             </div>
-            <p class="mt-3">Finding nearby restaurants...</p>
+            <p>Finding nearby restaurants...</p>
+            <p class="loading-subtitle">Searching for places serving ${escapeHtml(dishName)}</p>
         </div>
     `;
 
+    // Show modal
+    if (currentModal) {
+        currentModal.dispose();
+    }
+    currentModal = new bootstrap.Modal(document.getElementById('restaurantsModal'));
+    currentModal.show();
+
+    // Fetch restaurants
     fetch(`/swipes/dish/${dishId}/restaurants/`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to load restaurants');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            isLoading = false;
             if (data.status === 'success') {
-                displayRestaurants(data.restaurants);
+                displayRestaurants(data.restaurants, dishName);
             } else {
                 showError(data.message || 'Failed to load restaurants');
             }
         })
         .catch(error => {
+            isLoading = false;
             console.error('Error:', error);
-            showError('Failed to load restaurants');
+            showError(error.message || 'Failed to load restaurants. Please try again.');
         });
 }
 
-function displayRestaurants(restaurants) {
+function displayRestaurants(restaurants, dishName) {
     const container = document.getElementById('restaurantsContent');
 
-    if (restaurants.length === 0) {
+    if (!restaurants || restaurants.length === 0) {
         container.innerHTML = `
-            <div class="alert alert-warning">
-                <strong>No restaurants found nearby</strong>
-                <p class="mb-0">Try searching online or check the dish details page for more options.</p>
+            <div class="no-results">
+                <div class="no-results-icon">
+                    <i class="fas fa-store-slash"></i>
+                </div>
+                <h5>No restaurants found nearby</h5>
+                <p>We couldn't find restaurants serving "${escapeHtml(dishName)}" within your area.</p>
+                <a href="https://www.google.com/search?q=${encodeURIComponent(dishName + ' restaurant near me')}"
+                   target="_blank" class="btn" style="background: #FD7979; color: white;">
+                    <i class="fas fa-search me-2"></i>Search on Google
+                </a>
             </div>
         `;
         return;
     }
 
-    let html = '<h5 class="mb-3">Found ' + restaurants.length + ' nearby restaurants:</h5>';
+    let html = `
+        <div class="results-header">
+            <h5>Nearby Restaurants</h5>
+            <span class="results-count">${restaurants.length} found</span>
+        </div>
+    `;
 
-    restaurants.forEach(restaurant => {
+    restaurants.forEach((restaurant, index) => {
+        const delay = index * 0.08;
         html += `
-            <div class="restaurant-item">
-                <div class="restaurant-name">${restaurant.name}</div>
-                <div class="d-flex flex-wrap gap-3 mb-2" style="font-size: 14px; color: #666;">
-                    ${restaurant.distance ? `<span>📏 ${restaurant.distance.toFixed(1)} miles</span>` : ''}
-                    ${restaurant.rating ? `<span>⭐ ${restaurant.rating}</span>` : ''}
-                    ${restaurant.reviews ? `<span>(${restaurant.reviews} reviews)</span>` : ''}
-                    ${restaurant.price_range ? `<span>💰 ${restaurant.price_range}</span>` : ''}
+            <div class="restaurant-item" style="animation-delay: ${delay}s;">
+                <div class="restaurant-name">${escapeHtml(restaurant.name)}</div>
+                <div class="restaurant-meta">
+                    ${restaurant.distance ? `<span><i class="fas fa-location-dot"></i> ${restaurant.distance.toFixed(1)} mi</span>` : ''}
+                    ${restaurant.rating ? `<span><i class="fas fa-star rating-star"></i> ${restaurant.rating}</span>` : ''}
+                    ${restaurant.reviews ? `<span>(${restaurant.reviews})</span>` : ''}
+                    ${restaurant.price_range ? `<span>${restaurant.price_range}</span>` : ''}
                 </div>
-                ${restaurant.address ? `<p class="text-muted mb-2" style="font-size: 13px;">${restaurant.address}</p>` : ''}
-                <div class="mt-2">
+                ${restaurant.address ? `<div class="restaurant-address"><i class="fas fa-map-marker-alt me-1"></i>${escapeHtml(restaurant.address)}</div>` : ''}
+                <div class="restaurant-actions">
                     ${restaurant.google_place_id ? `
                         <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${restaurant.google_place_id}"
-                           target="_blank" class="btn btn-primary btn-sm me-2">
-                            🗺️ View on Maps
+                           target="_blank" class="btn btn-primary btn-sm">
+                            <i class="fas fa-map me-1"></i>Maps
                         </a>
                     ` : ''}
                     ${restaurant.phone ? `
-                        <a href="tel:${restaurant.phone}" class="btn btn-success btn-sm me-2">
-                            📞 Call
+                        <a href="tel:${restaurant.phone}" class="btn btn-success btn-sm">
+                            <i class="fas fa-phone me-1"></i>Call
                         </a>
                     ` : ''}
                     ${restaurant.website ? `
-                        <a href="${restaurant.website}" target="_blank" class="btn btn-info btn-sm">
-                            🌐 Website
+                        <a href="${restaurant.website}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-globe me-1"></i>Website
                         </a>
                     ` : ''}
                 </div>
@@ -390,11 +680,30 @@ function displayRestaurants(restaurants) {
 
 function showError(message) {
     document.getElementById('restaurantsContent').innerHTML = `
-        <div class="alert alert-danger">
-            <strong>Error</strong>
-            <p class="mb-0">${message}</p>
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h5>Something went wrong</h5>
+            <p>${escapeHtml(message)}</p>
+            <button onclick="location.reload()" class="btn" style="background: #FD7979; color: white;">
+                <i class="fas fa-redo me-2"></i>Refresh Page
+            </button>
         </div>
     `;
+    isLoading = false;
 }
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Reset loading state when modal is closed
+document.getElementById('restaurantsModal').addEventListener('hidden.bs.modal', function () {
+    isLoading = false;
+});
 </script>
 {% endblock %}

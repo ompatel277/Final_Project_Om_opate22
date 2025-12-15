@@ -594,24 +594,39 @@
         }
 
         function saveLocation(lat, lng, city) {
-            localStorage.setItem('userLocation', JSON.stringify({latitude: lat, longitude: lng, city: city}));
-            {% if user.is_authenticated %}
-            fetch("{% url 'dishes:set_location' %}", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
-                body: JSON.stringify({latitude: lat, longitude: lng, city: city})
-            })
-            .then(r => r.json())
-            .then(data => {
-                window.location.reload();
-            });
-            {% else %}
-            document.getElementById('navLocationText').textContent = city.substring(0, 12);
-            const modal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
-            if (modal) modal.hide();
-            alert('Location saved! Log in to sync across devices.');
-            {% endif %}
-        }
+    // Get user's timezone from browser
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    localStorage.setItem('userLocation', JSON.stringify({
+        latitude: lat,
+        longitude: lng,
+        city: city,
+        timezone: userTimezone
+    }));
+
+    {% if user.is_authenticated %}
+    fetch("{% url 'dishes:set_location' %}", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
+        body: JSON.stringify({
+            latitude: lat,
+            longitude: lng,
+            city: city,
+            timezone: userTimezone
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        window.location.reload();
+    });
+    {% else %}
+    document.getElementById('navLocationText').textContent = city.substring(0, 12);
+    const modal = bootstrap.Modal.getInstance(document.getElementById('locationModal'));
+    if (modal) modal.hide();
+    alert('Location saved! Log in to sync across devices.');
+    {% endif %}
+}
+
 
         function toggleChatbot() {
             document.getElementById('chatbotWindow').classList.toggle('show');
