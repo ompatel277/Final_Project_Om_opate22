@@ -298,6 +298,22 @@
     font-weight: 500;
 }
 
+.location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFF3E0;
+    color: #E65100;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.location-badge i {
+    color: #FD7979;
+}
+
 /* No Results State */
 .no-results {
     text-align: center;
@@ -557,6 +573,7 @@
 <script>
 let currentModal = null;
 let isLoading = false;
+const userLocationCity = "{{ user_location.city|default:'' }}";
 
 function showRestaurants(dishId, dishName) {
     {% if not has_location %}
@@ -616,6 +633,10 @@ function showRestaurants(dishId, dishName) {
 
 function displayRestaurants(restaurants, dishName) {
     const container = document.getElementById('restaurantsContent');
+    const locationLabel = userLocationCity
+        ? `<div class="location-badge"><i class="fas fa-location-dot"></i><span>${escapeHtml(userLocationCity)}</span></div>`
+        : '';
+    const locationFallback = userLocationCity ? `near ${escapeHtml(userLocationCity)}` : 'within your area';
 
     if (!restaurants || restaurants.length === 0) {
         container.innerHTML = `
@@ -624,7 +645,7 @@ function displayRestaurants(restaurants, dishName) {
                     <i class="fas fa-store-slash"></i>
                 </div>
                 <h5>No restaurants found nearby</h5>
-                <p>We couldn't find restaurants serving "${escapeHtml(dishName)}" within your area.</p>
+                 <p>We couldn't find restaurants serving "${escapeHtml(dishName)}" ${locationFallback}.</p>
                 <a href="https://www.google.com/search?q=${encodeURIComponent(dishName + ' restaurant near me')}"
                    target="_blank" class="btn" style="background: #FD7979; color: white;">
                     <i class="fas fa-search me-2"></i>Search on Google
@@ -636,7 +657,10 @@ function displayRestaurants(restaurants, dishName) {
 
     let html = `
         <div class="results-header">
-            <h5>Nearby Restaurants</h5>
+            <div>
+                <h5>Nearby Restaurants</h5>
+                ${locationLabel}
+            </div>
             <span class="results-count">${restaurants.length} found</span>
         </div>
     `;

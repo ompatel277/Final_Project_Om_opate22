@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
-from dishes.models import Dish, Restaurant, Cuisine
+from dishes.models import Dish, Restaurant, Cuisine, RestaurantDish
 from dishes.location_utils import (
     DEFAULT_MAX_DISTANCE_MILES,
     get_dishes_from_nearby_restaurants,
@@ -375,13 +375,11 @@ def get_dish_restaurants_view(request, dish_id):
             num_results=5
         )
     except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': f'Error searching restaurants: {str(e)}'
-        }, status=500)
+        restaurants_data = []
 
-    # Parse and calculate distances
+
     local_restaurants = []
+    # Prefer live data from Google Maps API
     for restaurant_data in restaurants_data:
         parsed = maps_service.parse_restaurant_data(restaurant_data)
 
@@ -394,6 +392,38 @@ def get_dish_restaurants_view(request, dish_id):
             )
             if parsed['distance'] <= DEFAULT_MAX_DISTANCE_MILES:
                 local_restaurants.append(parsed)
+
+        # Fallback to locally stored restaurants for the dish if API results are empty
+        if not local_restaurants:
+            nearby_dishes = RestaurantDish.objects.filter(
+                dish=dish,
+                is_available=True,
+                restaurant__is_active=True,
+                restaurant__latitude__isnull=False,
+                restaurant__longitude__isnull=False,
+            ).select_related('restaurant')
+
+            for restaurant_dish in nearby_dishes:
+                restaurant = restaurant_dish.restaurant
+                distance = haversine_distance(
+                    user_location['latitude'],
+                    user_location['longitude'],
+                    restaurant.latitude,
+                    restaurant.longitude,
+                )
+
+                if distance <= DEFAULT_MAX_DISTANCE_MILES:
+                    local_restaurants.append({
+                        'name': restaurant.name,
+                        'address': restaurant.full_address,
+                        'distance': distance,
+                        'rating': restaurant.rating,
+                        'reviews': restaurant.total_reviews,
+                        'price_range': restaurant.price_range,
+                        'google_place_id': restaurant.google_place_id,
+                        'phone': restaurant.phone,
+                        'website': restaurant.website,
+                    })
 
     # Sort by distance
     local_restaurants.sort(key=lambda x: x.get('distance', 999))
